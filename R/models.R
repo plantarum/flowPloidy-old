@@ -1,9 +1,33 @@
 ## Contains the various model components used in the flowPloidy analysis.
 
+#####################################################################
+## singleCutBase is the un-vectorized version - not for users, who ##
+## should use singleCut instead!                                   ##
+#####################################################################
+singleCutBase <- function(SCa, intensity, xx){
+  ## Modfit appears to cut off the debris slightly above the lowest data,
+  ## which gives a better fit. The index here is the offset from the first
+  ## channel with data in it to start fitting the singleCut model.
+  ## Hard-coded to 2 it will always start at the *second* channel with data
+  ## in it. Need to test this and determine best fit. Could be a better
+  ## hard-coded value, or use an extra model parameter to dynamically fit
+  ## each time.
+  first.channel <- which(intensity > 0)[2]
+
+  res <- 0
+  if(xx >= first.channel & xx < length(intensity)){
+    channels = (xx + 1):length(intensity)
+    for(j in channels){
+      res <- res + j^(1/3) * intensity[j] * 2 / (pi * j * sqrt(xx/j * (1 - xx/j)))
+    }
+  }
+  return(SCa * res)
+}
+
 #' Single-cut debris model
 #'
 #' Models debris using the single-cut model described by Bagwell et al.
-#'   (1991).
+#' (1991). 
 #'
 #' The model is:
 #' S(x) = SCa ⱼ₌ₓ₊₁∑ⁿ ³√j YⱼPₛ(j, x)
@@ -43,34 +67,59 @@
 #'   Cytometry, 12: 107–118. doi: 10.1002/cyto.990120203 
 #' 
 #' @author Tyler Smith
-singleCutBase <- function(SCa, intensity, xx){
-  ## unvectorized version, vectorized below.
-  
-  ## Modfit appears to cut off the debris slightly above the lowest data,
-  ## which gives a better fit. The index here is the offset from the first
-  ## channel with data in it to start fitting the singleCut model.
-  ## Hard-coded to 2 it will always start at the *second* channel with data
-  ## in it. Need to test this and determine best fit. Could be a better
-  ## hard-coded value, or use an extra model parameter to dynamically fit
-  ## each time.
-  first.channel <- which(intensity > 0)[2]
-
-  res <- 0
-  if(xx >= first.channel & xx < length(intensity)){
-    channels = (xx + 1):length(intensity)
-    for(j in channels){
-      res <- res + j^(1/3) * intensity[j] * 2 / (pi * j * sqrt(xx/j * (1 - xx/j)))
-    }
-  }
-  return(SCa * res)
-}
 
 #' @rdname singleCut
 #' @export
 singleCut <- Vectorize(singleCutBase, "xx")
 
-#' @rdname singleCut
+#########################
+## Gaussian components ##
+#########################
+
+#' Gaussian model components
+#'
+#' Utility functions for modeling Gaussian/normal components in FCS
+#' histograms. Three 'versions' are provided, A, B, and C - they are
+#' identical except for the prefix letters.
+#'
+#' Each component contains a two peaks, representing the G1 and G2
+#' peaks. The G2 peak is constrained to have a mean and standard deviation 
+#' twice that of the G1 peak values.
+#'
+#' @name gausModel
+#'
+#' @param a1,a2,b1,b2,c1,c2 numeric values, peak area
+#' @param Ma,Mb,Mc numeric values, peak mean
+#' @param Sa,Sb,Sc numeric values, peak standard deviation
+#' @param xx numeric vector, intensity values for each channel
+NULL
+
+#' @rdname gausModel
 #' @export
+gaussA  <- function(a1, Ma, Sa, a2, xx){
+    a1 / (sqrt(2 * pi) * Sa) * exp(-((xx - Ma)^2)/(2 * Sa^2)) +
+      a2 / (sqrt(2 * pi) * Sa * 2) * exp(-((xx - Ma * 2)^2)/(2 * (Sa * 2)^2))
+}
+
+#' @rdname gausModel
+#' @export
+gaussB  <- function(b1, Mb, Sb, b2, xx){
+  b1 / (sqrt(2 * pi) * Sb) * exp(-((xx - Mb)^2)/(2 * Sb^2)) +
+    b2 / (sqrt(2 * pi) * Sb * 2) * exp(-((xx - Mb * 2)^2)/(2 * (Sb * 2)^2))
+}
+
+#' @rdname gausModel
+#' @export
+gaussC  <- function(c1, Mc, Sc, c2, xx){
+  c1 / (sqrt(2 * pi) * Sc) * exp(-((xx - Mc)^2)/(2 * Sc^2)) +
+    c2 / (sqrt(2 * pi) * Sc * 2) * exp(-((xx - Mc * 2)^2)/(2 * (Sc * 2)^2))
+}
+
+
+#####################
+## Complete Models ##
+#####################
+
 oneSampleSC <-
   function (xx, a1, Ma, Sa, a2, b1, Mb, Sb, b2, SCa, intensity) { 
     ## a1 == highest G1 peak
@@ -85,8 +134,6 @@ oneSampleSC <-
         singleCut(SCa, intensity, xx) 
 }
 
-#' @rdname singleCut
-#' @export
 oneSampleSCInit <- function(mCall, LHS, data) {
   ## Not sure we need this fancy stuff, given we have the data already in
   ## hand, and in order:
@@ -119,46 +166,7 @@ oneSampleSCInit <- function(mCall, LHS, data) {
   value
 }
 
-#' @rdname singleCut
-#' @export
 SSoneSSC <- selfStart(oneSampleSC, oneSampleSCInit,
                       c("a1", "Ma", "Sa", "a2", "b1", "Mb", "Sb", "b2",
                         "SCa"))  
 
-#########################
-## Gaussian components ##
-#########################
-
-#' @name gausModel
-#' @title Gaussian model components
-#'
-#' Each component contains a two peaks, representing the G1 and G2
-#' peaks. The G2 peak is constrained to have a mean and standard deviation 
-#' twice that of the G1 peak values. 
-#' 
-#' @param a1,a2,b1,b2,c1,c2 numeric values, peak area
-#' @param Ma,Mb,Mc numeric values, peak mean
-#' @param Sa,Sb,Sc numeric values, peak standard deviation
-#' @param xx numeric vector, intensity values for each channel
-NULL
-
-#' @rdname gausModel
-#' @export
-gaussA  <- function(a1, Ma, Sa, a2, xx){
-    a1 / (sqrt(2 * pi) * Sa) * exp(-((xx - Ma)^2)/(2 * Sa^2)) +
-      a2 / (sqrt(2 * pi) * Sa * 2) * exp(-((xx - Ma * 2)^2)/(2 * (Sa * 2)^2))
-}
-
-#' @rdname gausModel
-#' @export
-gaussB  <- function(b1, Mb, Sb, b2, xx){
-  b1 / (sqrt(2 * pi) * Sb) * exp(-((xx - Mb)^2)/(2 * Sb^2)) +
-    b2 / (sqrt(2 * pi) * Sb * 2) * exp(-((xx - Mb * 2)^2)/(2 * (Sb * 2)^2))
-}
-
-#' @rdname gausModel
-#' @export
-gaussC  <- function(c1, Mc, Sc, c2, xx){
-  c1 / (sqrt(2 * pi) * Sc) * exp(-((xx - Mc)^2)/(2 * Sc^2)) +
-    c2 / (sqrt(2 * pi) * Sc * 2) * exp(-((xx - Mc * 2)^2)/(2 * (Sc * 2)^2))
-}
