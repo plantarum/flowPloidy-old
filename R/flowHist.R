@@ -121,6 +121,7 @@
 ##' ## possible channels to use are listed in the 'name' column.
 ##'
 ##' }
+##' @export
 flowHist <- function(FCS = NULL, FILE = NULL, CHANNEL,
                      bins = 256, window = 20, smooth = 20, pick = FALSE){
   ## You probably want to subdivide the bins evenly. i.e., if there are
@@ -182,6 +183,7 @@ flowHist <- function(FCS = NULL, FILE = NULL, CHANNEL,
   return(res)
 }
 
+##' @export
 print.flowHist <- function(self){
   message("flowHist object")
   message("Source file: ", self$file)
@@ -237,6 +239,7 @@ print.flowHist <- function(self){
 ##' @param ... additional parameters passed to \code{plot}
 ##' @return Not applicable, used for plotting
 ##' @author Tyler Smith
+##' @export
 plotFH <- function(self, ...){
   ## plots the raw data for a flowHist object
   plot(self$data$intensity, type = 'n', main = self$file,
@@ -258,6 +261,7 @@ plotFH <- function(self, ...){
 ##'   over the raw data.
 ##' @return Not applicable
 ##' @author Tyler Smith
+##' @export
 plot.flowHist <- function(self, init = FALSE, nls = TRUE, comps = TRUE){
   plotFH(self)
   
