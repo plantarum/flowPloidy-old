@@ -1,5 +1,5 @@
 Package: flowPloidy
-Title: What the Package Does (one line, title case)
+Title: Analyze flow cytometer data to determine sample ploidy
 Version: 0.0.0.9000
 Authors@R: person("Tyler", "Smith", email = "tyler@plantarum.ca", role = c("aut", "cre"))
 Description: Determine sample ploidy via flow cytometry histogram analysis.
