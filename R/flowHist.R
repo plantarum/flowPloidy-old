@@ -1,5 +1,8 @@
 ## Functions for creating and viewing flowHist objects.
 
+#' @importFrom flowCore read.FCS exprs pData parameters
+NULL
+
 ##' Create flowHist objects from an FCS file or a flowFrame object
 ##'
 ##' Creates a \code{flowHist} object from an FCS file, or a

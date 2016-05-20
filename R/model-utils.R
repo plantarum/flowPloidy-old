@@ -1,5 +1,8 @@
 ## Utilities used in constructing and fitting models
 
+#' @importFrom caTools runmean runmax
+NULL
+
 #' findPeaks
 #'
 #' Locate potential peaks in histogram data

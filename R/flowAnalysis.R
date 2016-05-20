@@ -1,5 +1,8 @@
 ## Functions for analyzing flowHist datasets
 
+#' @importFrom car deltaMethod
+NULL
+
 ##' Complete non-linear regression analysis of flowHist histogram data
 ##'
 ##' Completes the NLS analysis, and calculates the modelled events and CVs
