@@ -17,7 +17,7 @@
 ##' @param Ma,Mb curve mean parameter
 ##' @param Sa,Sb curve standard deviation parameter
 ##' @param xx vector of histogram intensities
-##' @return
+##' @return NA
 ##' @author Tyler Smith
 ##' @name gauss
 fA1 <- function(a1, Ma, Sa, xx){
