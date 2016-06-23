@@ -1,0 +1,58 @@
+---
+title: "flowPloidy: Overview"
+author: "Tyler Smith"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{flowPloidy: Overview}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: flowPloidy.bibtex
+---
+
+# Installation
+
+`flowPloidy` depends on the Bioconductor package `flowCore`. You will have to install this dependency before we get started (this requires an internet connection):
+
+```{r, eval=FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite()
+biocLite("flowCore")
+```
+
+You only need to do this once, not each time you use `flowPloidy`. Once you've done so, you can install `flowPloidy`, and the remaining dependencies will be automatically installed for you. `flowPloidy` is currently available from [BitBucket](https://bitbucket.org/tws/flowPloidy), and you can install it from there using the `devtools` package (which must already be installed):
+
+```{r, eval=FALSE}
+library(devtools)
+install_bitbucket("tws/flowPloidy")
+```
+
+# Getting Started
+Once all the necessary libraries are installed, we're ready to start working with our FCS data.
+
+This is a test citation [@bagwell_1993].
+
+```{r}
+x <- 1:10
+y <- 2:11
+plot(x, y)
+```
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+# References
