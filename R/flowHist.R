@@ -189,6 +189,7 @@ flowHist <- function(FCS = NULL, FILE = NULL, CHANNEL,
 ##' @export
 print.flowHist <- function(self){
   message("flowHist object")
+  message("===============")
   message("Source file: ", self$file)
   message("Channel: ", self$channel)
   message("Values: ", dim(self$data)[1])
@@ -198,6 +199,12 @@ print.flowHist <- function(self){
                               FUN = function(x) attr(x, "compName"))),
                 collapse = ", "))
   
+  if(is.null(self$standard)){
+    message("Standard not specified")
+  } else {
+    message(paste("Standard GC value: ", substitute(self$standard)))
+  }
+
   if(is.null(self$nls)){
     message("Not fit")
   } else {
@@ -205,31 +212,38 @@ print.flowHist <- function(self){
     message(paste("Fit!"))
   }
 
-  if(is.null(self$standard)){
-    message("Standard not specified")
-  } else {
-    message(paste("Standard GC value: ", substitute(self$standard)))
-  }
-
   if(!is.null(self$counts)){
-    message(paste("Modelled events:", round(self$counts$total$value, 1)))
-    message(paste("Peak A:", round(self$counts$firstPeak$value, 1), " at ",
-                  round(coef(self$nls)["Ma"], 1)))
-    message(paste("Peak B:", round(self$counts$secondPeak$value, 1), " at ",
-                  round(coef(self$nls)["Mb"], 1)))
+    message("\nAnalysis\n========\n", paste("Modelled events:", round(self$counts$total$value, 1)))
+    ## message(paste("Peak A:", round(self$counts$firstPeak$value, 1), " at ",
+    ##               round(coef(self$nls)["Ma"], 1)))
+    ## message(paste("Peak B:", round(self$counts$secondPeak$value, 1), " at ",
+    ##               round(coef(self$nls)["Mb"], 1)))
+    counts <- c(self$counts$firstPeak$value,
+                   self$counts$secondPeak$value)
+    size <- c(coef(self$nls)["Ma"],  coef(self$nls)["Mb"])
   }
 
   if(!is.null(self$cv)){
-    message(paste("CV A:", round(self$cv$CVa, 3)))
-    message(paste("CV B:", round(self$cv$CVb, 3)))
-    message(paste("Ratio:", round(self$cv$CI[1], 3), "/",
-                  round(1/self$cv$CI[1], 3))) 
+    ## message(paste("CV A:", round(self$cv$CVa, 3)))
+    ## message(paste("CV B:", round(self$cv$CVb, 3)))
+    message(paste("Ratio Peak A / Peak B: ", round(self$cv$CI[1], 3), ", SE: ",
+                  round(self$cv$CI[2], 5), sep = ""))
+    cvs <- c(self$cv$CVa, self$cv$CVb)
   }
 
+  message("\nPeak Data")
+  cat("=========\n")
+  peaktable <- kable(data.frame(counts = counts, size = size, cvs = cvs,
+                                row.names = c("Peak A", "Peak B")), digits = 3,
+                     format = "markdown")
+  for(i in 1:length(peaktable))
+    message(peaktable[i])
+  
   if(!is.null(self$RCS)){
+    message()
     message(paste("RCS:", round(self$RCS, 3)))
   }
-  
+
 }
 
 ##' Plot the raw data for a flowHist object
@@ -246,7 +260,7 @@ print.flowHist <- function(self){
 plotFH <- function(self, ...){
   ## plots the raw data for a flowHist object
   plot(self$data$intensity, type = 'n', main = self$file,
-       ylab = "Intensity", xlab = "channel", ...)
+       ylab = "Intensity", xlab = self$channel, ...)
   polygon(x = c(self$data$x, max(self$data$x) + 1), y = c(self$data$intensity, 0),
           col = "lightgray", border = NA)
 }
