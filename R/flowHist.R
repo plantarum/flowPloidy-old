@@ -165,18 +165,24 @@ flowHist <- function(FCS = NULL, FILE = NULL, CHANNEL,
 
   if(pick)
     res$peaks <- pickPeaks(res)
-  else
-    res$peaks <- cleanPeaks(findPeaks(res, window = window, smooth = smooth),
-                            window = window)  
+  else{
+    res$peaks <- findPeaks(res, window = window, smooth = smooth)
+    res$peaks <- cleanPeaks(res$peaks, window = window)  
+  }
+    ## res$peaks <- cleanPeaks(findPeaks(res, window = window, smooth = smooth),
+    ##                         window = window)  
 
-  res$comps <- list(singleCut, fA1, fB1)
+  res$comps <- list(singleCut, fA1)
 
   if(res$peaks[1, "mean"] * 2 <= nrow(res$data))
     res$comps <- c(res$comps, fA2)
 
-  if(res$peaks[2, "mean"] * 2 <= nrow(res$data))
-    res$comps <- c(res$comps, fB2)
-
+  if(nrow(res$peaks) > 1){
+    res$comps <- c(res$comps, fB1)
+    if(res$peaks[2, "mean"] * 2 <= nrow(res$data))
+      res$comps <- c(res$comps, fB2)
+  }
+  
   res$model <- makeModel(res$comps)
   ##res$model = makeModel(res$comps, env = globalenv())
 
@@ -220,24 +226,34 @@ print.flowHist <- function(self){
     ##               round(coef(self$nls)["Mb"], 1)))
     counts <- c(self$counts$firstPeak$value,
                    self$counts$secondPeak$value)
+    ##if(length(counts) == 1) counts <- c(counts, NA)
     size <- c(coef(self$nls)["Ma"],  coef(self$nls)["Mb"])
+    if(is.na(size[2])) size <- size[1]
   }
 
   if(!is.null(self$cv)){
-    ## message(paste("CV A:", round(self$cv$CVa, 3)))
-    ## message(paste("CV B:", round(self$cv$CVb, 3)))
-    message(paste("Ratio Peak A / Peak B: ", round(self$cv$CI[1], 3), ", SE: ",
-                  round(self$cv$CI[2], 5), sep = ""))
     cvs <- c(self$cv$CVa, self$cv$CVb)
+    ##if(length(cvs) == 1) cvs <- c(cvs, NA)
+    if(!is.null(self$cv$CVb)){
+      message(paste("Ratio Peak A / Peak B: ", round(self$cv$CI[1], 3), ", SE: ",
+                    round(self$cv$CI[2], 5), sep = ""))
+    }
   }
 
-  message("\nPeak Data")
-  cat("=========\n")
-  peaktable <- kable(data.frame(counts = counts, size = size, cvs = cvs,
-                                row.names = c("Peak A", "Peak B")), digits = 3,
-                     format = "markdown")
-  for(i in 1:length(peaktable))
-    message(peaktable[i])
+  if(!is.null(self$counts) & !is.null(self$cv)){
+    message("\nPeak Data")
+    cat("=========\n")
+    if(length(counts) == 2)
+      rnames <- c("Peak A", "Peak B")
+    else if (length(counts) == 1)
+      rnames <- "Peak A"
+    peaktable <- kable(data.frame(counts = counts, size = size, cvs = cvs,
+                                  row.names = rnames), format = "markdown",
+                       digits = 3)
+    
+    for(i in 1:length(peaktable))
+      message(peaktable[i])
+  }
   
   if(!is.null(self$RCS)){
     message()

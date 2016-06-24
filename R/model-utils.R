@@ -144,8 +144,10 @@ cleanPeaks <- function(peaks, window){
 
   rownames(out) <- NULL
 
-  out <- out[1:2, ]
-  out <- out[order(out[, "mean"]), ]
+  out <- out[1:min(2, nrow(out)), , drop = FALSE]
+  if(nrow(out) > 1){
+    out <- out[order(out[, "mean"]), ]
+  }
   out
 }
 
