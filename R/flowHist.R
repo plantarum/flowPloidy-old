@@ -313,6 +313,9 @@ plot.flowHist <- function(self, init = FALSE, nls = TRUE, comps = TRUE){
   if(nls & (! is.null(self$nls))){
     lines(x = self$data$x, y = predict(self$nls), col = 2)
   }
+
+  coltab <- c(fA1 = "blue", fA2 = "blue", fB1 = "orange", fB2 = "orange",
+                 `single cut` = "green") 
   
   if(comps & (! is.null(self$nls))){
     for(i in seq_along(self$comps)){
@@ -324,14 +327,16 @@ plot.flowHist <- function(self, init = FALSE, nls = TRUE, comps = TRUE){
                       args = c(list(intensity = self$data$intensity,
                                     xx = self$data$x),
                                params))
-        lines(x = self$data$x, y = yy, col = i + 2)
+        lines(x = self$data$x, y = yy,
+              col = coltab[attr(self$comps[[i]], which = "compName")])
       } else {
         params <-
           as.list(coef(self$nls)[names(formals(self$comps[[i]]))])
         params <- params[! is.na(names(params))]
         yy <- do.call(self$comps[[i]],
                       args = c(list(xx = self$data$x), params))
-        lines(x = self$data$x, y = yy, col = i + 2)
+        lines(x = self$data$x, y = yy,
+              col = coltab[attr(self$comps[[i]], which = "compName")])
       }
     }
   }
