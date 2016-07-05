@@ -155,6 +155,7 @@ attr(singleCut, "compName") <- "single cut"
 ##' @author Tyler Smith
 ##' @export
 flowInit <- function(fh) {
+  modChange <- FALSE
   xy <- fh$data
   if(class(fh$peaks) != "matrix")
     stop("no peaks identified for flowHist object -- see pickPeaks or findPeaks")
@@ -179,16 +180,30 @@ flowInit <- function(fh) {
     ## Is a2 off the chart? It shouldn't be! Models with an a2 peak can
     ## break if the a2 peak is beyond the data range.
     if((peaks[1, "mean"] * 2) > max(xy[ ,"x"])){
-      warning("a2 peak appears to be out of range")
-      a2 <- 0
+      warning("a2 peak appears to be out of range, it has been removed from the model")
+      params <- params[params != "a2"]
+      fh$comps <- fh$comps[sapply(fh$comps,
+                                  FUN = function(x)
+                                    attr(x, which = "compName")) != "fA2"]
+      modChange <- TRUE
     } else {
       a2 <- xy[peaks[1, "mean"] * 2, "intensity"] * Sa * 2 / 0.4
+      tmpval <- c(a2)
+      names(tmpval) <- c("a2")
+      value <- c(value, tmpval)
     }
-    tmpval <- c(a2)
-    names(tmpval) <- c("a2")
-    value <- c(value, tmpval)
+  } else if(! "a2" %in% params) {
+    if((peaks[1, "mean"] * 2) < max(xy[ ,"x"])){
+      warning("a2 peak appears to be IN range, adding it to the model")
+      fh$comps <- c(fh$comps, fA2)
+      modChange <- TRUE
+      a2 <- xy[peaks[1, "mean"] * 2, "intensity"] * Sa * 2 / 0.4
+      tmpval <- c(a2)
+      names(tmpval) <- c("a2")
+      value <- c(value, tmpval)
+    }
   }
-
+  
   if("Mb" %in% params){
     Mb <- peaks[2, "mean"]
     Sb <- Mb / 20
@@ -200,15 +215,29 @@ flowInit <- function(fh) {
 
   if("b2" %in% params) {
     if((peaks[2, "mean"] * 2) > max(xy[,"x"])){
-      warning("b2 peak appears to be out of range")
-      b2 <- 0
+      warning("b2 peak appears to be out of range, it has been removed from the model")
+      params <- params[params != "b2"]
+      fh$comps <- fh$comps[sapply(fh$comps,
+                                  FUN = function(x)
+                                    attr(x, which = "compName")) != "fB2"] 
+      modChange <- TRUE
     } else {
       b2 <- as.vector(xy[peaks[2, "mean"] * 2, "intensity"] * Sb * 2 / 0.4)
+      tmpval <- c(b2)
+      names(tmpval) <- c("b2")
+      value <- c(value, tmpval)
     }
-    tmpval <- c(b2)
-    names(tmpval) <- c("b2")
-    value <- c(value, tmpval)
-  }
+  } else if(! "b2" %in% params) {
+    if((peaks[2, "mean"] * 2) < max(xy[ ,"x"])){
+      warning("b2 peak appears to be IN range, adding it to the model")
+      fh$comps <- c(fh$comps, fB2)
+      modChange <- TRUE
+      b2 <- xy[peaks[1, "mean"] * 2, "intensity"] * Sb * 2 / 0.4
+      tmpval <- c(b2)
+      names(tmpval) <- c("b2")
+      value <- c(value, tmpval)
+    }
+  } 
 
   if("SCa" %in% params){
     SCa <- 0.1                            # just a wild guess for now
@@ -216,8 +245,12 @@ flowInit <- function(fh) {
     names(tmpval) <- c("SCa")
     value <- c(value, tmpval)
   }
+  fh$init <- as.list(value)
+  if(modChange){
+    fh$model <- makeModel(fh$comps)
+  }
 
-  as.list(value)
+  return(fh)
 }
 
 ##' Build an NLS model from a list of components

@@ -189,7 +189,7 @@ flowHist <- function(FCS = NULL, FILE = NULL, CHANNEL,
   res$model <- makeModel(res$comps)
   ##res$model = makeModel(res$comps, env = globalenv())
 
-  res$init <- flowInit(res)
+  res <- flowInit(res)
   class(res) <- "flowHist"
   
   return(res)

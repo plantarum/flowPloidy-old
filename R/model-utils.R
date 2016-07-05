@@ -181,7 +181,7 @@ cleanPeaks <- function(peaks, window){
 #' @export
 pickInit <- function(fh){
   fh$peaks <- pickPeaks(fh)
-  fh$init <- flowInit(fh)
+  fh <- flowInit(fh)
   fh
 }
 
