@@ -1,7 +1,9 @@
+library(devtools)
+load_all()
 chan = "FL3.INT.LIN"
 files <- list.files(system.file("extdata", package = "flowPloidy"))
 
-i <- 12
+i <- 15
 filei <- system.file("extdata", files[i], package = "flowPloidy")
 fhi <- flowHist(FILE = filei, CHANNEL = chan)
 plot(fhi, init = TRUE)
@@ -11,12 +13,9 @@ plot(fhi)
 fhi
 
 
-## 734.LMD
-## Something wrong with this one -- no fA2 component in the model, but it
-## should be??
-
-## "337.LMD" requires manually setting the init values
-## "240+2.LMD" requires manually setting the init values
+## 12: 734.LMD requires manually setting the init values
+## 8: "337.LMD" requires manually setting the init values
+## "240+S.LMD" requires manually setting the init values
 ## "248+r.LMD" check linearity
 
 file1 <- system.file("extdata", "188-15.LMD", package = "flowPloidy")
