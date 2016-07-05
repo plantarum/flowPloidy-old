@@ -25,6 +25,7 @@ biocLite("flowCore")
 
 You only need to do this once, not each time you use `flowPloidy`. Once `flowCore` is installed, you can install `flowPloidy`, and the remaining dependencies will automatically be installed for you. `flowPloidy` is currently available from [BitBucket](https://bitbucket.org/tws/flowPloidy), and you can install it from there using the `devtools` package (which must already be installed):
 
+
 ```{r, eval=FALSE}
 library(devtools)
 install_bitbucket("tws/flowPloidy")
@@ -119,10 +120,13 @@ fh2 <- pickInit(fh2)
 
 ```{r, echo = FALSE}
 fh2$init <- structure(list(Ma = 169.413778820931, Sa = 8.47068894104653, 
-    a1 = 5096.20000780635, a2 = 0, Mb = 233.075681056846, Sb = 11.6537840528423, 
-    b1 = 2927.36208898762, SCa = 0.1), .Names = c("Ma", "Sa", 
-                                                  "a1", "a2", "Mb", "Sb", "b1", "SCa"))
-
+    a1 = 5096.20000780635, Mb = 233.075681056846, Sb = 11.6537840528423, 
+    b1 = 2927.36208898762, SCa = 0.1), .Names = c("Ma", "Sa", "a1", "Mb",
+                                                  "Sb", "b1", "SCa"))
+fh2$comps <- fh2$comps[sapply(fh2$comps,
+                              FUN = function(x)
+                                attr(x, which = "compName")) != "fA2"]
+fh2$model <- makeModel(fh2$comps)
 plot(fh2)
 points(fh2$init$Ma, 245, col = 2, cex = 3)
 points(fh2$init$Mb, 95, col = 3, cex = 3)
