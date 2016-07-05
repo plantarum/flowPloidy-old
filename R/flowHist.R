@@ -204,7 +204,7 @@ print.flowHist <- function(self){
   message("Values: ", dim(self$data)[1])
   message("Total events: ", sum(self$data$intensity))
   message("Model components: ",
-          paste(unlist(lapply(fh1$comps,
+          paste(unlist(lapply(self$comps,
                               FUN = function(x) attr(x, "compName"))),
                 collapse = ", "))
   
