@@ -3,6 +3,9 @@
 #' @importFrom flowCore read.FCS exprs pData parameters
 NULL
 
+#' @importFrom knitr kable
+NULL
+
 ##' Create flowHist objects from an FCS file or a flowFrame object
 ##'
 ##' Creates a \code{flowHist} object from an FCS file, or a

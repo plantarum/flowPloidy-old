@@ -13,8 +13,8 @@ LazyData: true
 Imports:
     flowCore,
     car,
-    caTools
+    caTools,
+    knitr
 RoxygenNote: 5.0.1
-Suggests: knitr,
-    rmarkdown
+Suggests: rmarkdown
 VignetteBuilder: knitr
