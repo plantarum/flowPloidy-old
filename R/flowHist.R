@@ -348,3 +348,47 @@ plot.flowHist <- function(self, init = FALSE, nls = TRUE, comps = TRUE){
   }
 }
 
+#' Extract analysis results from a flowHist object
+#'
+#' A convenience function for extracting the results of the NLS
+#'   curve-fitting analysis on a flowHist object.
+#'
+#' If \code{fh} is a single flowHist object, a data.frame with a single
+#' row is returned. If \code{fh} is a list of \code{flowHist} objects, a
+#' row for each object will be added to the data.frame.
+#'
+#' If a file name is provided, the data will be saved to that file.
+#' 
+#' @title exportFlowHist
+#' @param fh a flowHist object, or a list of flowHist objects.
+#' @param file character, the name of the file to save dat to
+#' @return a data frame 
+#' @author Tyler Smith
+#' @export
+exportFlowHist <- function(fh, file = NULL){
+  if(class(fh) == "flowHist")
+    res <- exFlowHist(fh)
+  else if (class(fh) == "list" && all(sapply(fh, class) == "flowHist")){
+    res <- do.call(rbind, lapply(fh, exFlowHist))
+  }
+  if(! is.null(file))
+    write.table(x = res, file = file)
+
+  res
+}
+
+exFlowHist <- function(fh){
+  data.frame(file = fh$file, channel = fh$channel,
+             components = paste(names(fh$comps), collapse = ";"),
+             totalEvents = sum(fh$data$intensity),
+             modelledEvents = fh$counts$total$value,
+             countsA = fh$counts$firstPeak$value,
+             countsB = ifelse(is.null(fh$counts$secondPeak$value), NA, fh$counts$secondPeak$value),
+             sizeA = coef(fh$nls)["Ma"],
+             sizeB = coef(fh$nls)["Mb"],
+             cvA = fh$cv$CVa,
+             cvB = ifelse(is.null(fh$cv$CVb), NA, fh$cv$CVb),
+             ratioAB = unlist(ifelse(is.null(fh$cv$CI[1]), NA, fh$cv$CI[1])),
+             ratioSE = unlist(ifelse(is.null(fh$cv$CI[2]), NA, fh$cv$CI[2])),
+             rcs = fh$RCS, row.names = NULL)
+}

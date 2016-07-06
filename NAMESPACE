@@ -2,6 +2,8 @@
 
 S3method(plot,flowHist)
 S3method(print,flowHist)
+export(buildHist)
+export(exportFlowHist)
 export(fhAnalyze)
 export(fhCV)
 export(fhCount)
