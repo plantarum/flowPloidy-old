@@ -154,9 +154,8 @@ flowHist <- function(FCS = NULL, FILE = NULL, CHANNEL,
     res$peaks <- findPeaks(res, window = window, smooth = smooth)
     res$peaks <- cleanPeaks(res$peaks, window = window)  
   }
-    ## res$peaks <- cleanPeaks(findPeaks(res, window = window, smooth = smooth),
-    ##                         window = window)  
 
+  ## Add model components
   res$comps <- list(singleCut = singleCut, fA1 = fA1)
 
   if(res$peaks[1, "mean"] * 2 <= nrow(res$data))
@@ -169,7 +168,6 @@ flowHist <- function(FCS = NULL, FILE = NULL, CHANNEL,
   }
   
   res$model <- makeModel(res$comps)
-  ##res$model = makeModel(res$comps, env = globalenv())
 
   res <- flowInit(res)
   class(res) <- "flowHist"
@@ -204,68 +202,57 @@ buildHist <- function(FCS, CHANNEL, bins){
 
 #' @export
 print.flowHist <- function(self){
-  message("flowHist object")
-  message("===============")
-  message("Source file: ", self$file)
-  message("Channel: ", self$channel)
-  message("Values: ", dim(self$data)[1])
-  message("Total events: ", sum(self$data$intensity))
-  message("Model components: ",
-          paste(names(self$comps), collapse = ", "))
+  cat(paste("flowHist object",
+            "\n===============",
+            "\nSource file: ", self$file,
+            "\nChannel: ", self$channel,
+            "\nValues: ", dim(self$data)[1],
+            "\nTotal events: ", sum(self$data$intensity),
+            "\nModel components: ",
+            paste(names(self$comps), collapse = ", "), sep = "")) 
   
   if(is.null(self$standard)){
-    message("Standard not specified")
+    cat("\nStandard not specified")
   } else {
-    message(paste("Standard GC value: ", substitute(self$standard)))
+    cat(paste("\nStandard GC value: ", substitute(self$standard)))
   }
 
   if(is.null(self$nls)){
-    message("Not fit")
+    cat("\nNot fit")
   } else {
     ## replace this with some measure of goodness-of-fit
-    message(paste("Fit!"))
+    cat(paste("\nFit!"))
   }
 
   if(!is.null(self$counts)){
-    message("\nAnalysis\n========\n", paste("Modelled events:", round(self$counts$total$value, 1)))
-    ## message(paste("Peak A:", round(self$counts$firstPeak$value, 1), " at ",
-    ##               round(coef(self$nls)["Ma"], 1)))
-    ## message(paste("Peak B:", round(self$counts$secondPeak$value, 1), " at ",
-    ##               round(coef(self$nls)["Mb"], 1)))
+    cat(paste("\n\nAnalysis\n========\n",
+              paste("Modelled events: ", round(self$counts$total$value, 1)), sep = ""))
     counts <- c(self$counts$firstPeak$value,
                    self$counts$secondPeak$value)
-    ##if(length(counts) == 1) counts <- c(counts, NA)
     size <- c(coef(self$nls)["Ma"],  coef(self$nls)["Mb"])
     if(is.na(size[2])) size <- size[1]
   }
 
   if(!is.null(self$cv)){
     cvs <- c(self$cv$CVa, self$cv$CVb)
-    ##if(length(cvs) == 1) cvs <- c(cvs, NA)
     if(!is.null(self$cv$CVb)){
-      message(paste("Ratio Peak A / Peak B: ", round(self$cv$CI[1], 3), ", SE: ",
+      cat(paste("\nRatio Peak A / Peak B: ", round(self$cv$CI[1], 3), ", SE: ",
                     round(self$cv$CI[2], 5), sep = ""))
     }
   }
 
   if(!is.null(self$counts) & !is.null(self$cv)){
-    message("\nPeak Data")
-    cat("=========\n")
     if(length(counts) == 2)
       rnames <- c("Peak A", "Peak B")
     else if (length(counts) == 1)
       rnames <- "Peak A"
-    peaktable <- kable(data.frame(counts = counts, size = size, cvs = cvs,
-                                  row.names = rnames), format = "markdown",
-                       digits = 3)
-    
-    for(i in 1:length(peaktable))
-      message(peaktable[i])
+    print(kable(data.frame(counts = counts, size = size, cvs = cvs,
+                           row.names = rnames), format = "markdown",
+                digits = 3))
   }
   
   if(!is.null(self$RCS)){
-    message()
-    message(paste("RCS:", round(self$RCS, 3)))
+    cat(paste("\nRCS:", round(self$RCS, 3), "\n"))
   }
 
 }

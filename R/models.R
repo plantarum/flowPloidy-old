@@ -3,23 +3,23 @@
 ## Functions for building non-linear models for application to flowHist
 ## objects. 
 
-##' @title Gaussian model components
-##' 
-##' Components for modeling Gaussian features in flow histograms
-##'
-##' Typically the complete models will contain fA1 and fB2, which model the
-##' G1 peaks of the sample and the standard. In most cases, they will also
-##' contain fA2 and fB2, which model the G2 peaks. The G2 peaks are linked
-##' to the G1 peaks, in that they require some of the parameters from the
-##' G1 peaks as well (mean and standard deviation).
-##' 
-##' @param a1,a2,b1,b2 area parameters
-##' @param Ma,Mb curve mean parameter
-##' @param Sa,Sb curve standard deviation parameter
-##' @param xx vector of histogram intensities
-##' @return NA
-##' @author Tyler Smith
-##' @name gauss
+#' @title Gaussian model components
+#' 
+#' Components for modeling Gaussian features in flow histograms
+#'
+#' Typically the complete models will contain fA1 and fB2, which model the
+#' G1 peaks of the sample and the standard. In most cases, they will also
+#' contain fA2 and fB2, which model the G2 peaks. The G2 peaks are linked
+#' to the G1 peaks, in that they require some of the parameters from the
+#' G1 peaks as well (mean and standard deviation).
+#' 
+#' @param a1,a2,b1,b2 area parameters
+#' @param Ma,Mb curve mean parameter
+#' @param Sa,Sb curve standard deviation parameter
+#' @param xx vector of histogram intensities
+#' @return NA
+#' @author Tyler Smith
+#' @name gauss
 fA1 <- function(a1, Ma, Sa, xx){
   (a1 / (sqrt(2 * pi) * Sa) * exp(-((xx - Ma)^2)/(2 * Sa^2)))
 }
@@ -130,24 +130,24 @@ singleCut <- function(SCa, intensity, xx){
   singleCutVect(SCa, intensity, xx)
 }
 
-##' Provide starting values for flowHist NLS models
-##'
-##' Given a flowHist object with peaks identified (as should be the case
-##' after calls to \code{flowHist} or \code{pickInit} (and also the
-##' internal functions \code{pickPeaks} or \code{findPeaks},
-##' \code{flowInit} will provide rough guesses for starting parameter
-##' values.
-##'
-##' In most cases, at least with reasonably clean histograms, these guesses
-##' are sufficient for the NLS optimization routine to find appropriate
-##' values.
-##' 
-##' @title flowInit
-##' @param fh a \code{flowHist} object 
-##' @return Returns the \code{flowHist} object with the initial parameter
-##'   estimates in the init slot.
-##' @author Tyler Smith
-##' @export
+#' Provide starting values for flowHist NLS models
+#'
+#' Given a flowHist object with peaks identified (as should be the case
+#' after calls to \code{flowHist} or \code{pickInit} (and also the
+#' internal functions \code{pickPeaks} or \code{findPeaks},
+#' \code{flowInit} will provide rough guesses for starting parameter
+#' values.
+#'
+#' In most cases, at least with reasonably clean histograms, these guesses
+#' are sufficient for the NLS optimization routine to find appropriate
+#' values.
+#' 
+#' @title flowInit
+#' @param fh a \code{flowHist} object 
+#' @return Returns the \code{flowHist} object with the initial parameter
+#'   estimates in the init slot.
+#' @author Tyler Smith
+#' @export
 flowInit <- function(fh) {
   modChange <- FALSE
   xy <- fh$data
@@ -218,7 +218,7 @@ flowInit <- function(fh) {
       value <- c(value, tmpval)
     }
   } else if(! "b2" %in% params) {
-    if((peaks[2, "mean"] * 2) < max(xy[ ,"x"])){
+    if(nrow(peaks) > 1 && (peaks[2, "mean"] * 2) < max(xy[ ,"x"])){
       warning("b2 peak appears to be IN range, adding it to the model")
       fh$comps$fB2 <- fB2
       modChange <- TRUE
@@ -243,13 +243,13 @@ flowInit <- function(fh) {
   return(fh)
 }
 
-##' Build an NLS model from a list of components
-##'
-##' @title makeModel
-##' @param components a list of model components to combine
-##' @param env the parent frame. Not intended for use by users.
-##' @return a function for use in the R nonlinear regression routine.
-##' @author Tyler Smith
+#' Build an NLS model from a list of components
+#'
+#' @title makeModel
+#' @param components a list of model components to combine
+#' @param env the parent frame. Not intended for use by users.
+#' @return a function for use in the R nonlinear regression routine.
+#' @author Tyler Smith
 makeModel <- function(components, env = parent.frame()){
 
   names(components) <- NULL
