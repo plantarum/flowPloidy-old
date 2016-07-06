@@ -1,9 +1,12 @@
+render("vignettes/flowPloidy-overview.Rmd", output_format = "md_document")
+pandoc flowPloidy-overview.md -o flowPloidy-overview.pdf --listings --template=ty2
+
 library(devtools)
 load_all()
 chan = "FL3.INT.LIN"
 files <- list.files(system.file("extdata", package = "flowPloidy"))
 
-i <- 15
+i <- 3
 filei <- system.file("extdata", files[i], package = "flowPloidy")
 fhi <- flowHist(FILE = filei, CHANNEL = chan)
 plot(fhi, init = TRUE)

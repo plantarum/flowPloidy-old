@@ -6,7 +6,7 @@
 - [x] use proper named lists for the components
 
 # Features
-- linearity
-- initial peak detection using FFT transform
-- export results as a table for saving to disk
+- [ ] linearity
+- [ ] initial peak detection using FFT transform
+- [x] export results as a table for saving to disk
 
