@@ -86,7 +86,7 @@ fhCount <- function(fh, lower = 0, upper = 256, subdivisions = 1000){
               Sa = coef(fh$nls)["Sa"],
               lower = lower, upper = upper,
               subdivisions = 1000)
-  if("fB1" %in% sapply(fh$comp, FUN = function(x) attr(x, which = "compName"))){
+  if("fB1" %in% names(fh$comps)){
     secondPeak <-
       integrate(fB1, b1 = coef(fh$nls)["b1"],
                 Mb = coef(fh$nls)["Mb"],
@@ -105,7 +105,7 @@ fhCount <- function(fh, lower = 0, upper = 256, subdivisions = 1000){
 ##' @export
 fhCV <- function(fh){
   CVa <- coef(fh$nls)["Sa"]/coef(fh$nls)["Ma"]
-  if("fB1" %in% sapply(fh$comp, FUN = function(x) attr(x, which = "compName"))){
+  if("fB1" %in% names(fh$comps)){
     CVb <- coef(fh$nls)["Sb"]/coef(fh$nls)["Mb"]
     CI <- deltaMethod(fh$nls, "Ma/Mb")
   } else {

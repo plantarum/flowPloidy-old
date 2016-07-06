@@ -23,25 +23,21 @@
 fA1 <- function(a1, Ma, Sa, xx){
   (a1 / (sqrt(2 * pi) * Sa) * exp(-((xx - Ma)^2)/(2 * Sa^2)))
 }
-attr(fA1, "compName") <- "fA1"
 
 #' @rdname gauss
 fA2 <- function(a2, Sa, Ma, xx){
   (a2 / (sqrt(2 * pi) * Sa * 2) * exp(-((xx - Ma * 2)^2)/(2 * (Sa * 2)^2)))
 }
-attr(fA2, "compName") <- "fA2"
 
 #' @rdname gauss
 fB1 <- function(b1, Mb, Sb, xx){
   (b1 / (sqrt(2 * pi) * Sb) * exp(-((xx - Mb)^2)/(2 * Sb^2)))
 }
-attr(fB1, "compName") <- "fB1"
 
 #' @rdname gauss
 fB2 <- function(b2, Sb, Mb, xx){
   (b2 / (sqrt(2 * pi) * Sb * 2) * exp(-((xx - Mb * 2)^2)/(2 * (Sb * 2)^2)))
 }
-attr(fB2, "compName") <- "fB2"
 
 ## Single-cut debris model
 ## 
@@ -133,8 +129,6 @@ singleCutVect <- Vectorize(singleCutBase, "xx")
 singleCut <- function(SCa, intensity, xx){
   singleCutVect(SCa, intensity, xx)
 }
-attr(singleCut, "compName") <- "single cut"
-
 
 ##' Provide starting values for flowHist NLS models
 ##'
@@ -182,9 +176,7 @@ flowInit <- function(fh) {
     if((peaks[1, "mean"] * 2) > max(xy[ ,"x"])){
       warning("a2 peak appears to be out of range, it has been removed from the model")
       params <- params[params != "a2"]
-      fh$comps <- fh$comps[sapply(fh$comps,
-                                  FUN = function(x)
-                                    attr(x, which = "compName")) != "fA2"]
+      fh$comps$fA2 <- NULL
       modChange <- TRUE
     } else {
       a2 <- xy[peaks[1, "mean"] * 2, "intensity"] * Sa * 2 / 0.4
@@ -195,7 +187,7 @@ flowInit <- function(fh) {
   } else if(! "a2" %in% params) {
     if((peaks[1, "mean"] * 2) < max(xy[ ,"x"])){
       warning("a2 peak appears to be IN range, adding it to the model")
-      fh$comps <- c(fh$comps, fA2)
+      fh$comps$fA2 <- fA2
       modChange <- TRUE
       a2 <- xy[peaks[1, "mean"] * 2, "intensity"] * Sa * 2 / 0.4
       tmpval <- c(a2)
@@ -217,9 +209,7 @@ flowInit <- function(fh) {
     if((peaks[2, "mean"] * 2) > max(xy[,"x"])){
       warning("b2 peak appears to be out of range, it has been removed from the model")
       params <- params[params != "b2"]
-      fh$comps <- fh$comps[sapply(fh$comps,
-                                  FUN = function(x)
-                                    attr(x, which = "compName")) != "fB2"] 
+      fh$comps$fB2 <- NULL
       modChange <- TRUE
     } else {
       b2 <- as.vector(xy[peaks[2, "mean"] * 2, "intensity"] * Sb * 2 / 0.4)
@@ -230,7 +220,7 @@ flowInit <- function(fh) {
   } else if(! "b2" %in% params) {
     if((peaks[2, "mean"] * 2) < max(xy[ ,"x"])){
       warning("b2 peak appears to be IN range, adding it to the model")
-      fh$comps <- c(fh$comps, fB2)
+      fh$comps$fB2 <- fB2
       modChange <- TRUE
       b2 <- xy[peaks[1, "mean"] * 2, "intensity"] * Sb * 2 / 0.4
       tmpval <- c(b2)
@@ -262,6 +252,7 @@ flowInit <- function(fh) {
 ##' @author Tyler Smith
 makeModel <- function(components, env = parent.frame()){
 
+  names(components) <- NULL
   args <- unlist(lapply(components, formals))
   args <- args[unique(names(args))]
   
@@ -277,5 +268,3 @@ makeModel <- function(components, env = parent.frame()){
   eval(call("function", as.pairlist(args), bod), env)
 
 }
-
-
