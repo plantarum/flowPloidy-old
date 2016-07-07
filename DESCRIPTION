@@ -19,6 +19,7 @@ Imports:
     bitops,
     quantreg,
     pbkrtest,
-    rmarkdown
+Suggests:
+    knitr
 RoxygenNote: 5.0.1
-VignetteBuilder: rmarkdown
+VignetteBuilder: knitr

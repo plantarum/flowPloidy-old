@@ -13,7 +13,7 @@ output:
         pandoc_args: ["--variable=fontfamily:tgschola"]
 vignette: >
   %\VignetteIndexEntry{flowPloidy: Overview}
-  %\VignetteEngine{rmarkdown::render}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: flowPloidy.bibtex
 ---
