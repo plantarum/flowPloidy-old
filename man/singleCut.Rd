@@ -27,7 +27,7 @@ Models debris using the single-cut model described by Bagwell et al.
 \details{
 The model is:
 \deqn{S(x) = a \sum{j = x + 1}^{n} \sqrt[3]{j} Y_j P_s(j, x)}
- 
+
 x is the histogram channel that we're estimating the debris value for
 SCa is the amplitude parameter
 Y_j is the histogram intensity for channel j.
