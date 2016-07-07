@@ -2,7 +2,6 @@
 .Rhistory
 .RData
 *~
-man
 inst/doc
-*html
+html
 
