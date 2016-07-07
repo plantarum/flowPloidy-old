@@ -14,7 +14,10 @@ Imports:
     flowCore,
     car,
     caTools,
-    knitr
+    knitr,
+    bitops,
+    quantreg,
+    pbkrtest
 RoxygenNote: 5.0.1
 Suggests: rmarkdown
 VignetteBuilder: knitr
