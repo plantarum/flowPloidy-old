@@ -127,7 +127,7 @@ singleCutVect <- Vectorize(singleCutBase, "xx")
 
 #' @rdname singleCut
 singleCut <- function(SCa, intensity, xx){
-  flowPloidy:::singleCutVect(SCa, intensity, xx)
+  singleCutVect(SCa, intensity, xx)
 }
 
 #' Provide starting values for flowHist NLS models
