@@ -3,18 +3,18 @@
 #' @importFrom car deltaMethod
 NULL
 
-##' Complete non-linear regression analysis of flowHist histogram data
-##'
-##' Completes the NLS analysis, and calculates the modelled events and CVs
-##' for the result.
-##' 
-##' @title fhAnalyze
-##' @param fh a flowHist object
-##' @return a flowHist object with the analysis (nls, counts, cv, RCS)
-##'   slots filled.
-##' @seealso \code{\link{flowHist}}
-##' @author Tyler Smith
-##' @export
+#' Complete non-linear regression analysis of flowHist histogram data
+#'
+#' Completes the NLS analysis, and calculates the modelled events and CVs
+#' for the result.
+#' 
+#' @title fhAnalyze
+#' @param fh a flowHist object
+#' @return a flowHist object with the analysis (nls, counts, cv, RCS)
+#'   slots filled.
+#' @seealso \code{\link{flowHist}}
+#' @author Tyler Smith
+#' @export
 fhAnalyze <- function(fh){
   fh$nls <- fhNLS(fh)
   fh$counts <- fhCount(fh)
@@ -72,7 +72,14 @@ fhNLS <- function(fh){
 
 ##' @rdname fhAnalyze
 ##' @export
-fhCount <- function(fh, lower = 0, upper = 256, subdivisions = 1000){
+fhCount <- function(fh){
+  ## lower was originally an argument to fhCount, but I don't think it will
+  ## ever be anything other than 0?
+  lower = 0
+  ## similarly, upper was an argument, but it should always be the number of bins
+  upper = nrow(fh$data)
+  ## I think anything >= the number of bins should be fine for subdivisions:
+  subdivisions = upper * 2
   total <-
     do.call(integrate,
             c(substitute(fh$model),

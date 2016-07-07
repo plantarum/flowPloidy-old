@@ -2,7 +2,7 @@
 % Please edit documentation in R/models.R
 \name{flowInit}
 \alias{flowInit}
-\title{flowInit}
+\title{Provide starting values for flowHist NLS models}
 \usage{
 flowInit(fh)
 }
@@ -14,15 +14,13 @@ Returns the \code{flowHist} object with the initial parameter
   estimates in the init slot.
 }
 \description{
-Provide starting values for flowHist NLS models
-}
-\details{
 Given a flowHist object with peaks identified (as should be the case
 after calls to \code{flowHist} or \code{pickInit} (and also the
 internal functions \code{pickPeaks} or \code{findPeaks},
 \code{flowInit} will provide rough guesses for starting parameter
 values.
-
+}
+\details{
 In most cases, at least with reasonably clean histograms, these guesses
 are sufficient for the NLS optimization routine to find appropriate
 values.

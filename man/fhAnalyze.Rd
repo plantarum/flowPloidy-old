@@ -14,7 +14,7 @@ fhRCS(fh)
 
 fhNLS(fh)
 
-fhCount(fh, lower = 0, upper = 256, subdivisions = 1000)
+fhCount(fh)
 
 fhCV(fh)
 }

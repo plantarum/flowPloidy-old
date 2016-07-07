@@ -2,7 +2,7 @@
 % Please edit documentation in R/models.R
 \name{makeModel}
 \alias{makeModel}
-\title{makeModel}
+\title{Build an NLS model from a list of components}
 \usage{
 makeModel(components, env = parent.frame())
 }

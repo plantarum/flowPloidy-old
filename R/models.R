@@ -3,7 +3,7 @@
 ## Functions for building non-linear models for application to flowHist
 ## objects. 
 
-#' @title Gaussian model components
+#' Gaussian model components
 #' 
 #' Components for modeling Gaussian features in flow histograms
 #'
@@ -41,12 +41,12 @@ fB2 <- function(b2, Sb, Mb, xx){
 
 ## Single-cut debris model
 ## 
-## S(x) = a ⱼ₌ₓ₊₁∑ⁿ ³√j YⱼPₛ(j, x)
-## Pₛ(j, x) = 2 / (πj √(x/j)(1 - x/j)
+## S(x) = a \sum{j = x + 1}^{n} \sqrt[3]{j} Y_j P_s(j, x)
+## P_s (j, x) = \frac{2}{(\pi j \sqrt{(x/j) (1 - x/j)}
 ##
 ## a = amplitude parameter
-## Yⱼ = intensity in channel j
-## Pₛ(j, x) = probability of a nuclei from channel j falling into channel x
+## Y_j = intensity in channel j
+## P_s(j, x) = probability of a nuclei from channel j falling into channel x
 ## when cut.
 ##
 ## By this formula, the debris intensity in a channel/bin is a function of
@@ -65,18 +65,18 @@ fB2 <- function(b2, Sb, Mb, xx){
 #' (1991). 
 #'
 #' The model is:
-#' S(x) = SCa ⱼ₌ₓ₊₁∑ⁿ ³√j YⱼPₛ(j, x)
-#'
+#' \deqn{S(x) = a \sum{j = x + 1}^{n} \sqrt[3]{j} Y_j P_s(j, x)}
+#'  
 #' x is the histogram channel that we're estimating the debris value for
 #' SCa is the amplitude parameter
-#' Yⱼ is the histogram intensity for channel j.
+#' Y_j is the histogram intensity for channel j.
 #' 
-#' where Pₛ(j, x) is the probability of a nuclei from channel j falling
+#' where P_s(j, x) is the probability of a nuclei from channel j falling
 #' into channel x when cut. That is, for j > x, the probability that
 #' fragmenting a nuclei from channel j with a single cut will produce a
 #' fragment of size x. This probability is calculated as:
 #'
-#' Pₛ(j, x) = 2 / (πj √(x/j)(1 - x/j)
+#' \deqn{P_s (j, x) = \frac{2}{(\pi j \sqrt{(x/j) (1 - x/j)}}}
 #'
 #' This model involves a recursive calculation, since the fitted value for
 #' channel x depends not just on the intensity for channel x, but also the
@@ -90,12 +90,12 @@ fB2 <- function(b2, Sb, Mb, xx){
 #' @param intensity a numeric vector, the histogram intensity in each channel
 #' @param xx an integer vector, the ordered channels corresponding to the
 #'   values in `intensity'.
-#' @return
+#' @return NA
 #' 
 #' @references Bagwell, C. B., Mayo, S. W., Whetstone, S. D., Hitchcox, S.
 #'   A., Baker, D. R., Herbert, D. J., Weaver, D. L., Jones, M. A. and
 #'   Lovett, E. J. (1991), DNA histogram debris theory and compensation.
-#'   Cytometry, 12: 107–118. doi: 10.1002/cyto.990120203 
+#'   Cytometry, 12: 107-118. doi: 10.1002/cyto.990120203 
 #' 
 #' @author Tyler Smith
 
@@ -142,7 +142,6 @@ singleCut <- function(SCa, intensity, xx){
 #' are sufficient for the NLS optimization routine to find appropriate
 #' values.
 #' 
-#' @title flowInit
 #' @param fh a \code{flowHist} object 
 #' @return Returns the \code{flowHist} object with the initial parameter
 #'   estimates in the init slot.
@@ -245,7 +244,8 @@ flowInit <- function(fh) {
 
 #' Build an NLS model from a list of components
 #'
-#' @title makeModel
+#' Build an NLS model from a list of components
+#' 
 #' @param components a list of model components to combine
 #' @param env the parent frame. Not intended for use by users.
 #' @return a function for use in the R nonlinear regression routine.

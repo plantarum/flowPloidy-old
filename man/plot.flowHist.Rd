@@ -4,10 +4,10 @@
 \alias{plot.flowHist}
 \title{plot.flowHist}
 \usage{
-plot.flowHist(self, init = FALSE, nls = TRUE, comps = TRUE)
+\method{plot}{flowHist}(x, init = FALSE, nls = TRUE, comps = TRUE, ...)
 }
 \arguments{
-\item{self}{a flowHist object}
+\item{x}{a flowHist object}
 
 \item{init}{boolean; if TRUE, plot the regression model using the
 initial parameter estimates over the raw data.}
@@ -17,6 +17,8 @@ raw data (i.e., using the final parameter values)}
 
 \item{comps}{boolean; if TRUE, plot the individual model components
 over the raw data.}
+
+\item{...}{additional arguments passed on to plot()}
 }
 \value{
 Not applicable
@@ -25,7 +27,7 @@ Not applicable
 Plot histograms for flowHist objects
 }
 \details{
-.. content for \details{} ..
+.. content for details ..
 }
 \author{
 Tyler Smith

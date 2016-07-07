@@ -18,7 +18,7 @@ singleCut(SCa, intensity, xx)
 values in `intensity'.}
 }
 \value{
-
+NA
 }
 \description{
 Models debris using the single-cut model described by Bagwell et al.
@@ -26,18 +26,18 @@ Models debris using the single-cut model described by Bagwell et al.
 }
 \details{
 The model is:
-S(x) = SCa ⱼ₌ₓ₊₁∑ⁿ ³√j YⱼPₛ(j, x)
-
+\deqn{S(x) = a \sum{j = x + 1}^{n} \sqrt[3]{j} Y_j P_s(j, x)}
+ 
 x is the histogram channel that we're estimating the debris value for
 SCa is the amplitude parameter
-Yⱼ is the histogram intensity for channel j.
+Y_j is the histogram intensity for channel j.
 
-where Pₛ(j, x) is the probability of a nuclei from channel j falling
+where P_s(j, x) is the probability of a nuclei from channel j falling
 into channel x when cut. That is, for j > x, the probability that
 fragmenting a nuclei from channel j with a single cut will produce a
 fragment of size x. This probability is calculated as:
 
-Pₛ(j, x) = 2 / (πj √(x/j)(1 - x/j)
+\deqn{P_s (j, x) = \frac{2}{(\pi j \sqrt{(x/j) (1 - x/j)}}}
 
 This model involves a recursive calculation, since the fitted value for
 channel x depends not just on the intensity for channel x, but also the
@@ -52,6 +52,6 @@ Tyler Smith
 Bagwell, C. B., Mayo, S. W., Whetstone, S. D., Hitchcox, S.
   A., Baker, D. R., Herbert, D. J., Weaver, D. L., Jones, M. A. and
   Lovett, E. J. (1991), DNA histogram debris theory and compensation.
-  Cytometry, 12: 107–118. doi: 10.1002/cyto.990120203
+  Cytometry, 12: 107-118. doi: 10.1002/cyto.990120203
 }
 

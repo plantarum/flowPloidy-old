@@ -6,15 +6,7 @@
 \alias{fB1}
 \alias{fB2}
 \alias{gauss}
-\title{Gaussian model components
-
-Components for modeling Gaussian features in flow histograms
-
-Typically the complete models will contain fA1 and fB2, which model the
-G1 peaks of the sample and the standard. In most cases, they will also
-contain fA2 and fB2, which model the G2 peaks. The G2 peaks are linked
-to the G1 peaks, in that they require some of the parameters from the
-G1 peaks as well (mean and standard deviation).}
+\title{Gaussian model components}
 \usage{
 fA1(a1, Ma, Sa, xx)
 
@@ -35,6 +27,16 @@ fB2(b2, Sb, Mb, xx)
 }
 \value{
 NA
+}
+\description{
+Components for modeling Gaussian features in flow histograms
+}
+\details{
+Typically the complete models will contain fA1 and fB2, which model the
+G1 peaks of the sample and the standard. In most cases, they will also
+contain fA2 and fB2, which model the G2 peaks. The G2 peaks are linked
+to the G1 peaks, in that they require some of the parameters from the
+G1 peaks as well (mean and standard deviation).
 }
 \author{
 Tyler Smith

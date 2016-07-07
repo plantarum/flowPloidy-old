@@ -6,6 +6,15 @@ NULL
 #' @importFrom knitr kable
 NULL
 
+#' @importFrom graphics hist lines locator plot points polygon
+NULL
+
+#' @importFrom stats as.formula coef integrate predict
+NULL
+
+#' @importFrom utils write.table
+NULL
+
 #' Create flowHist objects from an FCS file or a flowFrame object
 #'
 #' Creates a \code{flowHist} object from an FCS file, or a
@@ -201,47 +210,47 @@ buildHist <- function(FCS, CHANNEL, bins){
 }
 
 #' @export
-print.flowHist <- function(self){
+print.flowHist <- function(x, ...){
   cat(paste("flowHist object",
             "\n===============",
-            "\nSource file: ", self$file,
-            "\nChannel: ", self$channel,
-            "\nValues: ", dim(self$data)[1],
-            "\nTotal events: ", sum(self$data$intensity),
+            "\nSource file: ", x$file,
+            "\nChannel: ", x$channel,
+            "\nValues: ", dim(x$data)[1],
+            "\nTotal events: ", sum(x$data$intensity),
             "\nModel components: ",
-            paste(names(self$comps), collapse = ", "), sep = "")) 
+            paste(names(x$comps), collapse = ", "), sep = "")) 
   
-  if(is.null(self$standard)){
+  if(is.null(x$standard)){
     cat("\nStandard not specified")
   } else {
-    cat(paste("\nStandard GC value: ", substitute(self$standard)))
+    cat(paste("\nStandard GC value: ", substitute(x$standard)))
   }
 
-  if(is.null(self$nls)){
+  if(is.null(x$nls)){
     cat("\nNot fit")
   } else {
     ## replace this with some measure of goodness-of-fit
     cat(paste("\nFit!"))
   }
 
-  if(!is.null(self$counts)){
+  if(!is.null(x$counts)){
     cat(paste("\n\nAnalysis\n========\n",
-              paste("Modelled events: ", round(self$counts$total$value, 1)), sep = ""))
-    counts <- c(self$counts$firstPeak$value,
-                   self$counts$secondPeak$value)
-    size <- c(coef(self$nls)["Ma"],  coef(self$nls)["Mb"])
+              paste("Modelled events: ", round(x$counts$total$value, 1)), sep = ""))
+    counts <- c(x$counts$firstPeak$value,
+                   x$counts$secondPeak$value)
+    size <- c(coef(x$nls)["Ma"],  coef(x$nls)["Mb"])
     if(is.na(size[2])) size <- size[1]
   }
 
-  if(!is.null(self$cv)){
-    cvs <- c(self$cv$CVa, self$cv$CVb)
-    if(!is.null(self$cv$CVb)){
-      cat(paste("\nRatio Peak A / Peak B: ", round(self$cv$CI[1], 3), ", SE: ",
-                    round(self$cv$CI[2], 5), sep = ""))
+  if(!is.null(x$cv)){
+    cvs <- c(x$cv$CVa, x$cv$CVb)
+    if(!is.null(x$cv$CVb)){
+      cat(paste("\nRatio Peak A / Peak B: ", round(x$cv$CI[1], 3), ", SE: ",
+                    round(x$cv$CI[2], 5), sep = ""))
     }
   }
 
-  if(!is.null(self$counts) & !is.null(self$cv)){
+  if(!is.null(x$counts) & !is.null(x$cv)){
     if(length(counts) == 2)
       rnames <- c("Peak A", "Peak B")
     else if (length(counts) == 1)
@@ -251,8 +260,8 @@ print.flowHist <- function(self){
                 digits = 3))
   }
   
-  if(!is.null(self$RCS)){
-    cat(paste("\nRCS:", round(self$RCS, 3), "\n"))
+  if(!is.null(x$RCS)){
+    cat(paste("\nRCS:", round(x$RCS, 3), "\n"))
   }
 
 }
@@ -278,58 +287,58 @@ plotFH <- function(self, ...){
   
 #' Plot histograms for flowHist objects
 #'
-#' .. content for \details{} ..
+#' .. content for details ..
 #' @title plot.flowHist
-#' @param self a flowHist object
+#' @param x a flowHist object
 #' @param init boolean; if TRUE, plot the regression model using the
 #'   initial parameter estimates over the raw data. 
 #' @param nls boolean; if TRUE, plot the fitted regression model over the
 #'   raw data (i.e., using the final parameter values)
 #' @param comps boolean; if TRUE, plot the individual model components
 #'   over the raw data.
+#' @param ... additional arguments passed on to plot()
 #' @return Not applicable
 #' @author Tyler Smith
 #' @export
-plot.flowHist <- function(self, init = FALSE, nls = TRUE, comps = TRUE){
-  plotFH(self)
+plot.flowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
+  plotFH(x, ...)
   
   if(init){
-    ##iv <- fHcall(self, "getInitial")
-    yy <- do.call(self$model,
-                  args = c(list(intensity = self$data$intensity,
-                                xx = self$data$x),
-                           self$init))
+    yy <- do.call(x$model,
+                  args = c(list(intensity = x$data$intensity,
+                                xx = x$data$x),
+                           x$init))
 
-    lines(x = self$data$x,
+    lines(x = x$data$x,
           y = yy, 
           col = 1, lwd = 3, lty = 5)
   }
   
-  if(nls & (! is.null(self$nls))){
-    lines(x = self$data$x, y = predict(self$nls), col = 2)
+  if(nls & (! is.null(x$nls))){
+    lines(x = x$data$x, y = predict(x$nls), col = 2)
   }
 
   coltab <- c(fA1 = "blue", fA2 = "blue", fB1 = "orange", fB2 = "orange",
                  `single cut` = "green") 
   
-  if(comps & (! is.null(self$nls))){
-    for(i in seq_along(self$comps)){
-      if("intensity" %in% names(formals(self$comps[[i]]))){
+  if(comps & (! is.null(x$nls))){
+    for(i in seq_along(x$comps)){
+      if("intensity" %in% names(formals(x$comps[[i]]))){
         params <-
-          as.list(coef(self$nls)[names(formals(self$comps[[i]]))])
+          as.list(coef(x$nls)[names(formals(x$comps[[i]]))])
         params <- params[! is.na(names(params))]
-        yy <- do.call(self$comps[[i]],
-                      args = c(list(intensity = self$data$intensity,
-                                    xx = self$data$x),
+        yy <- do.call(x$comps[[i]],
+                      args = c(list(intensity = x$data$intensity,
+                                    xx = x$data$x),
                                params))
-        lines(x = self$data$x, y = yy, col = coltab[names(self$comps)[[i]]])
+        lines(x = x$data$x, y = yy, col = coltab[names(x$comps)[[i]]])
       } else {
         params <-
-          as.list(coef(self$nls)[names(formals(self$comps[[i]]))])
+          as.list(coef(x$nls)[names(formals(x$comps[[i]]))])
         params <- params[! is.na(names(params))]
-        yy <- do.call(self$comps[[i]],
-                      args = c(list(xx = self$data$x), params))
-        lines(x = self$data$x, y = yy, col = coltab[names(self$comps)[[i]]])
+        yy <- do.call(x$comps[[i]],
+                      args = c(list(xx = x$data$x), params))
+        lines(x = x$data$x, y = yy, col = coltab[names(x$comps)[[i]]])
       }
     }
   }

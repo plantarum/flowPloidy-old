@@ -1,7 +1,8 @@
 Package: flowPloidy
 Title: Analyze flow cytometer data to determine sample ploidy
 Version: 0.0.0.9000
-Authors@R: person("Tyler", "Smith", email = "tyler@plantarum.ca", role = c("aut", "cre"))
+Author: Tyler Smith <tyler@plantarum.ca>
+Maintainer: Tyler Smith <tyler@plantarum.ca>
 Description: Determine sample ploidy via flow cytometry histogram analysis.
     Reads Flow Cytometry Standard (FCS) files via the flowCore bioconductor
     package, and provides functions for determining the DNA ploidy of
@@ -20,4 +21,4 @@ Imports:
     pbkrtest,
     rmarkdown
 RoxygenNote: 5.0.1
-VignetteBuilder: rmarkdown::render
+VignetteBuilder: rmarkdown
