@@ -4,8 +4,13 @@ author: "Tyler Smith"
 date: "`r Sys.Date()`"
 output: 
     rmarkdown::html_vignette:
-        fig_width: 7
-        fig_height: 6
+        fig_width: 6
+        fig_height: 4
+    pdf_document:
+        fig_width: 5
+        fig_height: 4
+        fig_caption: false
+        pandoc_args: ["--variable=fontfamily:tgschola"]
 vignette: >
   %\VignetteIndexEntry{flowPloidy: Overview}
   %\VignetteEngine{knitr::rmarkdown}
@@ -60,7 +65,7 @@ The channel names are in the `name` column, which you can extract directly with:
 colnames(exprs(fcs))
 ```
 
-Hopefully you see something there that corresponds to the channel you're interested in. In our case, it's "FL3.INT.LIN".
+Hopefully you see something there that corresponds to the channel you're interested in. In our case, it's "`FL3.INT.LIN`".
 
 
 # Simple Analysis
@@ -73,13 +78,13 @@ fh1 <- flowHist(FILE = file1, CHANNEL = "FL3.INT.LIN")
 
 Now that we have our data loaded, `plot` will display it for us:
 
-```{r}
+```{r simplePlot, fig.cap = "FCS Histogram"}
 plot(fh1)
 ```
 
 During the loading process, `flowPloidy` attempts to locate cell populations and identify initial values for model fitting. You can see this by setting the `init = TRUE` argument in the `plot` function: 
 
-```{r}
+```{r initialValues, fig.cap = "Histogram with Initial Values"}
 plot(fh1, init = TRUE)
 ```
 
@@ -93,7 +98,7 @@ Note that I have assigned the output of `fhAnalyze()` to the original `flowHist`
 
 Now that `fh1` contains a fitted model, the results will be displayed when we call `plot` again:
 
-```{r}
+```{r simpleAnalysis, fig.cap = "Histogram with Fitted Model"}
 plot(fh1)
 ```
 
@@ -105,11 +110,15 @@ fh1
 
 Here we see the number of nuclei modelled in total, the ratio between the peaks with the standard error of the ratio, and a table of peak data: nuclei counts, peak size, and the coefficient of variation for the peak.
 
+## A Comment on Reduced Chi-Square Values
+
+I have also included the Reduced Chi-Square value (RCS), recommended by @bagwell_1993 as an objective assessment of model fit. These values *should* be between 0.7 and 4.0. However, they are very sensitive to various other factors, not all strictly related to goodness of fit [@rabinovitch_1994]. In particular, I have noticed that small numbers of events detected in the higher bins (beyond the limits of the modelled peaks) can exert a disproportionate influence on RCS. Compare the previous model fit (which has a long tail of low values) to the next to see an example of this. This could be *fixed* by tweaking the way RCS is calculated, excluding regions where the fitted values are very low. At this point, I'm not sure if this is legitimate or worthwhile.
+
 # Manually Selecting Starting Values
 
 Sometimes, particularly with noisy histograms, `flowPloidy` will not produce useful starting values:
 
-```{r}
+```{r noisyData, fig.cap = "Histogram with Bad Initial Values"}
 file2 <- system.file("extdata", "337.LMD", package = "flowPloidy")
 fh2 <- flowHist(FILE = file2, CHANNEL = "FL3.INT.LIN")
 plot(fh2, init = TRUE)
@@ -123,7 +132,7 @@ fh2 <- pickInit(fh2)
 
 `flowHist` will prompt you to click on the peaks of the first and second peak manually, adding a circle to the plot at each point.
 
-```{r, echo = FALSE}
+```{r fakingInteraction, echo = FALSE, fig.cap = "Histogram with Manually Selected Peaks"}
 ## This stuff is automatically done by the interactive function pickInit,
 ## which we can't actually use in the automated vignette.
 fh2$init <- structure(list(Ma = 169.413778820931, Sa = 8.47068894104653, 
@@ -139,13 +148,13 @@ points(fh2$init$Mb, 95, col = 3, cex = 3)
 
 The new peak values are used to recalculate the initial values:
 
-```{r}
+```{r initPick, fig.cap = "Histogram with Corrected Initial Values"}
 plot(fh2, init = TRUE)
 ```
 
 Now we are ready for the analysis:
 
-```{r, cache = TRUE}
+```{r correctedAnalysis, cache = TRUE, fig.cap = "Histogram with Fitted Model"}
 fh2 <- fhAnalyze(fh2)
 plot(fh2)
 fh2
@@ -178,7 +187,5 @@ exportFlowHist(list(fh1, fh2), file = "flow-results.csv")
 - [ ] gating
 - [ ] workflow for processing large numbers of FCS files, saving detailed
   analysis (not just summary table).
-
-[@bagwell_1993]
 
 # References
