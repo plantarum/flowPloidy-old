@@ -19,6 +19,10 @@ Imports:
     bitops,
     quantreg,
     pbkrtest,
+    stringr,
+    evaluate,
+    formatR,
+    highr
 Suggests:
     knitr
 RoxygenNote: 5.0.1
