@@ -250,7 +250,6 @@ flowInit <- function(fh) {
 #' @param env the parent frame. Not intended for use by users.
 #' @return a function for use in the R nonlinear regression routine.
 #' @author Tyler Smith
-#' @export
 makeModel <- function(components, env = parent.frame()){
 
   names(components) <- NULL

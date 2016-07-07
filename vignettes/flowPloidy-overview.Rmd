@@ -140,7 +140,7 @@ fh2$init <- structure(list(Ma = 169.413778820931, Sa = 8.47068894104653,
     b1 = 2927.36208898762, SCa = 0.1), .Names = c("Ma", "Sa", "a1", "Mb",
                                                   "Sb", "b1", "SCa"))
 fh2$comps$fA2 <- NULL
-fh2$model <- makeModel(fh2$comps)
+fh2$model <- flowPloidy:::makeModel(fh2$comps)
 plot(fh2)
 points(fh2$init$Ma, 245, col = 2, cex = 3)
 points(fh2$init$Mb, 95, col = 3, cex = 3)
