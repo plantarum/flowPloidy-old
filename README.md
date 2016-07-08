@@ -37,7 +37,7 @@ install_bitbucket("tws/flowPloidy")
 library(flowPloidy)
 ```
 
-If you built the vignette, you can view them with:
+If you built the vignette, you can view it with:
 
 ```{r}
 fpVig <- vignette("flowPloidy-overview")
