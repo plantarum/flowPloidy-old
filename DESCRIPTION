@@ -15,7 +15,6 @@ Imports:
     flowCore,
     car,
     caTools,
-    knitr,
     bitops,
     quantreg,
     pbkrtest,
