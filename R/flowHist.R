@@ -319,7 +319,7 @@ plot.flowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
   }
 
   coltab <- c(fA1 = "blue", fA2 = "blue", fB1 = "orange", fB2 = "orange",
-                 `single cut` = "green") 
+                 singleCut = "green") 
   
   if(comps & (! is.null(x$nls))){
     for(i in seq_along(x$comps)){
