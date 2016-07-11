@@ -3,19 +3,22 @@
 \name{flowHist}
 \alias{buildHist}
 \alias{flowHist}
+\alias{histBatch}
 \title{flowHist}
 \usage{
-flowHist(FCS = NULL, FILE = NULL, CHANNEL, bins = 256, window = 20,
+flowHist(FCS = NULL, FILE = NULL, channel, bins = 256, window = 20,
   smooth = 20, pick = FALSE)
 
-buildHist(FCS, CHANNEL, bins)
+histBatch(files, channel, bins = 256, verbose = TRUE)
+
+buildHist(FCS, channel, bins)
 }
 \arguments{
 \item{FCS}{a \code{flowFrame} object, as created by the \code{flowCore::read.FCS} function}
 
 \item{FILE}{the path to an FCS file}
 
-\item{CHANNEL}{the name of the channel containing the intensity data
+\item{channel}{the name of the channel containing the intensity data
 for the histogram}
 
 \item{bins}{an integer specifying the number of bins to use in building
@@ -30,6 +33,11 @@ the histogram via \code{caTools::runmean}}
 \item{pick}{boolean; if TRUE, the user will be prompted to select peaks
 to use for starting values. Otherwise (the default), starting values
 will be detected automatically.}
+
+\item{verbose}{boolean; if TRUE, \code{histBatch} will list files as it
+processes them.}
+
+\item{file}{a character vector, FCS file names}
 }
 \value{
 A \code{flowHist} object. Initially, it has the following
@@ -72,6 +80,8 @@ G1 peaks
 are some issues with the interpretation of this value. It can be quite
 sensitive to values at the end of the histogram, as one example.
 
+\code{histBatch} returns a list of \code{flowHist} objects.
+
 }
 }
 \description{
@@ -85,7 +95,7 @@ Starting with a \code{flowFrame} object, either read from a FCS data
 file or already in memory, \code{flowHist} will:
 
 \enumerate{
-\item Extract the intensity data from CHANNEL. The actual channel to
+\item Extract the intensity data from channel. The actual channel to
 use will depend on the original FCS file. In our case, we use
 "FL3.INT.LIN". See the examples for hints on how to find the right
 channel.
@@ -117,7 +127,7 @@ function \code{flowInit}.
 }
 \examples{
 \dontrun{
-## To find possible values for CHANNEL:
+## To find possible values for channel:
 fcs <- read.FCS("path-to-file.lmd", dataset = 1, alter.names = TRUE)
 fcs
 ## This will present a summary like this:

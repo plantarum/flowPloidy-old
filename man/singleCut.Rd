@@ -7,7 +7,7 @@
 \usage{
 singleCutBase(SCa, intensity, xx)
 
-singleCut(SCa, intensity, xx)
+singleCut(SCa, SCvals)
 }
 \arguments{
 \item{SCa}{a numeric value, the single-cut amplitude parameter}
