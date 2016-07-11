@@ -126,14 +126,24 @@ singleCutBase <- function(SCa, intensity, xx){
 singleCutVect <- Vectorize(singleCutBase, "xx")
 
 #' @rdname singleCut
-singleCut <- function(SCa, intensity, xx){
+singleCut <- function(SCa, SCvals){
   ## I have no idea why the 'flowPloidy:::' prefix is needed here. As far
   ## as I can tell, the package will load and function just fine without
   ## it. However, the function install_bitbucket(..., build_vignettes =
   ## true) fails without it. It's not doing any harm otherwise, except to
   ## my sense of decency, so I leave it here.
-  flowPloidy:::singleCutVect(SCa, intensity, xx)
+  SCa * SCvals
 }
+
+## singleCut <- function(SCa, intensity, xx){
+##   ## I have no idea why the 'flowPloidy:::' prefix is needed here. As far
+##   ## as I can tell, the package will load and function just fine without
+##   ## it. However, the function install_bitbucket(..., build_vignettes =
+##   ## true) fails without it. It's not doing any harm otherwise, except to
+##   ## my sense of decency, so I leave it here.
+##   flowPloidy:::singleCutVect(SCa, intensity, xx)
+## }
+
 
 #' Provide starting values for flowHist NLS models
 #'

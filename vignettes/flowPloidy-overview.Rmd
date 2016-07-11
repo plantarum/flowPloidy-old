@@ -108,7 +108,7 @@ We can see that the coarse initial estimates were indeed close enough to give us
 fh1
 ```
 
-Here we see the number of nuclei modelled in total, the ratio between the peaks with the standard error of the ratio, and a table of peak data: nuclei counts, peak size, and the coefficient of variation for the peak.
+Here we see the ratio between the peaks with the standard error of the ratio, and a table of peak data: nuclei counts (i.e., the number of nuclei modelled in the G1 peaks), peak size, and the coefficient of variation for the peak.
 
 ## A Comment on Reduced Chi-Square Values
 

@@ -166,7 +166,8 @@ flowHist <- function(FCS = NULL, FILE = NULL, CHANNEL,
 
   ## Add model components
   res$comps <- list(singleCut = singleCut, fA1 = fA1)
-
+  res$data$SCvals <- singleCutVect(1, res$data$intensity, res$data$x)
+  
   if(res$peaks[1, "mean"] * 2 <= nrow(res$data))
     res$comps <- c(res$comps, fA2 = fA2)
 
@@ -234,14 +235,15 @@ print.flowHist <- function(x, ...){
   }
 
   if(!is.null(x$counts)){
-    cat(paste("\n\nAnalysis\n========\n",
-              paste("Modelled events: ", round(x$counts$total$value, 1)), sep = ""))
+    cat(paste("\n\nAnalysis\n========\n"))
+    ## cat(paste("Modelled events: ",
+    ##           round(x$counts$total$value, 1)))
     counts <- c(x$counts$firstPeak$value,
-                   x$counts$secondPeak$value)
+                x$counts$secondPeak$value)
     size <- c(coef(x$nls)["Ma"],  coef(x$nls)["Mb"])
     if(is.na(size[2])) size <- size[1]
   }
-
+  
   if(!is.null(x$cv)){
     cvs <- c(x$cv$CVa, x$cv$CVb)
     if(!is.null(x$cv$CVb)){
@@ -305,7 +307,7 @@ plot.flowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
   
   if(init){
     yy <- do.call(x$model,
-                  args = c(list(intensity = x$data$intensity,
+                  args = c(list(SCvals = x$data$SCvals,
                                 xx = x$data$x),
                            x$init))
 
@@ -323,13 +325,12 @@ plot.flowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
   
   if(comps & (! is.null(x$nls))){
     for(i in seq_along(x$comps)){
-      if("intensity" %in% names(formals(x$comps[[i]]))){
+      if("SCvals" %in% names(formals(x$comps[[i]]))){
         params <-
           as.list(coef(x$nls)[names(formals(x$comps[[i]]))])
         params <- params[! is.na(names(params))]
         yy <- do.call(x$comps[[i]],
-                      args = c(list(intensity = x$data$intensity,
-                                    xx = x$data$x),
+                      args = c(list(SCvals = x$data$SCvals),
                                params))
         lines(x = x$data$x, y = yy, col = coltab[names(x$comps)[[i]]])
       } else {
@@ -377,7 +378,6 @@ exFlowHist <- function(fh){
   data.frame(file = fh$file, channel = fh$channel,
              components = paste(names(fh$comps), collapse = ";"),
              totalEvents = sum(fh$data$intensity),
-             modelledEvents = fh$counts$total$value,
              countsA = fh$counts$firstPeak$value,
              countsB = ifelse(is.null(fh$counts$secondPeak$value), NA, fh$counts$secondPeak$value),
              sizeA = coef(fh$nls)["Ma"],

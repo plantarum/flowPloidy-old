@@ -62,14 +62,14 @@ fhNLS <- function(fh){
   model <- fh$model
   form1 <- paste("intensity ~ model(")
   args <- as.character(names(formals(fh$model)))
-  args <- args[!args %in% c("", "intensity", "xx")]
+  args <- args[!args %in% c("", "SCvals", "xx")]
   args <- paste(args, collapse = ", ")
-  form3 <- ", intensity = intensity, xx = x)"
+  form3 <- ", SCvals = SCvals, xx = x)"
   form <- as.formula(paste(form1, args, form3))
 
   eval(call("nls", form, start = fh$init, data = fh$data)) 
 }
-
+  
 ##' @rdname fhAnalyze
 ##' @export
 fhCount <- function(fh){
@@ -80,13 +80,13 @@ fhCount <- function(fh){
   upper = nrow(fh$data)
   ## I think anything >= the number of bins should be fine for subdivisions:
   subdivisions = upper * 2
-  total <-
-    do.call(integrate,
-            c(substitute(fh$model),
-              as.list(coef(fh$nls)),
-              intensity = substitute(fh$data$intensity),
-              lower = lower, upper = upper,
-              subdivisions = subdivisions))
+  ## total <-
+  ##   do.call(integrate,
+  ##           c(substitute(fh$model),
+  ##             as.list(coef(fh$nls)),
+  ##             SCvals = substitute(fh$data$SCvals),
+  ##             lower = lower, upper = upper,
+  ##             subdivisions = subdivisions))
   firstPeak <-
     integrate(fA1, a1 = coef(fh$nls)["a1"],
               Ma = coef(fh$nls)["Ma"],
@@ -104,7 +104,7 @@ fhCount <- function(fh){
     secondPeak <- NULL
   }
   
-  return(list(total = total, firstPeak = firstPeak,
+  return(list(firstPeak = firstPeak,
               secondPeak = secondPeak)) 
 }  
 
