@@ -24,7 +24,7 @@ NULL
 #' file or already in memory, \code{flowHist} will:
 #'
 #' \enumerate{
-#' \item Extract the intensity data from CHANNEL. The actual channel to
+#' \item Extract the intensity data from channel. The actual channel to
 #' use will depend on the original FCS file. In our case, we use
 #' "FL3.INT.LIN". See the examples for hints on how to find the right
 #' channel.  
@@ -58,7 +58,7 @@ NULL
 #' @name flowHist
 #' @param FCS a \code{flowFrame} object, as created by the \code{flowCore::read.FCS} function
 #' @param FILE the path to an FCS file
-#' @param CHANNEL the name of the channel containing the intensity data
+#' @param channel the name of the channel containing the intensity data
 #'   for the histogram
 #' @param bins an integer specifying the number of bins to use in building
 #'   the histogram
@@ -69,6 +69,9 @@ NULL
 #' @param pick boolean; if TRUE, the user will be prompted to select peaks
 #'   to use for starting values. Otherwise (the default), starting values
 #'   will be detected automatically.
+#' @param file a character vector, FCS file names 
+#' @param verbose boolean; if TRUE, \code{histBatch} will list files as it
+#'   processes them.
 #' @return A \code{flowHist} object. Initially, it has the following
 #'   slots:
 #'
@@ -109,13 +112,15 @@ NULL
 #' are some issues with the interpretation of this value. It can be quite
 #' sensitive to values at the end of the histogram, as one example.
 #'
+#' \code{histBatch} returns a list of \code{flowHist} objects.
+#' 
 #' }
 #' 
 #' @author Tyler Smith
 #'
 #' @examples
 #' \dontrun{
-#' ## To find possible values for CHANNEL:
+#' ## To find possible values for channel:
 #' fcs <- read.FCS("path-to-file.lmd", dataset = 1, alter.names = TRUE)
 #' fcs
 #' ## This will present a summary like this:
@@ -138,7 +143,7 @@ NULL
 #'
 #' }
 #' @export
-flowHist <- function(FCS = NULL, FILE = NULL, CHANNEL,
+flowHist <- function(FCS = NULL, FILE = NULL, channel,
                      bins = 256, window = 20, smooth = 20, pick = FALSE){
   ## You probably want to subdivide the bins evenly. i.e., if there are
   ## 1024 bins in the data, use 128, 256, 512 bins
@@ -152,10 +157,10 @@ flowHist <- function(FCS = NULL, FILE = NULL, CHANNEL,
   if(!is.null(FILE))
     FCS <- read.FCS(FILE, dataset = 1, alter.names = TRUE)
 
-  res <- list(channel = CHANNEL, nls = NULL, standard = NULL,
+  res <- list(channel = channel, nls = NULL, standard = NULL,
               file = FCS@description$GUID) 
   ## Build histogram
-  res$data = buildHist(FCS, CHANNEL, bins)
+  res$data = buildHist(FCS, channel, bins)
   
   if(pick)
     res$peaks <- pickPeaks(res)
@@ -185,18 +190,32 @@ flowHist <- function(FCS = NULL, FILE = NULL, CHANNEL,
   return(res)
 }
 
+#' @rdname flowHist 
+#' @export
+histBatch <- function(files, channel, bins = 256, verbose = TRUE){ 
+  res <- list()
+  for(i in seq_along(files)){
+    if(verbose) message("processing ", files[i])
+    #filei <- system.file("extdata", files[i], package = "flowPloidy")
+    res[[files[i]]] <- flowHist(FILE = files[i], channel = channel)
+    tryVal <- try(res[[files[i]]] <- fhAnalyze(res[[files[i]]]))
+    if(verbose && inherits(tryVal, "try-error")) message("-- analysis failed")
+  }              
+  return(res)
+}
+
 #' @export
 #' @rdname flowHist
-buildHist <- function(FCS, CHANNEL, bins){
+buildHist <- function(FCS, channel, bins){
   ## Extract the data channel
-  chanDat <- exprs(FCS)[, CHANNEL]
+  chanDat <- exprs(FCS)[, channel]
 
   ## remove the top bin - this contains clipped values representing all
   ## out-of-range data, not true values
   chanTrim <- chanDat[chanDat < max(chanDat)]
 
   metaData <- pData(parameters(FCS))
-  maxBins <- metaData[which(metaData$name == CHANNEL), "range"]
+  maxBins <- metaData[which(metaData$name == channel), "range"]
   
   ## aggregate bins: combine maxBins into bins via hist
   binAg <- floor(maxBins / bins)
@@ -368,6 +387,9 @@ exportFlowHist <- function(fh, file = NULL){
   else if (class(fh) == "list" && all(sapply(fh, class) == "flowHist")){
     res <- do.call(rbind, lapply(fh, exFlowHist))
   }
+  row.names(res) <- res$file
+  res$file <- NULL
+  
   if(! is.null(file))
     write.table(x = res, file = file)
 
@@ -375,16 +397,35 @@ exportFlowHist <- function(fh, file = NULL){
 }
 
 exFlowHist <- function(fh){
-  data.frame(file = fh$file, channel = fh$channel,
+  if(!is.null(fh$nls)){
+    data.frame(file = fh$file, channel = fh$channel,
              components = paste(names(fh$comps), collapse = ";"),
              totalEvents = sum(fh$data$intensity),
              countsA = fh$counts$firstPeak$value,
-             countsB = ifelse(is.null(fh$counts$secondPeak$value), NA, fh$counts$secondPeak$value),
+             countsB = ifelse(is.null(fh$counts$secondPeak$value), NA,
+                              fh$counts$secondPeak$value),
              sizeA = coef(fh$nls)["Ma"],
              sizeB = coef(fh$nls)["Mb"],
              cvA = fh$cv$CVa,
              cvB = ifelse(is.null(fh$cv$CVb), NA, fh$cv$CVb),
-             ratioAB = unlist(ifelse(is.null(fh$cv$CI[1]), NA, fh$cv$CI[1])),
-             ratioSE = unlist(ifelse(is.null(fh$cv$CI[2]), NA, fh$cv$CI[2])),
+             ratioAB = unlist(ifelse(is.null(fh$cv$CI[1]), NA,
+                                     fh$cv$CI[1])),
+             ratioSE = unlist(ifelse(is.null(fh$cv$CI[2]), NA,
+                                     fh$cv$CI[2])),
              rcs = fh$RCS, row.names = NULL)
+  } else {
+    data.frame(file = fh$file, channel = fh$channel,
+               components = paste(names(fh$comps), collapse = ";"),
+               totalEvents = sum(fh$data$intensity),
+               countsA = NA,
+               countsB = NA,
+               sizeA = NA,
+               sizeB = NA,
+               cvA = NA,
+               cvB = NA,
+               ratioAB = NA,
+               ratioSE = NA,
+               rcs = NA, row.names = NULL)
+  }
 }
+
