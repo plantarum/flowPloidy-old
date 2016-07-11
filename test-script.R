@@ -4,8 +4,9 @@ chan = "FL3.INT.LIN"
 files <- list.files(system.file("extdata", package = "flowPloidy"),
                     full.names = TRUE)
 
-i <- 3
-filei <- system.file("extdata", files[i], package = "flowPloidy")
+i <- 1
+#filei <- system.file("extdata", files[i], package = "flowPloidy")
+filei <- files[i]
 fhi <- flowHist(FILE = filei, CHANNEL = chan)
 plot(fhi, init = TRUE)
 fhi <- pickInit(fhi)
@@ -13,8 +14,42 @@ fhi <- fhAnalyze(fhi)
 plot(fhi)
 fhi
 
+
+fhNLS.lm <- function(fh){
+  model <- fh$model
+  form1 <- paste("intensity ~ model(")
+  args <- as.character(names(formals(fh$model)))
+  args <- args[!args %in% c("", "intensity", "xx")]
+  args <- paste(args, collapse = ", ")
+  form3 <- ", intensity = intensity, xx = x)"
+  form <- as.formula(paste(form1, args, form3))
+
+  eval(call("nlsLM", form, start = fh$init, data = fh$data,
+            lower = rep(0, length = length(fh$init)),
+            control = list(ftol = .Machine$double.xmin,
+                           ptol = .Machine$double.xmin))) 
+}
+
+
+
+flowDat <- fhi$dat
+flowSC <- singleCutVect(1, flowDat$intensity, flowDat$x)
+
+flowFun <- function (SCa, SCvals, xx, a1, Ma, Sa, a2, b1, Mb, Sb) 
+{
+  SCvals * SCa
+} + {
+  (a1/(sqrt(2 * pi) * Sa) * exp(-((xx - Ma)^2)/(2 * Sa^2)))
+} + {
+  (a2/(sqrt(2 * pi) * Sa * 2) * exp(-((xx - Ma * 2)^2)/(2 * 
+                                                        (Sa * 2)^2)))
+} + {
+  (b1/(sqrt(2 * pi) * Sb) * exp(-((xx - Mb)^2)/(2 * Sb^2)))
+}
+
 library(pander)
 myReport <- Pandoc$new("Tyler Smith", "flowPloidy Test")
+myReport$format <- "html"
 res <- list()
 for(i in seq_along(files)){
   message("processing ", files[i])
@@ -27,10 +62,26 @@ for(i in seq_along(files)){
   myReport$add(plot(fhi))
 }              
 
+histReport <- function(hb, author, title, reportFile = NULL,
+                       verbose = TRUE){
+  if(is.null(reportFile))
+    reportFile <- tempfile(tmpdir = getwd())
+  myReport <- Pandoc$new(author, title)
+  for(i in seq_along(hb)){
+    myReport$add(plot(hb[[i]], init = TRUE))
+  }
 
+  myReport$format <- "html"
+  myReport$export(reportFile, options = " ")
 
-histProcess <- function(author, title, files, chan, outFile, bins = 256, verbose = TRUE){
-  myReport <- Pandoc$new("Tyler Smith", "flowPloidy Test")
+}
+  
+histProcess <- function(files, chan, author, title,
+                        dataFile = NULL, reportFile = NULL, bins = 256,
+                        verbose = TRUE){ 
+  if(is.null(reportFile))
+    reportFile <- tempfile(tmpdir = getwd())
+  myReport <- Pandoc$new(author, title)
   res <- list()
 
   for(i in seq_along(files)){
@@ -39,12 +90,13 @@ histProcess <- function(author, title, files, chan, outFile, bins = 256, verbose
     res[[files[i]]] <- flowHist(FILE = files[i], CHANNEL = chan)
     tryVal <- try(res[[files[i]]] <- fhAnalyze(res[[files[i]]]))
     if(verbose && inherits(tryVal, "try-error")) message("-- analysis failed")
-    myReport$add.paragraph(paste("#", files[i]))
     myReport$add(plot(res[[files[i]]], init = TRUE))
   }              
 
-  myReport$add(exportFlowHist(res, file = outFile))
-  myReport$export()
+  exportFlowHist(res, file = dataFile)
+  myReport$format <- "html"
+  myReport$export(reportFile, options = " ")
+
   return(res)
 }
   

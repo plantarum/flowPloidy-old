@@ -7,6 +7,10 @@
 
 # Features
 - [ ] linearity
-- [ ] initial peak detection using FFT transform
+- [ ] initial peak detection with smoothing using kza::kz (or FFT?)
 - [x] export results as a table for saving to disk
+- [ ] save and restore parameter estimates from nls
+- [x] batch processing
+- [ ] switch to nlsLM for regressions
+
 
