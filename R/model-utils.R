@@ -64,6 +64,27 @@ findPeaks <- function(fh, window, smooth = window / 2){
   res
 }
 
+## Using kza::kz provides a cleaner smoothing than runmean. New feature to
+## add:
+## findPeaks <- function(fh, window, smooth = window / 2, meth = "rm"){
+##   ## extract all peaks from data
+##   ## smoothing removes most of the noisy peaks
+##   dat <- fh$data[, "intensity"]
+
+##   if(meth == "rm"){
+##     smDat <- runmean(dat, k = floor(smooth), endrule = "mean")
+##   } else if (meth == "kz") {
+##     smDat <- kz(dat, m = floor(smooth))
+##   } else {
+##     error("invalid method selected")
+##   }
+##     localMax <- runmax(smDat, k = window)
+##   isMax <- localMax == smDat
+##   maxVals <- dat[isMax]                 # use the raw data for heights 
+##   res <- cbind(mean = (1:length(dat))[isMax], height = maxVals)
+##   res
+## }
+
 #' @rdname findPeaks
 #'
 #' @param peaks a matrix of peaks, as returned by \code{findPeaks}
