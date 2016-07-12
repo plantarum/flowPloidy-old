@@ -13,8 +13,11 @@ biocLite("flowCore")
 and `devtools` from CRAN:
 
 ```{r}
-install.packages(devtools, dependencies = TRUE)
+install.packages("devtools", dependencies = TRUE)
+install.package("codetools")
 ```
+
+(`codetools` seems to be automatically installed sometimes, but not others. So to be safe, install it explicitly).
 
 In order to build the vignettes, you may need to have `pandoc` installed as well. On Windows, the easiest way to do this is likely just installing [RStudio](https://www.rstudio.com).
 
