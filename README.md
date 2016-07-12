@@ -22,7 +22,7 @@ In order to build the vignettes, you may need to have `pandoc` installed as well
 
 ```{r}
 library(devtools)
-install_bitbucket("tws/flowPloidy", build_vignettes = true)
+install_bitbucket("tws/flowPloidy", build_vignettes = TRUE)
 ```
 
 If you don't have the necessary tools to build the vignettes, you can omit them:
