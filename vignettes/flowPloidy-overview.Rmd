@@ -180,6 +180,55 @@ As a convenience, if you pass a file name to the `file` argument of `exportFlowH
 exportFlowHist(list(fh1, fh2), file = "flow-results.csv")
 ```
 
+# Processing Directories
+
+If you have a large number of files to process, `flowHist` can read them all in together. The `histBatch` function provides this feature. To use it, you need a list of file names to process. The R function `list.files()` is helpful here. If your FCS files are in the directory "`datadir/`", you can collect all their names using:
+
+```{r, eval = FALSE}
+my.files <- list.files("datadir/", full.names = TRUE)
+```
+
+If you have a mix of FCS files and other files together, you can supply a pattern to match only your data:
+
+```{r, eval = FALSE}
+my.files <- list.files("datadir/", pattern = ".LMD", full.names = TRUE)
+```
+
+If you want to combine directories, use `c()`:
+
+```{r}
+my.files <- list.files("datadir1/", full.names = TRUE)
+my.files <- c(my.files, list.files("datadir2/", full.names = TRUE))
+```
+
+For this example, I'll use the sample data included with `flowPloidy`:
+
+```{r}
+my.files <- list.files(system.file("extdata/", package = "flowPloidy"),
+                       pattern = "*.LMD", full.names = TRUE)
+```
+
+Now we can process all `r length(my.files)` files with one-line:
+
+```{r histBatch}
+batch1 <- histBatch(my.files, channel = "FL3.INT.LIN")
+```
+
+You can export the results with `exportFlowHist()`:
+
+```{r}
+exportFlowHist(batch1)
+```
+
+Note that there were a few failures in the analysis. I don't yet have a neat way to screen the output. In the meantime, you can step through the images to see which files need attention:
+
+```{r}
+parOld <- par(ask = TRUE)
+lapply(batch1, FUN = plot)
+## press enter to scroll through your files!
+par(parOld)
+```
+
 # TODO
 - [ ] add linearity parameter
 - [ ] convert to S4 classes for integration with flowCore and inclusion
