@@ -13,7 +13,7 @@ biocLite("flowCore")
 and `devtools` from CRAN:
 
 ```{r}
-install.packages(devtools)
+install.packages(devtools, dependencies = TRUE)
 ```
 
 In order to build the vignettes, you may need to have `pandoc` installed as well. On Windows, the easiest way to do this is likely just installing [RStudio](https://www.rstudio.com).
@@ -22,13 +22,14 @@ In order to build the vignettes, you may need to have `pandoc` installed as well
 
 ```{r}
 library(devtools)
-install_bitbucket("tws/flowPloidy", build_vignettes = true)
+install_bitbucket("tws/flowPloidy", dependencies = TRUE, 
+                  build_vignettes = TRUE)
 ```
 
 If you don't have the necessary tools to build the vignettes, you can omit them:
 
 ```{r}
-install_bitbucket("tws/flowPloidy")
+install_bitbucket("tws/flowPloidy", dependencies = TRUE)
 ```
 
 ## Getting Started
