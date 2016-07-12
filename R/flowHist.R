@@ -6,6 +6,9 @@ NULL
 #' @importFrom knitr kable
 NULL
 
+#' @importFrom rmarkdown render
+NULL
+
 #' @importFrom graphics hist lines locator plot points polygon
 NULL
 
