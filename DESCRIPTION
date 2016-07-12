@@ -15,7 +15,6 @@ Imports:
     flowCore,
     car,
     caTools,
-Suggests:
     knitr,
     rmarkdown
 RoxygenNote: 5.0.1
