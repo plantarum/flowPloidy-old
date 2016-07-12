@@ -16,6 +16,9 @@ singleCut(SCa, SCvals)
 
 \item{xx}{an integer vector, the ordered channels corresponding to the
 values in `intensity'.}
+
+\item{SCvals}{a numeric vector, stored in the \code{flowHist} object
+slot `SCvals`. Users shouldn't need this.}
 }
 \value{
 NA

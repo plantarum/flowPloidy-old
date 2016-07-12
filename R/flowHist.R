@@ -72,7 +72,7 @@ NULL
 #' @param pick boolean; if TRUE, the user will be prompted to select peaks
 #'   to use for starting values. Otherwise (the default), starting values
 #'   will be detected automatically.
-#' @param file a character vector, FCS file names 
+#' @param files a character vector, FCS file names 
 #' @param verbose boolean; if TRUE, \code{histBatch} will list files as it
 #'   processes them.
 #' @return A \code{flowHist} object. Initially, it has the following
@@ -326,7 +326,7 @@ plotFH <- function(self, ...){
 #' @export
 plot.flowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
   plotFH(x, ...)
-  
+
   if(init){
     yy <- do.call(x$model,
                   args = c(list(SCvals = x$data$SCvals,

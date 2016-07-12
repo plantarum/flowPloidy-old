@@ -34,10 +34,10 @@ the histogram via \code{caTools::runmean}}
 to use for starting values. Otherwise (the default), starting values
 will be detected automatically.}
 
+\item{files}{a character vector, FCS file names}
+
 \item{verbose}{boolean; if TRUE, \code{histBatch} will list files as it
 processes them.}
-
-\item{file}{a character vector, FCS file names}
 }
 \value{
 A \code{flowHist} object. Initially, it has the following

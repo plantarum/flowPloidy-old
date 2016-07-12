@@ -90,7 +90,7 @@ plot(fh1, init = TRUE)
 
 In this case, the initial values are close enough for the model-fitting routines to find a solution, so we can immediately proceed to the complete analysis. This will take a few moments:
 
-```{r, cache = TRUE}
+```{r}
 fh1 <- fhAnalyze(fh1)
 ```
 
@@ -154,7 +154,7 @@ plot(fh2, init = TRUE)
 
 Now we are ready for the analysis:
 
-```{r correctedAnalysis, cache = TRUE, fig.cap = "Histogram with Fitted Model"}
+```{r correctedAnalysis, fig.cap = "Histogram with Fitted Model"}
 fh2 <- fhAnalyze(fh2)
 plot(fh2)
 fh2
