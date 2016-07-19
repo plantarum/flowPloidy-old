@@ -249,14 +249,14 @@ print.flowHist <- function(x, ...){
   }
 
   if(is.null(x$nls)){
-    cat("\nNot fit")
+    cat("\nNot fit\n")
   } else {
     ## replace this with some measure of goodness-of-fit
-    cat(paste("\nFit!"))
+    cat(paste("\nFit!\n"))
   }
 
   if(!is.null(x$counts)){
-    cat(paste("\n\nAnalysis\n========\n"))
+    cat(paste("\nAnalysis\n========\n"))
     ## cat(paste("Modelled events: ",
     ##           round(x$counts$total$value, 1)))
     counts <- c(x$counts$firstPeak$value,
@@ -336,7 +336,7 @@ plot.flowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
           y = yy, 
           col = 1, lwd = 3, lty = 5)
   }
-  
+
   if(nls & (! is.null(x$nls))){
     lines(x = x$data$x, y = predict(x$nls), col = 2)
   }
