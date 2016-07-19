@@ -67,7 +67,14 @@ fhNLS <- function(fh){
   form3 <- ", SCvals = SCvals, xx = x)"
   form <- as.formula(paste(form1, args, form3))
 
-  eval(call("nls", form, start = fh$init, data = fh$data)) 
+  eval(call("nls", form, start = fh$init, data = fh$data))
+  ## res <- try(eval(call("nls", form, start = fh$init, data = fh$data)))
+  ## if(inherits(res, "try-error")){
+  ##   message("-- nls failed")
+  ##   return("FAILED")
+  ## } else {
+  ##   return(res)
+  ## }
 }
   
 ##' @rdname fhAnalyze
