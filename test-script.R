@@ -7,45 +7,25 @@ files <- list.files(system.file("extdata", package = "flowPloidy"),
 i <- 1
 #filei <- system.file("extdata", files[i], package = "flowPloidy")
 filei <- files[i]
-fhi <- flowHist(FILE = filei, CHANNEL = chan)
+fhi <- flowHist(FILE = filei, channel = chan)
 plot(fhi, init = TRUE)
 fhi <- pickInit(fhi)
 fhi <- fhAnalyze(fhi)
 plot(fhi)
 fhi
 
+my.files <- list.files(system.file("extdata/", package = "flowPloidy"),
+                       pattern = "*.LMD", full.names = TRUE)
 
-fhNLS.lm <- function(fh){
-  model <- fh$model
-  form1 <- paste("intensity ~ model(")
-  args <- as.character(names(formals(fh$model)))
-  args <- args[!args %in% c("", "intensity", "xx")]
-  args <- paste(args, collapse = ", ")
-  form3 <- ", intensity = intensity, xx = x)"
-  form <- as.formula(paste(form1, args, form3))
-
-  eval(call("nlsLM", form, start = fh$init, data = fh$data,
-            lower = rep(0, length = length(fh$init)),
-            control = list(ftol = .Machine$double.xmin,
-                           ptol = .Machine$double.xmin))) 
-}
+batch1 <- histBatch(my.files, channel = "FL3.INT.LIN")
+parOld <- par(ask = TRUE)
+lapply(batch1, FUN = plot)
+## press enter to scroll through your files!
+par(parOld)
 
 
 
-flowDat <- fhi$dat
-flowSC <- singleCutVect(1, flowDat$intensity, flowDat$x)
 
-flowFun <- function (SCa, SCvals, xx, a1, Ma, Sa, a2, b1, Mb, Sb) 
-{
-  SCvals * SCa
-} + {
-  (a1/(sqrt(2 * pi) * Sa) * exp(-((xx - Ma)^2)/(2 * Sa^2)))
-} + {
-  (a2/(sqrt(2 * pi) * Sa * 2) * exp(-((xx - Ma * 2)^2)/(2 * 
-                                                        (Sa * 2)^2)))
-} + {
-  (b1/(sqrt(2 * pi) * Sb) * exp(-((xx - Mb)^2)/(2 * Sb^2)))
-}
 
 library(pander)
 myReport <- Pandoc$new("Tyler Smith", "flowPloidy Test")

@@ -3,6 +3,9 @@
 #' @importFrom car deltaMethod
 NULL
 
+#' @importFrom minpack.lm nlsLM
+NULL
+
 #' Complete non-linear regression analysis of flowHist histogram data
 #'
 #' Completes the NLS analysis, and calculates the modelled events and CVs
@@ -16,11 +19,15 @@ NULL
 #' @author Tyler Smith
 #' @export
 fhAnalyze <- function(fh){
-  fh$nls <- fhNLS(fh)
-  fh$counts <- fhCount(fh)
-  fh$cv <- fhCV(fh)
-  fh$RCS <- fhRCS(fh)
-  fh
+  tryVal <- try(fh <- fhNLS(fh))
+  if(inherits(tryVal, "try-error")){
+    message("\n*** Analysis Failed: ", fh$file, " ***\n")
+  } else {
+    fh$counts <- fhCount(fh)
+    fh$cv <- fhCV(fh)
+    fh$RCS <- fhRCS(fh)
+  }
+  return(fh)
 }
 
 ##' @rdname fhAnalyze
@@ -67,16 +74,13 @@ fhNLS <- function(fh){
   form3 <- ", SCvals = SCvals, xx = x)"
   form <- as.formula(paste(form1, args, form3))
 
-  eval(call("nls", form, start = fh$init, data = fh$data))
-  ## res <- try(eval(call("nls", form, start = fh$init, data = fh$data)))
-  ## if(inherits(res, "try-error")){
-  ##   message("-- nls failed")
-  ##   return("FAILED")
-  ## } else {
-  ##   return(res)
-  ## }
+  fh$nls <- eval(call("nlsLM", form, start = fh$init, data = fh$data,
+                      lower = rep(0, length = length(fh$init)),
+                      control = list(ftol = .Machine$double.xmin,
+                                     ptol = .Machine$double.xmin)))
+  return(fh)
 }
-  
+
 ##' @rdname fhAnalyze
 ##' @export
 fhCount <- function(fh){

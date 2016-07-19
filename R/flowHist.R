@@ -199,12 +199,9 @@ histBatch <- function(files, channel, bins = 256, verbose = TRUE){
   res <- list()
   for(i in seq_along(files)){
     if(verbose) message("processing ", files[i])
-    #filei <- system.file("extdata", files[i], package = "flowPloidy")
     tmpRes <- flowHist(FILE = files[i], channel = channel)
     res[[tmpRes$file]] <- tmpRes
-    ##res[[tmpRes$file]] <- fhAnalyze(res[[tmpRes$file]])
-    tryVal <- try(res[[tmpRes$file]] <- fhAnalyze(res[[tmpRes$file]]))
-    if(verbose && inherits(tryVal, "try-error")) message("-- analysis failed")
+    res[[tmpRes$file]] <- fhAnalyze(res[[tmpRes$file]])
   }              
   return(res)
 }

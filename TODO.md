@@ -11,6 +11,6 @@
 - [x] export results as a table for saving to disk
 - [ ] save and restore parameter estimates from nls
 - [x] batch processing
-- [ ] switch to nlsLM for regressions
+- [x] switch to nlsLM for regressions
 
 
