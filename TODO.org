@@ -1,0 +1,20 @@
+* Code clean-up [2/5]
+  - [ ] break up flowHist into smaller reusable chunks, to facilitate
+    stepping through the init process, and redoing individual steps
+  - [X] use consistent names for flowHist objects: pick one of fh, self etc
+    and replace all the others.
+  - [ ] use consistent syntax - pass and return complete flowHist objects,
+    rather than individual slots
+  - [ ] incorporate flowHist slots into flowFrame objects?
+  - [X] use proper named lists for the components
+
+* Features [4/7]
+  - [ ] S-phase
+  - [ ] linearity
+  - [X] initial peak detection with smoothing using kza::kz (or FFT?)
+    Different smoothing algorithms just shift the trade-offs between
+    accuracy and noise in the data. Tried kza:kz, kernalapply, rollapply.
+  - [X] export results as a table for saving to disk
+  - [ ] save and restore parameter estimates from nls
+  - [X] batch processing
+  - [X] switch to nlsLM for regressions
