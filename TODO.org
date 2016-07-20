@@ -8,9 +8,13 @@
   - [ ] incorporate flowHist slots into flowFrame objects?
   - [X] use proper named lists for the components
 
-* Features [4/7]
+* Features [5/7]
   - [ ] S-phase
-  - [ ] linearity
+  - [X] linearity
+    Linearity parameter is now added and functioning properly in the
+    ~linearity~ branch. Not sure how to deal with this just yet. The sample
+    data ranges from 1.92 -- 2.07. How much is acceptable? Should it be
+    used to 'correct' the mean ratios?
   - [X] initial peak detection with smoothing using kza::kz (or FFT?)
     Different smoothing algorithms just shift the trade-offs between
     accuracy and noise in the data. Tried kza:kz, kernalapply, rollapply.
