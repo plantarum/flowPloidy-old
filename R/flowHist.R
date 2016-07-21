@@ -195,11 +195,13 @@ flowHist <- function(FCS = NULL, FILE = NULL, channel,
 
 #' @rdname flowHist 
 #' @export
-histBatch <- function(files, channel, bins = 256, verbose = TRUE){ 
+histBatch <- function(files, channel, bins = 256, verbose = TRUE,
+                      window = 20, smooth = 20){ 
   res <- list()
   for(i in seq_along(files)){
     if(verbose) message("processing ", files[i])
-    tmpRes <- flowHist(FILE = files[i], channel = channel)
+    tmpRes <- flowHist(FILE = files[i], channel = channel, window = window,
+                       smooth = smooth)
     res[[tmpRes$file]] <- tmpRes
     res[[tmpRes$file]] <- fhAnalyze(res[[tmpRes$file]])
   }              

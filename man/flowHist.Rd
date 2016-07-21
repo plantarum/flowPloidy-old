@@ -9,7 +9,8 @@
 flowHist(FCS = NULL, FILE = NULL, channel, bins = 256, window = 20,
   smooth = 20, pick = FALSE)
 
-histBatch(files, channel, bins = 256, verbose = TRUE)
+histBatch(files, channel, bins = 256, verbose = TRUE, window = 20,
+  smooth = 20)
 
 buildHist(FCS, channel, bins)
 }
