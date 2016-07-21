@@ -77,7 +77,8 @@ fhNLS <- function(fh){
   fh$nls <- eval(call("nlsLM", form, start = fh$init, data = fh$data,
                       lower = rep(0, length = length(fh$init)),
                       control = list(ftol = .Machine$double.xmin,
-                                     ptol = .Machine$double.xmin)))
+                                     ptol = .Machine$double.xmin,
+                                     maxiter = 1024)))
   return(fh)
 }
 
