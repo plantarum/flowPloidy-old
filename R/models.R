@@ -3,6 +3,58 @@
 ## Functions for building non-linear models for application to flowHist
 ## objects.
 
+## Broadened rectangles:
+## simplified with a fixed sd of 1. Very little change in results with more
+## flexible models, so keeping it simple.
+erf <- function(x) 2 * pnorm(x * sqrt(2)) - 1
+
+## yup, appending flowPloidy:::erf because just erf causes R CMD build to
+## fail during vignette creation. That's odd.
+brA <- function(BRA, Ma, xx){
+  BRA * ((flowPloidy:::erf(((2 * Ma) - xx)/sqrt(2 * 1)) -
+          flowPloidy:::erf((Ma - xx)/sqrt(2 * 1))) / 2)
+}
+
+brB <- function(BRB, Mb, xx){
+  BRB * ((flowPloidy:::erf(((2 * Mb) - xx)/sqrt(2 * 1)) -
+          flowPloidy:::erf((Mb - xx)/sqrt(2 * 1))) / 2)
+}
+
+## for testing the influence of sd:
+## This isn't used in any other code, retained here for further study if
+## needed. 
+## brA1 <- function(BRA, Ma, xx, sd){
+##   BRA * ((flowPloidy::erf(((2 * Ma) - xx)/sqrt(2 * sd)) -
+##           erf((Ma - xx)/sqrt(2 * sd))) / 2)
+## }
+
+
+## The basic broadened trapezoid functions
+## Retained here for study, but the complexity doesn't provide much/any
+## useful improvement in the model fit.
+## broadenedTrapezoid <- function(BTt1, BTt2, BTx1, BTx2, BTs1, BTs2, xx){
+##   ((BTt2 - BTt1) / (BTx2 - BTx1) * (xx - BTx2) + BTt2) *
+##     ((erf((BTx2 - xx)/sqrt(2 * BTs2)) -
+##       erf((BTx1 - xx)/sqrt(2 * BTs1))) / 2)
+## }
+
+## ## Translated into model components:
+## btA <- function(BTt1A, BTt2A, Ma, xx){
+##   ## Simplified to use a fixed sd (5), and bounded to the G1 mean value
+##   ## (and by extension the G2 mean value).
+##   ((BTt2A - BTt1A) / Ma * (xx - (2 * Ma)) + BTt2A) *
+##     ((erf(((2 * Ma) - xx)/sqrt(2 * 5)) -
+##       erf((Ma - xx)/sqrt(2 * 5))) / 2)
+## }
+
+## btB <- function(BTt1B, BTt2B, Mb, xx){
+##   ## Simplified to use a fixed sd (5), and bounded to the G1 mean value
+##   ## (and by extension the G2 mean value).
+##   ((BTt2B - BTt1B) / Mb * (xx - (2 * Mb)) + BTt2B) *
+##     ((erf(((2 * Mb) - xx)/sqrt(2 * 5)) -
+##       erf((Mb - xx)/sqrt(2 * 5))) / 2)
+## }
+
 #' Gaussian model components
 #'
 #' Components for modeling Gaussian features in flow histograms
@@ -251,6 +303,31 @@ flowInit <- function(fh) {
     names(tmpval) <- c("SCa")
     value <- c(value, tmpval)
   }
+
+  ## if("BTt1A" %in% params){
+  ##   tmpval <- c(20, 10)
+  ##   names(tmpval) <- c("BTt1A", "BTt2A")
+  ##   value <- c(value, tmpval)
+  ## }
+
+  ## if("BTt1B" %in% params){
+  ##   tmpval <- c(20, 10)
+  ##   names(tmpval) <- c("BTt1B", "BTt2B")
+  ##   value <- c(value, tmpval)
+  ## }
+
+  if("BRA" %in% params){
+    tmpval <- c(10)
+    names(tmpval) <- c("BRA")
+    value <- c(value, tmpval)
+  }
+
+  if("BRB" %in% params){
+    tmpval <- c(10)
+    names(tmpval) <- c("BRB")
+    value <- c(value, tmpval)
+  }
+
   fh$init <- as.list(value)
   if(modChange){
     fh$model <- makeModel(fh$comps)

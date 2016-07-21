@@ -9,10 +9,10 @@ NULL
 #' @importFrom rmarkdown render
 NULL
 
-#' @importFrom graphics hist lines locator plot points polygon
+#' @importFrom graphics hist lines locator plot points polygon grconvertX grconvertY text
 NULL
 
-#' @importFrom stats as.formula coef integrate predict
+#' @importFrom stats as.formula coef integrate predict pnorm
 NULL
 
 #' @importFrom utils write.table
@@ -177,10 +177,10 @@ flowHist <- function(FCS = NULL, FILE = NULL, channel,
   res$data$SCvals <- singleCutVect(1, res$data$intensity, res$data$x)
   
   if(res$peaks[1, "mean"] * 2 <= nrow(res$data))
-    res$comps <- c(res$comps, fA2 = fA2)
+    res$comps <- c(res$comps, fA2 = fA2, brA = brA)
 
   if(nrow(res$peaks) > 1){
-    res$comps <- c(res$comps, fB1 = fB1)
+    res$comps <- c(res$comps, fB1 = fB1, brB = brB)
     if(res$peaks[2, "mean"] * 2 <= nrow(res$data))
       res$comps <- c(res$comps, fB2 = fB2)
   }
@@ -341,10 +341,15 @@ plot.flowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
 
   if(nls & (! is.null(x$nls))){
     lines(x = x$data$x, y = predict(x$nls), col = 2)
+    text(paste("RCS: ", round(x$RCS, 3)), cex = 2,
+         x = grconvertX(0.9, from = "npc", to = "user"),
+         y = grconvertY(0.9, from = "npc", to = "user"))
+         
   }
 
   coltab <- c(fA1 = "blue", fA2 = "blue", fB1 = "orange", fB2 = "orange",
-                 singleCut = "green") 
+              singleCut = "green", btA = "magenta", btB = "turquoise",
+              brA = "magenta", brB = "turquoise") 
   
   if(comps & (! is.null(x$nls))){
     for(i in seq_along(x$comps)){
