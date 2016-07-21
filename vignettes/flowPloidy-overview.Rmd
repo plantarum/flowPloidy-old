@@ -112,7 +112,7 @@ Here we see the ratio between the peaks with the standard error of the ratio, an
 
 ## A Comment on Reduced Chi-Square Values
 
-I have also included the Reduced Chi-Square value (RCS), recommended by @bagwell_1993 as an objective assessment of model fit. These values *should* be between 0.7 and 4.0. However, they are very sensitive to various other factors, not all strictly related to goodness of fit [@rabinovitch_1994]. In particular, I have noticed that small numbers of events detected in the higher bins (beyond the limits of the modelled peaks) can exert a disproportionate influence on RCS. Compare the previous model fit (which has a long tail of low values) to the next to see an example of this. This could be *fixed* by tweaking the way RCS is calculated, excluding regions where the fitted values are very low. At this point, I'm not sure if this is legitimate or worthwhile.
+I have also included the Reduced Chi-Square value (RCS), recommended by @bagwell_1993 as an objective assessment of model fit. These values *should* be between 0.7 and 4.0. However, @rabinovitch_1994 questioned the utility of this measure, noting that it can be very sensitive to various factors not strictly related to goodness of fit. In earlier versions of `flowPloidy` the RCS values were quite high, but with the addition of an S-phase model component they seem to be fairly reasonable now.
 
 # Manually Selecting Starting Values
 
@@ -135,10 +135,10 @@ fh2 <- pickInit(fh2)
 ```{r fakingInteraction, echo = FALSE, fig.cap = "Histogram with Manually Selected Peaks"}
 ## This stuff is automatically done by the interactive function pickInit,
 ## which we can't actually use in the automated vignette.
-fh2$init <- structure(list(Ma = 169.413778820931, Sa = 8.47068894104653, 
-    a1 = 5096.20000780635, Mb = 233.075681056846, Sb = 11.6537840528423, 
-    b1 = 2927.36208898762, SCa = 0.1), .Names = c("Ma", "Sa", "a1", "Mb",
-                                                  "Sb", "b1", "SCa"))
+fh2$init <- structure(list(Ma = 169.172741823698, Sa = 8.45863709118489, 
+    a1 = 5117.40448157779, Mb = 233.083219921043, Sb = 11.6541609960521, 
+    b1 = 3005.84045384363, SCa = 0.1, BRA = 10, BRB = 10),
+    .Names = c("Ma", "Sa", "a1", "Mb", "Sb", "b1", "SCa", "BRA", "BRB"))
 fh2$comps$fA2 <- NULL
 fh2$model <- flowPloidy:::makeModel(fh2$comps)
 plot(fh2)

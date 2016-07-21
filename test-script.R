@@ -17,7 +17,8 @@ fhi
 my.files <- list.files(system.file("extdata/", package = "flowPloidy"),
                        pattern = "*.LMD", full.names = TRUE)
 
-batch1 <- histBatch(my.files, channel = "FL3.INT.LIN")
+batch1 <- histBatch(my.files, channel = "FL3.INT.LIN", window = 20,
+                    smooth = 20)
 parOld <- par(ask = TRUE)
 lapply(batch1, FUN = plot)
 ## press enter to scroll through your files!
@@ -93,10 +94,12 @@ plot(fh1)
 fh1
 
 file2 <- system.file("extdata", "SM239.LMD", package = "flowPloidy")
-fh2 <- flowHist(FILE = file2, CHANNEL = chan)
+fh2c <- flowHist(FILE = file2, channel = chan)
 plot(fh2, init = TRUE)
 fh2 <- fhAnalyze(fh2)
+fh2b <- fhAnalyze(fh2b)
 plot(fh2)
+plot(fh2b)
 fh2
 
 file3 <- system.file("extdata", "226.LMD", package = "flowPloidy")
