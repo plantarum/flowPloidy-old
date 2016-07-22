@@ -326,14 +326,29 @@ plot.flowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
     lines(x = x$data$x,
           y = yy, 
           col = 1, lwd = 3, lty = 5)
+
+    abline(v = x$init$Ma, col = "blue", lwd = 2)
+    points(x = x$init$Ma, y  = x$data$intensity[round(x$init$Ma, 0)],
+           cex = 2, pch = 16, col = "blue")
+    text(paste("Peak A: ", round(x$init$Ma, 0)), cex = 1,
+         x = x$init$Ma, col = "blue", pos = 2,
+         y = grconvertY(0.9, from = "npc", to = "user"))
+    abline(v = 2 * x$init$Ma, col = "blue", lwd = 0.5)
+    abline(v = x$init$Mb, col = "orange", lwd = 2)
+    points(x = x$init$Mb, y  = x$data$intensity[round(x$init$Mb, 0)],
+           cex = 2, pch = 16, col = "orange")
+    text(paste("Peak B: ", round(x$init$Mb, 0)), cex = 1,
+         x = x$init$Mb, col = "orange", pos = 2,
+         y = grconvertY(0.9, from = "npc", to = "user"))
+    abline(v = 2 * x$init$Mb, col = "orange", lwd = 0.5)
+
   }
 
   if(nls & (! is.null(x$nls))){
     lines(x = x$data$x, y = predict(x$nls), col = 2)
-    text(paste("RCS: ", round(x$RCS, 3)), cex = 2,
+    text(paste("RCS: ", round(x$RCS, 3)), cex = 1, pos = 2,
          x = grconvertX(0.9, from = "npc", to = "user"),
          y = grconvertY(0.9, from = "npc", to = "user"))
-         
   }
 
   if(comps & (! is.null(x$nls))){
