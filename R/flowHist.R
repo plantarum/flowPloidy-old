@@ -172,20 +172,9 @@ flowHist <- function(FCS = NULL, FILE = NULL, channel,
     res$peaks <- cleanPeaks(res$peaks, window = window)  
   }
 
-  ## Add model components
-  res$comps <- list(singleCut = singleCut, fA1 = fA1)
-  res$data$SCvals <- singleCutVect(1, res$data$intensity, res$data$x)
+  res <- addComponents(res)
   
-  if(res$peaks[1, "mean"] * 2 <= nrow(res$data))
-    res$comps <- c(res$comps, fA2 = fA2, brA = brA)
-
-  if(nrow(res$peaks) > 1){
-    res$comps <- c(res$comps, fB1 = fB1, brB = brB)
-    if(res$peaks[2, "mean"] * 2 <= nrow(res$data))
-      res$comps <- c(res$comps, fB2 = fB2)
-  }
-  
-  res$model <- makeModel(res$comps)
+  res <- makeModel(res)
 
   res <- flowInit(res)
   class(res) <- "flowHist"

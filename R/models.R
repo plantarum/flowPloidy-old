@@ -326,9 +326,35 @@ flowInit <- function(fh) {
 
   fh$init <- as.list(value)
   if(modChange){
-    fh$model <- makeModel(fh$comps)
+    fh <- makeModel(fh)
   }
 
+  return(fh)
+}
+
+addComponents <- function(fh){
+  if(is.null(fh$peaks))
+    stop("Can't fit components without peaks!")
+
+  ## Every histogram needs one peak, debris and S-phase:
+  fh$comps <- list(singleCut = singleCut, fA1 = fA1, brA = brA)
+  fh$data$SCvals <- singleCutVect(1, fh$data$intensity, fh$data$x)
+
+  ## G2 peak:
+  if(fh$peaks[1, "mean"] * 2 <= nrow(fh$data))
+    fh$comps <- c(fh$comps, fA2 = fA2)
+
+  ## Second G1 peak:
+  if(nrow(fh$peaks) > 1){
+    fh$comps <- c(fh$comps, fB1 = fB1, brB = brB)
+    if(fh$peaks[2, "mean"] * 2 <= nrow(fh$data))
+      fh$comps <- c(fh$comps, fB2 = fB2)
+  }
+
+  ## Clear out old initial values and nls fitting:
+  fh$nls <- NULL
+  fh$init <- NULL
+  
   return(fh)
 }
 
@@ -336,12 +362,12 @@ flowInit <- function(fh) {
 #'
 #' Build an NLS model from a list of components
 #'
-#' @param components a list of model components to combine
+#' @param fh a \code{flowHist} object
 #' @param env the parent frame. Not intended for use by users.
 #' @return a function for use in the R nonlinear regression routine.
 #' @author Tyler Smith
-makeModel <- function(components, env = parent.frame()){
-
+makeModel <- function(fh, env = parent.frame()){
+  components <- fh$comps
   names(components) <- NULL
   args <- unlist(lapply(components, formals))
   args <- args[unique(names(args))]
@@ -355,6 +381,7 @@ makeModel <- function(components, env = parent.frame()){
     bodList <- bodList[-1]
   }
 
-  eval(call("function", as.pairlist(args), bod), env)
-
+  fh$model <- eval(call("function", as.pairlist(args), bod), env)
+  fh$nls <- NULL                        # remove outdated results
+  return(fh)
 }
