@@ -9,10 +9,11 @@
   - [X] use proper named lists for the components
   - [ ] consolidate model component code
     Note: adding a new model component requires:
-    - adding a the component function in models.R (i.e., brB)
+    - adding a the component function in models.R (i.e., brB), including a
+      "col" attribute for plotting
     - add an if statement to add the component in flowHist() in flowHist.R 
     - adding an if statement to add initial values in flowInit() in models.R
-    - add appropriate colors to coltab in plot.flowHist() in flowHist.R
+    - +add appropriate colors to coltab in plot.flowHist() in flowHist.R+
       
     Component colors should be stored as attributes of the components
     themselves.

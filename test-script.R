@@ -24,10 +24,6 @@ lapply(batch1, FUN = plot)
 ## press enter to scroll through your files!
 par(parOld)
 
-
-
-
-
 library(pander)
 myReport <- Pandoc$new("Tyler Smith", "flowPloidy Test")
 myReport$format <- "html"
