@@ -228,7 +228,7 @@ flowInit <- function(fh) {
     ## Any model with Ma will require all three of these parameters:
     Ma <- peaks[1, "mean"]
     Sa <- Ma / 20                         # assume CV = 0.05
-    a1 <- peaks[1, "height"] * Sa / 0.4
+    a1 <- peaks[1, "height"] * Sa / 0.45
     tmpval <- c(Ma, Sa, a1)
     names(tmpval) <- c("Ma", "Sa", "a1")
     value <- c(value, tmpval)
@@ -243,7 +243,7 @@ flowInit <- function(fh) {
       fh$comps$fA2 <- NULL
       modChange <- TRUE
     } else {
-      a2 <- xy[peaks[1, "mean"] * 2, "intensity"] * Sa * 2 / 0.4
+      a2 <- xy[peaks[1, "mean"] * 2, "intensity"] * Sa * 2 / 0.45
       tmpval <- c(a2)
       names(tmpval) <- c("a2")
       value <- c(value, tmpval)
@@ -253,7 +253,7 @@ flowInit <- function(fh) {
       warning("a2 peak appears to be IN range, adding it to the model")
       fh$comps$fA2 <- fA2
       modChange <- TRUE
-      a2 <- xy[peaks[1, "mean"] * 2, "intensity"] * Sa * 2 / 0.4
+      a2 <- xy[peaks[1, "mean"] * 2, "intensity"] * Sa * 2 / 0.45
       tmpval <- c(a2)
       names(tmpval) <- c("a2")
       value <- c(value, tmpval)
@@ -263,7 +263,7 @@ flowInit <- function(fh) {
   if("Mb" %in% params){
     Mb <- peaks[2, "mean"]
     Sb <- Mb / 20
-    b1 <- peaks[2, "height"] * Sb / 0.4
+    b1 <- peaks[2, "height"] * Sb / 0.45
     tmpval <- c(Mb, Sb, b1)
     names(tmpval) <- c("Mb", "Sb", "b1")
     value <- c(value, tmpval)
@@ -276,7 +276,7 @@ flowInit <- function(fh) {
       fh$comps$fB2 <- NULL
       modChange <- TRUE
     } else {
-      b2 <- as.vector(xy[peaks[2, "mean"] * 2, "intensity"] * Sb * 2 / 0.4)
+      b2 <- as.vector(xy[peaks[2, "mean"] * 2, "intensity"] * Sb * 2 / 0.45)
       tmpval <- c(b2)
       names(tmpval) <- c("b2")
       value <- c(value, tmpval)
@@ -286,7 +286,7 @@ flowInit <- function(fh) {
       warning("b2 peak appears to be IN range, adding it to the model")
       fh$comps$fB2 <- fB2
       modChange <- TRUE
-      b2 <- xy[peaks[1, "mean"] * 2, "intensity"] * Sb * 2 / 0.4
+      b2 <- xy[peaks[1, "mean"] * 2, "intensity"] * Sb * 2 / 0.45
       tmpval <- c(b2)
       names(tmpval) <- c("b2")
       value <- c(value, tmpval)
