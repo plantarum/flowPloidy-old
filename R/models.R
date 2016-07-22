@@ -14,11 +14,13 @@ brA <- function(BRA, Ma, xx){
   BRA * ((flowPloidy:::erf(((2 * Ma) - xx)/sqrt(2 * 1)) -
           flowPloidy:::erf((Ma - xx)/sqrt(2 * 1))) / 2)
 }
+attr(brA, "col") <- "magenta"
 
 brB <- function(BRB, Mb, xx){
   BRB * ((flowPloidy:::erf(((2 * Mb) - xx)/sqrt(2 * 1)) -
           flowPloidy:::erf((Mb - xx)/sqrt(2 * 1))) / 2)
 }
+attr(brB, "col") <- "turquoise"
 
 ## for testing the influence of sd:
 ## This isn't used in any other code, retained here for further study if
@@ -27,7 +29,6 @@ brB <- function(BRB, Mb, xx){
 ##   BRA * ((flowPloidy::erf(((2 * Ma) - xx)/sqrt(2 * sd)) -
 ##           erf((Ma - xx)/sqrt(2 * sd))) / 2)
 ## }
-
 
 ## The basic broadened trapezoid functions
 ## Retained here for study, but the complexity doesn't provide much/any
@@ -75,21 +76,25 @@ brB <- function(BRB, Mb, xx){
 fA1 <- function(a1, Ma, Sa, xx){
   (a1 / (sqrt(2 * pi) * Sa) * exp(-((xx - Ma)^2)/(2 * Sa^2)))
 }
+attr(fA1, "col") <- "blue"
 
 #' @rdname gauss
 fA2 <- function(a2, Sa, Ma, xx){
   (a2 / (sqrt(2 * pi) * Sa * 2) * exp(-((xx - Ma * 2)^2)/(2 * (Sa * 2)^2)))
 }
+attr(fA2, "col") <- "blue"
 
 #' @rdname gauss
 fB1 <- function(b1, Mb, Sb, xx){
   (b1 / (sqrt(2 * pi) * Sb) * exp(-((xx - Mb)^2)/(2 * Sb^2)))
 }
+attr(fB1, "col") <- "orange"
 
 #' @rdname gauss
 fB2 <- function(b2, Sb, Mb, xx){
   (b2 / (sqrt(2 * pi) * Sb * 2) * exp(-((xx - Mb * 2)^2)/(2 * (Sb * 2)^2)))
 }
+attr(fB2, "col") <- "orange"
 
 ## Single-cut debris model
 ##
@@ -188,16 +193,7 @@ singleCut <- function(SCa, SCvals){
   ## my sense of decency, so I leave it here.
   SCa * SCvals
 }
-
-## singleCut <- function(SCa, intensity, xx){
-##   ## I have no idea why the 'flowPloidy:::' prefix is needed here. As far
-##   ## as I can tell, the package will load and function just fine without
-##   ## it. However, the function install_bitbucket(..., build_vignettes =
-##   ## true) fails without it. It's not doing any harm otherwise, except to
-##   ## my sense of decency, so I leave it here.
-##   flowPloidy:::singleCutVect(SCa, intensity, xx)
-## }
-
+attr(singleCut, "col") <- "green"
 
 #' Provide starting values for flowHist NLS models
 #'

@@ -347,10 +347,6 @@ plot.flowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
          
   }
 
-  coltab <- c(fA1 = "blue", fA2 = "blue", fB1 = "orange", fB2 = "orange",
-              singleCut = "green", btA = "magenta", btB = "turquoise",
-              brA = "magenta", brB = "turquoise") 
-  
   if(comps & (! is.null(x$nls))){
     for(i in seq_along(x$comps)){
       if("SCvals" %in% names(formals(x$comps[[i]]))){
@@ -360,14 +356,14 @@ plot.flowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
         yy <- do.call(x$comps[[i]],
                       args = c(list(SCvals = x$data$SCvals),
                                params))
-        lines(x = x$data$x, y = yy, col = coltab[names(x$comps)[[i]]])
+        lines(x = x$data$x, y = yy, col = attr(x$comps[[i]], "col"))
       } else {
         params <-
           as.list(coef(x$nls)[names(formals(x$comps[[i]]))])
         params <- params[! is.na(names(params))]
         yy <- do.call(x$comps[[i]],
                       args = c(list(xx = x$data$x), params))
-        lines(x = x$data$x, y = yy, col = coltab[names(x$comps)[[i]]])
+        lines(x = x$data$x, y = yy, col = attr(x$comps[[i]], "col"))
       }
     }
   }
