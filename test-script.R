@@ -19,6 +19,10 @@ my.files <- list.files(system.file("extdata/", package = "flowPloidy"),
 
 batch1 <- histBatch(my.files, channel = "FL3.INT.LIN", window = 20,
                     smooth = 20)
+
+batch1 <- flowShiny(batch1)
+
+
 parOld <- par(ask = TRUE)
 lapply(batch1, FUN = plot)
 ## press enter to scroll through your files!

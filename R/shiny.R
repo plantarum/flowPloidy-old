@@ -1,32 +1,89 @@
+#' @importFrom shiny fluidPage nearPoints reactive radioButtons actionButton plotOutput reactive eventReactive shinyApp
+
+flowShiny <- function(flowList){
+  .fhI <- 1
+  .fhList <- flowList
+  runApp(shinyApp(ui = ui, server = server))
+  return(.fhList)
+}
+
 ui <- fluidPage(
-  radioButtons(inputId = "peakPicker", label = "Move peak:",
-               choices = list("A" = "A", "B" = "B"), selected = "A"), 
-  actionButton(inputId = "update", label = "Update"),
-  plotOutput("init", click = "pointPicker"),
-  plotOutput("nls")
+  titlePanel("flowPloidy"),
+  sidebarLayout(
+    sidebarPanel(
+      htmlOutput("flowNumber", align = "center"),
+      fluidRow(
+        column(6, actionButton("nxt", label = "Next")),
+        column(6, actionButton("prev", label = "Previous"))),
+      tags$hr(),
+      radioButtons(inputId = "peakPicker",
+                   label = "Move peak:", 
+                   choices = list("A" = "A", "B" = "B"),
+                   selected = "A", inline = TRUE),
+      tags$hr(),
+      actionButton("exit", label = "Return to R")),
+    mainPanel(
+      plotOutput("init", click = "pointPicker")))
+  ## plotOutput("nls")
 )
 
 server <- function(input, output){
-  fhReact <- reactive({
-    xPt <- nearPoints(.fh$data, input$pointPicker, "x", "intensity",
-                      threshold = 25, maxpoints = 1)
+  nxtVal <- 0
+  prevVal <- 0
+  updateVal <- 0
+  
+  fhInitPlot <- reactive({
+    xPt <- nearPoints(.fhList[[fhCurrent()]]$data, input$pointPicker, "x",
+                      "intensity", threshold = 25, maxpoints = 1)
     if(nrow(xPt) > 0){
       if(input$peakPicker == "A"){
-        .fh <<- sliderPeaks(.fh, xPt[1,1], .fh$init$Mb)
+        .fhList[[fhCurrent()]] <<- sliderPeaks(.fhList[[fhCurrent()]],
+                                        xPt[1,1], 
+                                        .fhList[[fhCurrent()]]$init$Mb) 
+        .fhList[[fhCurrent()]] <<- fhAnalyze(.fhList[[fhCurrent()]])
       } else {
-        .fh <<- sliderPeaks(.fh, .fh$init$Ma, xPt[1,1])
+        .fhList[[fhCurrent()]] <<- sliderPeaks(.fhList[[fhCurrent()]],
+                                        .fhList[[fhCurrent()]]$init$Ma,
+                                        xPt[1,1])
+        .fhList[[fhCurrent()]] <<- fhAnalyze(.fhList[[fhCurrent()]])
       }
     }
-    .fh
+    .fhList[[fhCurrent()]]
+  })
+
+  fhCurrent <- reactive({
+    if(input$nxt > nxtVal){
+      nxtVal <<- input$nxt
+      if(.fhI < length(.fhList))
+        .fhI <<- .fhI + 1
+    }
+
+    if(input$prev > prevVal){
+      prevVal <<- input$prev      
+      if(.fhI > 1)
+        .fhI <<- .fhI - 1
+    }
+
+    ## if(input$update > updateVal){
+    ##   updateVal <<- input$update      
+    ##   .fhList[[fhCurrent()]] <<- fhAnalyze(.fhList[[fhCurrent()]])
+    ## }
+
+    .fhI
+  })
+  
+  observe({
+    if(input$exit > 0)
+      stopApp()
   })
 
   fhNLS <- eventReactive(input$update, {
-    .fh <<- fhAnalyze(.fh)
+    .fhList[[fhCurrent()]] <<- fhAnalyze(.fhList[[fhCurrent()]])
   })
 
   output$plot_clickedpoints <- renderTable({
-    res <- nearPoints(.fh$data, input$pointPicker, "x", "intensity",
-                      threshold = 25, maxpoints = 1)
+    res <- nearPoints(.fhList[[fhCurrent()]]$data, input$pointPicker, "x",
+                      "intensity", threshold = 25, maxpoints = 1)
     if (nrow(res) == 0)
       return()
     res
@@ -38,12 +95,15 @@ server <- function(input, output){
   })
   
   output$init <- renderPlot({
-    plot(fhReact(), init = TRUE)
+    plot(fhInitPlot(), init = TRUE, nls = TRUE, comps = TRUE)
   })
 
-  output$nls <- renderPlot({
-    plot(fhNLS())
+  output$flowNumber <- renderText({
+    paste("File", tags$b(fhCurrent()), "of", length(.fhList))
   })
+  ## output$nls <- renderPlot({
+  ##   plot(fhNLS())
+  ## })
 
 }
     
