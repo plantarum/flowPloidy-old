@@ -334,14 +334,15 @@ plot.flowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
          x = x$init$Ma, col = "blue", pos = 2,
          y = grconvertY(0.9, from = "npc", to = "user"))
     abline(v = 2 * x$init$Ma, col = "blue", lwd = 0.5)
-    abline(v = x$init$Mb, col = "orange", lwd = 2)
-    points(x = x$init$Mb, y  = x$data$intensity[round(x$init$Mb, 0)],
-           cex = 2, pch = 16, col = "orange")
-    text(paste("Peak B: ", round(x$init$Mb, 0)), cex = 1,
-         x = x$init$Mb, col = "orange", pos = 2,
-         y = grconvertY(0.9, from = "npc", to = "user"))
-    abline(v = 2 * x$init$Mb, col = "orange", lwd = 0.5)
-
+    if(! is.null(x$init$Mb)){
+      abline(v = x$init$Mb, col = "orange", lwd = 2)
+      points(x = x$init$Mb, y  = x$data$intensity[round(x$init$Mb, 0)],
+             cex = 2, pch = 16, col = "orange")
+      text(paste("Peak B: ", round(x$init$Mb, 0)), cex = 1,
+           x = x$init$Mb, col = "orange", pos = 2,
+           y = grconvertY(0.9, from = "npc", to = "user"))
+      abline(v = 2 * x$init$Mb, col = "orange", lwd = 0.5)
+    }
   }
 
   if(nls & (! is.null(x$nls))){
