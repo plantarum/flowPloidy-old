@@ -140,7 +140,7 @@ fh2$init <- structure(list(Ma = 169.172741823698, Sa = 8.45863709118489,
     b1 = 3005.84045384363, SCa = 0.1, BRA = 10, BRB = 10),
     .Names = c("Ma", "Sa", "a1", "Mb", "Sb", "b1", "SCa", "BRA", "BRB"))
 fh2$comps$fA2 <- NULL
-fh2$model <- flowPloidy:::makeModel(fh2$comps)
+fh2 <- flowPloidy:::makeModel(fh2)
 plot(fh2)
 points(fh2$init$Ma, 245, col = 2, cex = 3)
 points(fh2$init$Mb, 95, col = 3, cex = 3)
@@ -222,19 +222,11 @@ exportFlowHist(batch1)
 
 Note that there were a few failures in the analysis. I don't yet have a neat way to screen the output. In the meantime, you can step through the images to see which files need attention:
 
-```{r}
+```{r, eval = FALSE}
 parOld <- par(ask = TRUE)
 lapply(batch1, FUN = plot)
 ## press enter to scroll through your files!
 par(parOld)
 ```
-
-# TODO
-- [ ] add linearity parameter
-- [ ] convert to S4 classes for integration with flowCore and inclusion
-  in BioConductor
-- [ ] gating
-- [ ] workflow for processing large numbers of FCS files, saving detailed
-  analysis (not just summary table).
 
 # References
