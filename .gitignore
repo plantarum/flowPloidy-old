@@ -8,3 +8,4 @@ html
 pander*
 plots/
 vignettes/*_files/
+*/*pdf
