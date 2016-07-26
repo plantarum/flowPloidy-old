@@ -4,10 +4,10 @@
 \alias{makeModel}
 \title{Build an NLS model from a list of components}
 \usage{
-makeModel(components, env = parent.frame())
+makeModel(fh, env = parent.frame())
 }
 \arguments{
-\item{components}{a list of model components to combine}
+\item{fh}{a \code{flowHist} object}
 
 \item{env}{the parent frame. Not intended for use by users.}
 }
