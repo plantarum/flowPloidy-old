@@ -17,6 +17,7 @@ Imports:
     caTools,
     knitr,
     rmarkdown,
-    minpack.lm
+    minpack.lm,
+    shiny
 RoxygenNote: 5.0.1
 VignetteBuilder: knitr

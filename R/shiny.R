@@ -1,4 +1,7 @@
-#' @importFrom shiny fluidPage nearPoints reactive radioButtons actionButton plotOutput reactive eventReactive shinyApp titlePanel sidebarLayout sidebarPanel htmlOutput fluidRow tags mainPanel renderPrint renderTable renderPlot renderText
+#' @importFrom shiny fluidPage nearPoints reactive radioButtons actionButton plotOutput reactive eventReactive shinyApp titlePanel sidebarLayout sidebarPanel htmlOutput fluidRow tags mainPanel renderPrint renderTable renderPlot renderText column observe runApp stopApp wellPanel
+NULL
+
+#' @importFrom utils str
 NULL
 
 flowShiny <- function(flowList){

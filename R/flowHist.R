@@ -9,7 +9,7 @@ NULL
 #' @importFrom rmarkdown render
 NULL
 
-#' @importFrom graphics hist lines locator plot points polygon grconvertX grconvertY text
+#' @importFrom graphics hist lines locator plot points polygon grconvertX grconvertY text abline
 NULL
 
 #' @importFrom stats as.formula coef integrate predict pnorm
