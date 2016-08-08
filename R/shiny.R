@@ -4,6 +4,14 @@ NULL
 #' @importFrom utils str
 NULL
 
+#' Visually assess histogram fits
+#'
+#' Visually assess histogram fits
+#' @title flowShiny
+#' @param flowList a list of \code{flowHist} objects
+#' @return Returns the list of \code{flowHist} objects, updated by any
+#'   changes made in the GUI.
+#' @author Tyler Smith
 flowShiny <- function(flowList){
   .fhI <- 1
   .fhList <- flowList
