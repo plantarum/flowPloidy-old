@@ -1,4 +1,4 @@
-* Code clean-up [2/5]
+* Code clean-up [2/6]
   - [ ] break up flowHist into smaller reusable chunks, to facilitate
     stepping through the init process, and redoing individual steps
   - [X] use consistent names for flowHist objects: pick one of fh, self etc
@@ -15,9 +15,11 @@
     - adding an if statement to add initial values in flowInit() in models.R
     - +add appropriate colors to coltab in plot.flowHist() in flowHist.R+
       
-    Component colors should be stored as attributes of the components
-    themselves.
+    Component colors +should be+ are now stored as attributes of the
+    components themselves.
     Can initial value functions also be added as attributes?
+  - [ ] update vignettes and examples to use flowPloidyData package to
+    access sample files
 
 * Features [6/7]
   - [X] S-phase

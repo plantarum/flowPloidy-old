@@ -1,6 +1,6 @@
 Package: flowPloidy
 Title: Analyze flow cytometer data to determine sample ploidy
-Version: 0.0.0.9000
+Version: 0.97.0
 Author: Tyler Smith <tyler@plantarum.ca>
 Maintainer: Tyler Smith <tyler@plantarum.ca>
 Description: Determine sample ploidy via flow cytometry histogram analysis.
@@ -19,5 +19,7 @@ Imports:
     rmarkdown,
     minpack.lm,
     shiny
+Suggests:
+    flowPloidyData
 RoxygenNote: 5.0.1
 VignetteBuilder: knitr
