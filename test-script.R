@@ -1,3 +1,15 @@
+## Testing the S4 code:
+files <- list.files(system.file("extdata", package = "flowPloidy"),
+                    full.names = TRUE)
+
+fh1S4 <- new("flowHist4", file = files[1], channel = "FL3.INT.LIN")
+
+fh1S4comps <- addComponents4(fh1S4)
+
+fA1@initParams(fh1S4)
+
+fh1S4b <- setBins(fh1S4, 512)
+
 library(devtools)
 load_all()
 chan = "FL3.INT.LIN"
