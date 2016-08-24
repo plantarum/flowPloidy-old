@@ -9,3 +9,4 @@ pander*
 plots/
 vignettes/*_files/
 */*pdf
+s3/

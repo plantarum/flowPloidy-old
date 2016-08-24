@@ -1,12 +1,25 @@
-## Testing the S4 code:
-files <- list.files(system.file("extdata", package = "flowPloidy"),
-                    full.names = TRUE)
+library(devtools)
+library(flowCore)
+library(caTools)
+library(minpack.lm)
+library(car)
+library(flowPloidyData)
+library(knitr)
 
-fh1S4 <- new("flowHist4", file = files[1], channel = "FL3.INT.LIN")
+fh1S4 <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
 
-fh1S4 <- addComponents4(fh1S4)
+plotFH(fh1S4)
+plot(fh1S4, init = TRUE)
 
+fh1S4 <- fhAnalyze(fh1S4)
+
+plot(fh1S4)
+
+batch1 <-batchFlowHist(files = flowPloidyFiles, channel = "FL3.INT.LIN")
+
+tabulateFlowHist(batch1)
 tmp <- list()
+
 for(i in fh1S4@comps){
   tmp <- c(tmp, i@initParams(fh1S4))
 }
