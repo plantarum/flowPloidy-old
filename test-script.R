@@ -4,8 +4,13 @@ files <- list.files(system.file("extdata", package = "flowPloidy"),
 
 fh1S4 <- new("flowHist4", file = files[1], channel = "FL3.INT.LIN")
 
-fh1S4comps <- addComponents4(fh1S4)
+fh1S4 <- addComponents4(fh1S4)
 
+tmp <- list()
+for(i in fh1S4@comps){
+  tmp <- c(tmp, i@initParams(fh1S4))
+}
+  
 fA1@initParams(fh1S4)
 
 fh1S4b <- setBins(fh1S4, 512)

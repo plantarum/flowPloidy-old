@@ -73,7 +73,10 @@ fhComponents$fA2 <-
          exp(-((xx - Ma * 2)^2)/(2 * (Sa * 2)^2))) 
       },
       initParams = function(fh){
-        a2 <- fh@histData[peaks[1, "mean"] * 2, "intensity"] *
+        Ma <- fh@peaks[1, "mean"]
+        Sa <- Ma / 20
+        a1 <- fh@peaks[1, "height"] * Sa / 0.45
+        a2 <- fh@histData[fh@peaks[1, "mean"] * 2, "intensity"] *
           Sa * 2 / 0.45
         list(a2 = a2)
       }
@@ -110,7 +113,9 @@ fhComponents$fB2 <-
          exp(-((xx - Mb * 2)^2)/(2 * (Sb * 2)^2))) 
       },
       initParams = function(fh){
-        b2 <- fh@histData[peaks[1, "mean"] * 2, "intensity"] *
+        Mb <- fh@peaks[1, "mean"]
+        Sb <- Mb / 20
+        b2 <- fh@histData[fh@peaks[1, "mean"] * 2, "intensity"] *
           Sb * 2 / 0.45
         list(b2 = b2)
       }
@@ -190,5 +195,13 @@ makeModel4 <- function(fh, env = parent.frame()){
 
   fh@model <- eval(call("function", as.pairlist(args), bod), env)
   fh@nls <- structure(list(), class = "nls.lm")
+  fh
+}
+
+getInit4 <- function(fh){
+  fh@init <- list()
+  for(i in fh@comps){
+    fh@init <- c(fh@init, i@initParams(fh1S4))
+  }
   fh
 }
