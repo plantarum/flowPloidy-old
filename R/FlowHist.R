@@ -113,6 +113,28 @@ setClass(
   )
 )
 
+setMethod(
+  f = "initialize",
+  signature = "FlowHist",
+  definition = function(.Object, file, channel, bins = 256,
+                        window = 20, smooth = 20, pick = FALSE,
+                        ... ){
+    .Object@raw <- read.FCS(file, dataset = 1, alter.names = TRUE)
+    .Object@channel <- channel
+    .Object <- setBins(.Object, bins)
+    if(pick){
+      .Object <- pickPeaks(.Object)
+    } else {
+      .Object <- findPeaks(.Object, window = window,
+                                  smooth = smooth)
+      .Object <- cleanPeaks(.Object, window = window)
+    }
+    .Object <- addComponents(.Object)
+    .Object <- makeModel(.Object)
+    .Object <- getInit(.Object)
+    callNextMethod(.Object, ...)
+  })
+
 #' @rdname FlowHist
 #' @export
 FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
@@ -194,29 +216,6 @@ setMethod(
 
   }
 )
-
-setMethod(
-  f = "initialize",
-  signature = "FlowHist",
-  definition = function(.Object, file, channel, bins = 256,
-                        window = 20, smooth = 20, pick = FALSE,
-                        ... ){
-    .Object@raw <- read.FCS(file, dataset = 1, alter.names = TRUE)
-    .Object@channel <- channel
-    .Object <- setBins(.Object, bins)
-    if(pick){
-      .Object <- pickPeaks4(.Object)
-    } else {
-      .Object <- findPeaks4(.Object, window = window,
-                                  smooth = smooth)
-      .Object <- cleanPeaks4(.Object, window = window)
-    }
-    .Object <- addComponents4(.Object)
-    .Object <- makeModel4(.Object)
-    .Object <- getInit4(.Object)
-    callNextMethod(.Object, ...)
-  })
-
 
 ########################
 ## Plotting functions ##
@@ -458,7 +457,58 @@ getSingleCutValsBase <- function(intensity, xx){
 
 getSingleCutVals <- Vectorize(getSingleCutValsBase, "xx")
 
-findPeaks4 <- function(fh, window, smooth = window / 2){
+#' @importFrom caTools runmean runmax
+NULL
+
+#' findPeaks
+#'
+#' Locate potential peaks in histogram data
+#'
+#' Peaks are defined as local maxima in the vector of values, using a
+#' moving window. Note that these are used in the context of finding
+#' starting values - accuracy isn't important, we just need something
+#' `close-enough' that the nls algorithm will be able to find the correct
+#' value.
+#'
+#' Utility functions for use internally by flowPloidy; not exported and
+#' won't be visible to users. Usually invoked from within \code{flowHist}.
+#'
+#' Note that there is a trade-off between accuracy in detected peaks, and
+#' avoiding noise. Increasing the value of \code{smooth} will reduce the
+#' amount of 'noise' that is included in the peak list. However, increasing
+#' smoothing shifts the location of the actual peaks. Most of the time the
+#' default values provide an acceptable compromise, given we only need to
+#' get 'close enough' for the NLS optimization to find the true parameter
+#' values. If you'd like to explore this, the internal (unexported)
+#' function \code{fhPeakPlot} may be useful.
+#' 
+#' @param fh a \code{FlowHist} object
+#' @param window an integer, the width of the moving window to use in
+#'   identifying local maxima via \code{caTools::runmax}
+#' @param smooth an integer, the width of the moving window to use in
+#'   removing noise via \code{caTools::runmean}
+#' 
+#' @return Returns a matrix with two columns:
+#' \describe{
+#' \item{mean}{the index position of each potential peak}
+#' \item{height}{the height (intensity) of the peak at that index position}
+#' }
+#' 
+#' @author Tyler Smith
+#'
+#' @seealso \code{\link{fhPeakPlot}}
+#' 
+#' @examples
+#' \dontrun{
+#' set.seed(123)
+#' test.dat <-(cumsum(runif(1000, min = -1)))
+#' plot(test.dat, type = 'l')
+#' test.peaks <- flowPloidy::findPeaks(test.dat, window = 20)
+#' points(test.peaks, col = 'red', cex = 2)
+#' }
+#'
+#' @name findPeaks
+findPeaks <- function(fh, window, smooth = window / 2){
   ## extract all peaks from data
   ## smoothing removes most of the noisy peaks
   dat <- fh@histData[, "intensity"]
@@ -472,7 +522,29 @@ findPeaks4 <- function(fh, window, smooth = window / 2){
   fh
 }
 
-cleanPeaks4 <- function(fh, window){
+#' @rdname findPeaks
+#'
+#' @param peaks a matrix of peaks, as returned by \code{findPeaks}
+#'
+#' @details \code{cleanPeaks} filters the output of \code{findPeaks} to:  
+#' \itemize{
+#'
+#' \item remove duplicates, ie., peaks with the same intensity that occur
+#' within \code{window} positions of each other. Otherwise,
+#' \code{findPeaks} will consider noisy peaks without a single highest
+#' point to be multiple distinct peaks.
+#'
+#' \item drop G2 peaks. In some cases the G2 peak for one sample will have
+#' greater intensity than the G1 peak for another sample. We correct for
+#' this by removing detected peaks with means close to twice that of other
+#' peaks.
+#'
+#' \item ignore noise, by removing peaks with \code{intensity} < 40. A
+#' somewhat arbitrary value. It's tricky to deal with this issue when the
+#' debris field is large.
+#' }
+#' 
+cleanPeaks <- function(fh, window){
   ## Remove ties and multiple peaks for histogram analysis
 
   ## Screen out any ties - if two peaks have the same height, and are
@@ -541,7 +613,56 @@ cleanPeaks4 <- function(fh, window){
   fh
 }
 
-pickPeaks4 <- function(fh){
+#' @title Interactively select model starting values
+#'
+#' @description Prompts the user to select the peaks to use as initial
+#'   values for non-linear regression on a plot of the histogram data. 
+#'
+#' @details The raw histogram data are plotted, and the user is prompted to
+#'   select the peak positions to use as starting values in the NLS
+#'   procedure. This is useful when the automated peak-finding algorithm
+#'   fails to discriminate between overlapping peaks, or is confused by
+#'   noise.
+#'
+#' The normal use, \code{pickPeaks} is called from \code{pickInit}, rather
+#'   than directly by the user.
+#'
+#' @param fh A \code{flowHist} object
+#' 
+#' @return \code{pickInit} returns the \code{flowHist} object with its
+#'   initial value slot updated.
+#'
+#' \code{pickPeaks} returns a matrix with each peak as a row, with the mean
+#' (position) in the first column, and the height (intensity) in the second
+#' column.
+#'
+#' @author Tyler Smith
+#'
+#' @seealso \code{\link{flowInit}}
+#'
+#' @export
+pickInit <- function(fh){
+  fh@peaks = matrix()
+  fh@comps = list()
+  fh@model = function(){}
+  fh@init = list()
+  fh@nls = structure(list(), class = "nls")
+  fh@counts = list()
+  fh@CV = list()
+  fh@RCS = NA_real_
+
+  fh <- pickPeaks(fh)
+  fh <- addComponents(fh)
+  fh <- makeModel(fh)
+  fh <- getInit(fh)
+  fh
+}
+
+#' @describeIn pickInit
+#'
+#' Does the work of acutally plotting and selecting peaks for
+#'   \code{pickInit}
+pickPeaks <- function(fh){
   if(class(fh) != "FlowHist")
     stop("fh must be a FlowHist object")
   message("plotting data...")
@@ -558,4 +679,3 @@ pickPeaks4 <- function(fh){
   fh@peaks <- res
   fh
 }
-

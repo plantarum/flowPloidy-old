@@ -292,14 +292,14 @@ fhComponents$brB <-
 ## }
 
 
-addComponents4 <- function(fh){
+addComponents <- function(fh){
   for(i in fhComponents)
     if(i@includeTest(fh))
       fh@comps[[i@name]] <- i
   fh
 }
 
-makeModel4 <- function(fh, env = parent.frame()){
+makeModel <- function(fh, env = parent.frame()){
   components <- fh@comps
   names(components) <- NULL
   args <- unlist(lapply(components, FUN = function(x) formals(x@func)))
@@ -319,7 +319,7 @@ makeModel4 <- function(fh, env = parent.frame()){
   fh
 }
 
-getInit4 <- function(fh){
+getInit <- function(fh){
   fh@init <- list()
   for(i in fh@comps){
     fh@init <- c(fh@init, i@initParams(fh))
