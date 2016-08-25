@@ -18,6 +18,9 @@ plot(fh1S4)
 batch1 <-batchFlowHist(files = flowPloidyFiles, channel = "FL3.INT.LIN")
 
 tabulateFlowHist(batch1)
+
+tmp <- flowShiny(batch1)
+
 tmp <- list()
 
 for(i in fh1S4@comps){

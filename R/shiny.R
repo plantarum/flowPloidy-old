@@ -23,18 +23,18 @@ flowShiny <- function(flowList){
                wellPanel(
                htmlOutput("flowNumber", align = "center"),
                fluidRow(
-                 column(5, actionButton("nxt", label = "Next")),
-                 column(5, actionButton("prev", label = "Previous"))))),
+                 column(5, actionButton("prev", label = "Previous")),
+                 column(5, actionButton("nxt", label = "Next"))))),
         ## tags$hr(),
         column(3,
                wellPanel(radioButtons(inputId = "peakPicker",
-                            label = "Move peak:", 
-                            choices = list("A" = "A", "B" = "B"),
-                            selected = "A", inline = TRUE))),
+                                      label = "Move peak:", 
+                                      choices = list("A" = "A", "B" = "B"),
+                                      selected = "A", inline = TRUE))),
         ## tags$hr(),
         column(3, actionButton("exit", label = "Return to R"))),
-      fluidRow(
-        plotOutput("init", click = "pointPicker"))
+    fluidRow(
+      plotOutput("init", click = "pointPicker"))
   )
 
   server <- function(input, output){
@@ -43,19 +43,19 @@ flowShiny <- function(flowList){
     updateVal <- 0
     
     fhInitPlot <- reactive({
-      xPt <- nearPoints(.fhList[[fhCurrent()]]$data,
+      xPt <- nearPoints(.fhList[[fhCurrent()]]@histData,
                         input$pointPicker, "x", "intensity",
                         threshold = 25, maxpoints = 1)
       if(nrow(xPt) > 0){
         if(input$peakPicker == "A"){
           .fhList[[fhCurrent()]] <<-
             sliderPeaks(.fhList[[fhCurrent()]], xPt[1,1],
-                        .fhList[[fhCurrent()]]$init$Mb) 
+                        .fhList[[fhCurrent()]]@init$Mb) 
           .fhList[[fhCurrent()]] <<- fhAnalyze(.fhList[[fhCurrent()]])
         } else {
           .fhList[[fhCurrent()]] <<-
             sliderPeaks(.fhList[[fhCurrent()]],
-                        .fhList[[fhCurrent()]]$init$Ma, xPt[1,1])
+                        .fhList[[fhCurrent()]]@init$Ma, xPt[1,1])
           .fhList[[fhCurrent()]] <<- fhAnalyze(.fhList[[fhCurrent()]])
         }
       }
@@ -93,7 +93,7 @@ flowShiny <- function(flowList){
     })
 
     output$plot_clickedpoints <- renderTable({
-      res <- nearPoints(.fhList[[fhCurrent()]]$data,
+      res <- nearPoints(.fhList[[fhCurrent()]]@histData,
                         input$pointPicker, "x", "intensity",
                         threshold = 25, maxpoints = 1)
       if (nrow(res) == 0)
@@ -122,37 +122,49 @@ flowShiny <- function(flowList){
 ## shinyApp(ui = ui, server = server)     
    
 sliderPeaks <- function(fh, peakA, peakB){
-  pA <- fh$data[round(peakA, 0), ]
-  pB <- fh$data[round(peakB, 0), ]
+  pA <- fh@histData[round(peakA, 0), c("x", "intensity")]
+  pB <- fh@histData[round(peakB, 0), c("x", "intensity")]
 
-  fh$init$Ma <- pA[, "x"]
-  fh$init$Sa <- fh$init$Ma / 20
-  fh$init$a1 <- pA[, "intensity"] * fh$init$Sa / 0.45
-
-  if((pA[, "x"] * 2) <= max(fh$data[ ,"x"])){
-    fh$init$a2 <- fh$data[fh$init$Ma * 2, "intensity"] *
-      fh$init$Sa * 2 / 0.4
-    fh$comps$fA2 <- fA2
-  } else {
-    fh$init$a2 <- NULL
-    fh$comps$fA2 <- NULL
-  }
+  fh <- resetFlowHist(fh)
   
-  fh$init$Mb <- pB[, "x"]
-  fh$init$Sb <- fh$init$Mb / 20
-  fh$init$b1 <- pB[, "intensity"] * fh$init$Sb / 0.45
+  fh@peaks <- as.matrix(rbind(pA, pB))
+  colnames(fh@peaks) <- c("mean", "height")
+  #########################################################################
+  ## All this needs to do now is reset the peaks and repeat all the init ##
+  ## code, none of this other brittle testing code!!                     ##
+  #########################################################################
 
-  if((pB[, "x"] * 2) <= max(fh$data[ ,"x"])){
-    fh$init$b2 <- fh$data[fh$init$Mb * 2, "intensity"] *
-      fh$init$Sb * 2 / 0.4
-    fh$comps$fB2 <- fB2
-  } else {
-    fh$init$b2 <- NULL
-    fh$comps$fB2 <- NULL
-  }
-
+  fh <- addComponents(fh)
   fh <- makeModel(fh)
+  fh <- getInit(fh)
+  ## fh@init$Ma <- pA[, "x"]
+  ## fh@init$Sa <- fh@init$Ma / 20
+  ## fh@init$a1 <- pA[, "intensity"] * fh@init$Sa / 0.45
 
-  fh$nls <- NULL
+  ## if((pA[, "x"] * 2) <= max(fh@histData[ ,"x"])){
+  ##   fh@init$a2 <- fh@histData[fh@init$Ma * 2, "intensity"] *
+  ##     fh@init$Sa * 2 / 0.4
+  ##   fh@comps$fA2 <- fA2
+  ## } else {
+  ##   fh@init$a2 <- NULL
+  ##   fh@comps$fA2 <- NULL
+  ## }
+  
+  ## fh@init$Mb <- pB[, "x"]
+  ## fh@init$Sb <- fh@init$Mb / 20
+  ## fh@init$b1 <- pB[, "intensity"] * fh@init$Sb / 0.45
+
+  ## if((pB[, "x"] * 2) <= max(fh@histData[ ,"x"])){
+  ##   fh@init$b2 <- fh@histData[fh@init$Mb * 2, "intensity"] *
+  ##     fh@init$Sb * 2 / 0.4
+  ##   fh@comps$fB2 <- fB2
+  ## } else {
+  ##   fh@init$b2 <- NULL
+  ##   fh@comps$fB2 <- NULL
+  ## }
+
+  ## fh <- makeModel(fh)
+
+  ## fh@nls <- NULL
   return(fh)
 }
