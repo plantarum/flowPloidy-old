@@ -54,6 +54,7 @@ setOldClass("nls")
 #' the argument \code{init = TRUE}. If it doesn't look good, you can play
 #' with the \code{window} and \code{smooth} arguments (which is tedious!),
 #' or pick the peaks visually yourself with \code{pick = TRUE}.
+#' }
 #' 
 #' @name FlowHist
 #'

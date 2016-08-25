@@ -12,6 +12,7 @@ NULL
 #' @return Returns the list of \code{flowHist} objects, updated by any
 #'   changes made in the GUI.
 #' @author Tyler Smith
+#' @export
 flowShiny <- function(flowList){
   .fhI <- 1
   .fhList <- flowList
@@ -74,11 +75,6 @@ flowShiny <- function(flowList){
         if(.fhI > 1)
           .fhI <<- .fhI - 1
       }
-
-      ## if(input$update > updateVal){
-      ##   updateVal <<- input$update      
-      ##   .fhList[[fhCurrent()]] <<- fhAnalyze(.fhList[[fhCurrent()]])
-      ## }
 
       .fhI
     })

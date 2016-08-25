@@ -2,31 +2,19 @@
 % Please edit documentation in R/flowAnalysis.R
 \name{fhAnalyze}
 \alias{fhAnalyze}
-\alias{fhCV}
-\alias{fhCount}
-\alias{fhNLS}
-\alias{fhRCS}
 \title{fhAnalyze}
 \usage{
 fhAnalyze(fh)
-
-fhRCS(fh)
-
-fhNLS(fh)
-
-fhCount(fh)
-
-fhCV(fh)
 }
 \arguments{
-\item{fh}{a flowHist object}
+\item{fh}{a \code{FlowHist} object}
 }
 \value{
-a flowHist object with the analysis (nls, counts, cv, RCS)
-  slots filled.
+a \code{FlowHist} object with the analysis (nls, counts, cv,
+  RCS) slots filled.
 }
 \description{
-Complete non-linear regression analysis of flowHist histogram data
+Complete non-linear regression analysis of FlowHist histogram data
 }
 \details{
 Completes the NLS analysis, and calculates the modelled events and CVs
@@ -36,6 +24,6 @@ for the result.
 Tyler Smith
 }
 \seealso{
-\code{\link{flowHist}}
+\code{\link{FlowHist}}
 }
 
