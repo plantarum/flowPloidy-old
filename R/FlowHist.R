@@ -157,6 +157,25 @@ FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
       window = window, smooth = smooth, pick = pick)
 }
 
+#' Displays the column names present in an FCS file
+#'
+#' A convenience function for viewing column names in an FCS, in order to
+#'   select one for the \code{channel} argument in \code{FlowHist}.
+#' 
+#' @title viewFlowChannels
+#' @param file 
+#' @return A vector of column names from the FCS file.
+#' @seealso \code{FlowHist}
+#' @author Tyler Smith
+#' @export
+viewFlowChannels <- function(file){
+  tmp <- read.FCS(file, alter.names = TRUE, dataset = 1)
+  cnames <- colnames(exprs(tmp))
+  names(cnames) <- NULL
+  cnames
+}
+
+
 #' @rdname FlowHist 
 #' @export
 batchFlowHist <- function(files, channel, bins = 256, verbose = TRUE,
