@@ -446,29 +446,6 @@ setBins <- function(fh, bins = 256){
   fh
 }
 
-getSingleCutValsBase <- function(intensity, xx){
-  ## compute the single cut debris model values
-  
-  ## Do not extend the model below/beyond the data
-  ## Modfit appears to cut off the debris slightly above the lowest data,
-  ## which gives a better fit. Perhaps set first.channel to 2-4? Need to
-  ## test this and determine best fit. Possibly use an extra parameter to
-  ## tune this for each data set individually.
-  first.channel <- which(intensity > 0)[2]
-
-  res <- 0
-  if(xx >= first.channel & xx < length(intensity)){
-    channels = (xx + 1):length(intensity)
-    for(j in channels){
-      res <- res + j^(1/3) * intensity[j] * 2 /
-        (pi * j * sqrt(xx/j * (1 - xx/j)))
-    }
-  }
-  res
-}
-
-getSingleCutVals <- Vectorize(getSingleCutValsBase, "xx")
-
 #' @importFrom caTools runmean runmax
 NULL
 

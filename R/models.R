@@ -1,20 +1,30 @@
 ## Contains the various model components used in the flowPloidy analysis.
 
+##########################
+## ModelComponent Class ##
+##########################
 setClass(
-  Class = "modelComponent",
+  Class = "ModelComponent",
   representation = representation(
     name = "character",
     desc = "character", 
     color = "character",
     includeTest = "function",
+    ## function with one argument, the FlowHist object.
+    ## Return TRUE if the component should be included, FALSE otherwise.
     func = "function",
+    ## a single-line function that returns the value of the component.
+    ## Can take multiple arguments, usually one of which will be 'xx'
     initParams = "function"
+    ## a function that returns a named list of initial parameter
+    ## estimates, based on the single argument of the FlowHist object 
+    ## list(param1 = param1, ...)
   )
 )
 
 setMethod(
   f = "show",
-  signature = "modelComponent",
+  signature = "ModelComponent",
   def = function(object){
     cat("** flowHist model component: ")
     cat(object@name); cat(" ** \n")
@@ -27,25 +37,29 @@ setMethod(
  }
 )
 
+######################
+## Model Components ##
+######################
+
+## Store all the components in a single, unexported list. This serves as
+## our 'menu', which we will search through for each dataset, selecting the
+## components that pass the includeTest to add to the components for that
+## dataset. 
 fhComponents <- list()
 
 ## Define new components with the following template:
 ##
 ## fhComponents$<name> <-
-##   new("modelComponent", name = "<name>", color = "<colour>",
+##   new("ModelComponent", name = "<name>", color = "<colour>",
 ##       desc = "<one-line description>",
 ##       includeTest = function(fh){
-##         test based on the flowHist object. Return TRUE if the component
-##         should be included, FALSE otherwise. 
+##
 ##       },
 ##       func = function(){
-##         a single-line function that returns the value of the component.
-##         Can take multiple arguments, usually one of which will be 'xx'
+##
 ##       },
 ##       initParams = function(fh){
-##         a function that returns a named list of initial parameter
-##         estimates, based on the single argument of the flowHist object 
-##         list(param1 = param1, ...)
+##
 ##       }
 ##       )
 
@@ -67,7 +81,7 @@ fhComponents <- list()
 #' @author Tyler Smith
 #' @name gauss
 fhComponents$fA1 <-
-  new("modelComponent", name = "fA1", color = "blue",
+  new("ModelComponent", name = "fA1", color = "blue",
       desc = "Gaussian curve for G1 peak of sample A",
       includeTest = function(fh) {TRUE},
       func = function(a1, Ma, Sa, xx){
@@ -82,7 +96,7 @@ fhComponents$fA1 <-
       )
 
 fhComponents$fA2 <-
-  new("modelComponent", name = "fA2", color = "blue",
+  new("ModelComponent", name = "fA2", color = "blue",
       desc = "Gaussian curve for G2 peak of sample A",
       includeTest = function(fh){
         (fh@peaks[1, "mean"] * 2) <= nrow(fh@histData)
@@ -101,7 +115,7 @@ fhComponents$fA2 <-
       )
 
 fhComponents$fB1 <-
-  new("modelComponent", name = "fB1", color = "orange",
+  new("ModelComponent", name = "fB1", color = "orange",
       desc = "Gaussian curve for G1 peak of sample B",
       includeTest = function(fh){
         nrow(fh@peaks) > 1
@@ -118,7 +132,7 @@ fhComponents$fB1 <-
       )
 
 fhComponents$fB2 <-
-  new("modelComponent", name = "fB2", color = "blue",
+  new("ModelComponent", name = "fB2", color = "blue",
       desc = "Gaussian curve for G2 peak of sample B",
       includeTest = function(fh){
         if(nrow(fh@peaks) > 1)
@@ -202,10 +216,31 @@ fhComponents$fB2 <-
 #' @author Tyler Smith
 
 #' @rdname singleCut
+getSingleCutValsBase <- function(intensity, xx){
+  ## compute the single cut debris model values
+  
+  ## Do not extend the model below/beyond the data
+  ## Modfit appears to cut off the debris slightly above the lowest data,
+  ## which gives a better fit. Perhaps set first.channel to 2-4? Need to
+  ## test this and determine best fit. Possibly use an extra parameter to
+  ## tune this for each data set individually.
+  first.channel <- which(intensity > 0)[2]
 
+  res <- 0
+  if(xx >= first.channel & xx < length(intensity)){
+    channels = (xx + 1):length(intensity)
+    for(j in channels){
+      res <- res + j^(1/3) * intensity[j] * 2 /
+        (pi * j * sqrt(xx/j * (1 - xx/j)))
+    }
+  }
+  res
+}
+
+getSingleCutVals <- Vectorize(getSingleCutValsBase, "xx")
 
 fhComponents$SC <-
-  new("modelComponent", name = "SC", color = "green",
+  new("ModelComponent", name = "SC", color = "green",
       desc = "The single-cut debris model.",
       includeTest = function(fh){
         TRUE
@@ -224,7 +259,7 @@ fhComponents$SC <-
 erf <- function(x) 2 * pnorm(x * sqrt(2)) - 1
 
 fhComponents$brA <-
-  new("modelComponent", name = "brA", color = "magenta",
+  new("ModelComponent", name = "brA", color = "magenta",
       desc = "Broadened rectangle for S-phase of sample A",
       includeTest = function(fh){
         TRUE
@@ -241,7 +276,7 @@ fhComponents$brA <-
       )
 
 fhComponents$brB <-
-  new("modelComponent", name = "brB", color = "turquoise",
+  new("ModelComponent", name = "brB", color = "turquoise",
       desc = "Broadened rectangle for S-phase of sample B",
       includeTest = function(fh){
         nrow(fh@peaks) > 1        
@@ -291,7 +326,9 @@ fhComponents$brB <-
 ##       erf((Mb - xx)/sqrt(2 * 5))) / 2)
 ## }
 
-
+##############################
+## Model Building Functions ##
+##############################
 addComponents <- function(fh){
   for(i in fhComponents)
     if(i@includeTest(fh))
