@@ -7,13 +7,13 @@ NULL
 #' Visually assess histogram fits
 #'
 #' Visually assess histogram fits
-#' @title flowShiny
-#' @param flowList a list of \code{flowHist} objects
-#' @return Returns the list of \code{flowHist} objects, updated by any
+#' @title browseFlowHist
+#' @param flowList a list of \code{FlowHist} objects
+#' @return Returns the list of \code{FlowHist} objects, updated by any
 #'   changes made in the GUI.
 #' @author Tyler Smith
 #' @export
-flowShiny <- function(flowList){
+browseFlowHist <- function(flowList){
   .fhI <- 1
   .fhList <- flowList
   
