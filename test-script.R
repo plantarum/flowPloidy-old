@@ -1,10 +1,10 @@
 library(devtools)
-library(flowCore)
-library(caTools)
-library(minpack.lm)
-library(car)
+## library(flowCore)
+## library(caTools)
+## library(minpack.lm)
+## library(car)
 library(flowPloidyData)
-library(knitr)
+##library(knitr)
 
 fh1S4 <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
 

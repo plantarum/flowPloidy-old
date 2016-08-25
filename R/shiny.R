@@ -80,8 +80,10 @@ flowShiny <- function(flowList){
     })
     
     observe({
-      if(input$exit > 0)
+      if(input$exit > 0){
         stopApp()
+      }
+      
     })
 
     fhNLS <- eventReactive(input$update, {
