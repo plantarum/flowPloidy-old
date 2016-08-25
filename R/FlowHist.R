@@ -135,6 +135,19 @@ setMethod(
     callNextMethod(.Object, ...)
   })
 
+resetFlowHist <- function(fh){
+  ## Clear all analysis slots
+  fh@peaks = matrix()
+  fh@comps = list()
+  fh@model = function(){}
+  fh@init = list()
+  fh@nls = structure(list(), class = "nls")
+  fh@counts = list()
+  fh@CV = list()
+  fh@RCS = NA_real_
+  fh
+}
+
 #' @rdname FlowHist
 #' @export
 FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
@@ -423,14 +436,7 @@ setBins <- function(fh, bins = 256){
   
   ## NOTE!! add code to clear out out-dated model data when the hist
   ## changes.
-  fh@peaks = matrix()
-  fh@comps = list()
-  fh@model = function(){}
-  fh@init = list()
-  fh@nls = structure(list(), class = "nls")
-  fh@counts = list()
-  fh@CV = list()
-  fh@RCS = NA_real_
+  fh <- resetFlowHist(fh)
   fh
 }
 
