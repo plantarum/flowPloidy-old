@@ -328,6 +328,10 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
   }
 }
 
+####################
+## Exporting Data ##
+####################
+
 #' Extract analysis results from a flowHist object
 #'
 #' A convenience function for extracting the results of the NLS
@@ -399,12 +403,16 @@ exFlowHist <- function(fh){
 
 #' (Re-) set the bins for a FlowHist object
 #'
-#' This function sets the number of bins to use in aggregating FCS data
-#'   into a histogram. The 
+#' This function sets (or resets) the number of bins to use in aggregating
+#' FCS data into a histogram, and generates the corresponding data matrix.
+#'
+#' The \code{histData} matrix also contains the \code{SCvals} column. This
+#' is used to calculate the single-cut debris component in the NLS model.
+#' 
 #' @title setBins
 #' @param fh a \code{FlowHist} object
 #' @param bins integer, the number of bins to use in aggregating FCS data
-#' @return an \code{FlowHist} object, with the \code{bins} slot set to
+#' @return a \code{FlowHist} object, with the \code{bins} slot set to
 #'   \code{bins}, and the corresonding binned data stored in a matrix in
 #'   the \code{histData} slot. Any previous analysis slots are removed:
 #'   \code{peaks, comps, model, init, nls, counts, CV, RCS}.
@@ -434,8 +442,6 @@ setBins <- function(fh, bins = 256){
   SCvals <- getSingleCutVals(intensity, x)
   fh@histData <- data.frame(x = x , intensity = intensity, SCvals = SCvals)
   
-  ## NOTE!! add code to clear out out-dated model data when the hist
-  ## changes.
   fh <- resetFlowHist(fh)
   fh
 }
@@ -465,6 +471,10 @@ getSingleCutVals <- Vectorize(getSingleCutValsBase, "xx")
 
 #' @importFrom caTools runmean runmax
 NULL
+
+##############################
+## Peak Detection/Selection ##
+##############################
 
 #' findPeaks
 #'
@@ -672,7 +682,7 @@ pickPeaks <- function(fh){
   if(class(fh) != "FlowHist")
     stop("fh must be a FlowHist object")
   message("plotting data...")
-  plotFH4(fh)
+  plotFH(fh)
   message("select peak A:")
   peakA <- unlist(locator(1))
   points(peakA[1], peakA[2], col = 2, cex = 3)
