@@ -172,50 +172,50 @@ fhComponents$fB2 <-
 ## calculate the debris curve, and returns only the value for a single
 ## predictor value.
 
-
-#' Single-cut debris model
-#'
-#' Models debris using the single-cut model described by Bagwell et al.
-#' (1991).
-#'
-#' The model is:
-#' \deqn{S(x) = a \sum{j = x + 1}^{n} \sqrt[3]{j} Y_j P_s(j, x)}
-#'
-#' x is the histogram channel that we're estimating the debris value for
-#' SCa is the amplitude parameter
-#' Y_j is the histogram intensity for channel j.
-#'
-#' where P_s(j, x) is the probability of a nuclei from channel j falling
-#' into channel x when cut. That is, for j > x, the probability that
-#' fragmenting a nuclei from channel j with a single cut will produce a
-#' fragment of size x. This probability is calculated as:
-#'
-#' \deqn{P_s (j, x) = \frac{2}{(\pi j \sqrt{(x/j) (1 - x/j)}}}
-#'
-#' This model involves a recursive calculation, since the fitted value for
-#' channel x depends not just on the intensity for channel x, but also the
-#' intensities at all channels > x. Consequently, this is coded with an
-#' internal loop, and then vectorized to produce a well-behaved function
-#' that we can use with the standard nls toolchain.
-#'
-#' @name singleCut
-#'
-#' @param SCa a numeric value, the single-cut amplitude parameter
-#' @param intensity a numeric vector, the histogram intensity in each channel
-#' @param xx an integer vector, the ordered channels corresponding to the
-#'   values in `intensity'.
-#' @param SCvals a numeric vector, stored in the \code{flowHist} object
-#'   slot `SCvals`. Users shouldn't need this.
-#' @return NA
-#'
-#' @references Bagwell, C. B., Mayo, S. W., Whetstone, S. D., Hitchcox, S.
-#'   A., Baker, D. R., Herbert, D. J., Weaver, D. L., Jones, M. A. and
-#'   Lovett, E. J. (1991), DNA histogram debris theory and compensation.
-#'   Cytometry, 12: 107-118. doi: 10.1002/cyto.990120203
-#'
-#' @author Tyler Smith
-
-#' @rdname singleCut
+## Single-cut debris model
+##
+## Models debris using the single-cut model described by Bagwell et al.
+## (1991).
+##
+## The model is:
+## \deqn{S(x) = a \sum{j = x + 1}^{n} \sqrt[3]{j} Y_j P_s(j, x)}
+##
+## x is the histogram channel that we're estimating the debris value for
+## SCa is the amplitude parameter
+## Y_j is the histogram intensity for channel j.
+##
+## where P_s(j, x) is the probability of a nuclei from channel j falling
+## into channel x when cut. That is, for j > x, the probability that
+## fragmenting a nuclei from channel j with a single cut will produce a
+## fragment of size x. This probability is calculated as:
+##
+## \deqn{P_s (j, x) = \frac{2}{(\pi j \sqrt{(x/j) (1 - x/j)}}}
+##
+## This model involves a recursive calculation, since the fitted value
+## for channel x depends not just on the intensity for channel x, but
+## also the intensities at all channels > x. Consequently, this is coded
+## with an internal loop, and then vectorized to produce a well-behaved
+## function that we can use with the standard nls toolchain.
+##
+## @name singleCut
+##
+## @param SCa a numeric value, the single-cut amplitude parameter
+## @param intensity a numeric vector, the histogram intensity in each
+##   channel 
+## @param xx an integer vector, the ordered channels corresponding to the
+##   values in `intensity'.
+## @param SCvals a numeric vector, stored in the \code{flowHist} object
+##   slot `SCvals`. Users shouldn't need this.
+## @return NA
+##
+## @references Bagwell, C. B., Mayo, S. W., Whetstone, S. D., Hitchcox,
+##   S. 
+##   A., Baker, D. R., Herbert, D. J., Weaver, D. L., Jones, M. A. and
+##   Lovett, E. J. (1991), DNA histogram debris theory and compensation.
+##   Cytometry, 12: 107-118. doi: 10.1002/cyto.990120203
+##
+## @author Tyler Smith
+## @rdname singleCut
 getSingleCutValsBase <- function(intensity, xx){
   ## compute the single cut debris model values
   
@@ -267,8 +267,8 @@ fhComponents$brA <-
       func = function(BRA, Ma, xx){
         ## 2 * 1 is a placeholder for 2 * sd, should we decide it's worth
         ## adding sd as a separate parameter
-        BRA * ((erf(((2 * Ma) - xx)/sqrt(2 * 1)) -
-                erf((Ma - xx)/sqrt(2 * 1))) / 2)
+        BRA * ((flowPloidy:::erf(((2 * Ma) - xx)/sqrt(2 * 1)) -
+                flowPloidy:::erf((Ma - xx)/sqrt(2 * 1))) / 2)
       },
       initParams = function(fh){
         list(BRA = 10)
@@ -284,8 +284,8 @@ fhComponents$brB <-
       func = function(BRB, Mb, xx){
         ## 2 * 1 is a placeholder for 2 * sd, should we decide it's worth
         ## adding sd as a separate parameter
-        BRB * ((erf(((2 * Mb) - xx)/sqrt(2 * 1)) -
-                erf((Mb - xx)/sqrt(2 * 1))) / 2)
+        BRB * ((flowPloidy:::erf(((2 * Mb) - xx)/sqrt(2 * 1)) -
+                flowPloidy:::erf((Mb - xx)/sqrt(2 * 1))) / 2)
       },
       initParams = function(fh){
         list(BRB = 10)

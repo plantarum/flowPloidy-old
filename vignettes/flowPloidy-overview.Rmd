@@ -7,7 +7,7 @@ output:
         fig_width: 6
         fig_height: 4
     pdf_document:
-        fig_width: 5
+        fig_width: 6
         fig_height: 4
         fig_caption: false
         pandoc_args: ["--variable=fontfamily:tgschola"]
@@ -28,7 +28,9 @@ bibliography: flowPloidy.bibtex
 > `library(package-name)`.
 
 ## `flowCore`
-`flowPloidy` depends on the Bioconductor package `flowCore`. You will have to install this dependency before we get started (this requires an internet connection):
+`flowPloidy` depends on the Bioconductor package `flowCore`. You will have 
+to install this dependency before we get started (this requires an
+internet connection):
 
 ```{r, eval=FALSE}
 source("https://bioconductor.org/biocLite.R")
@@ -38,7 +40,8 @@ biocLite("flowCore")
 
 ## `devtools`
 
-In order to install packages directly from the repositories where they are developed, you need the `devtools` package:
+In order to install packages directly from the repositories where they are
+developed, you need the `devtools` package:
 
 ```{r, eval = FALSE}
 install.packages("devtools", dependencies = TRUE)
@@ -162,12 +165,12 @@ plot(fh1)
 The plot has been updated to include the fitted model components in
 different colours:
 
-    - green: single-cut debris model
-    - blue: sample A G1 and G2 peaks
-    - orange: sample B G1 and G2 peaks
-    - magenta: S-phase of sample A
-    - turqoise: S-phase of sample B
-    - red: the complete model
+- green: single-cut debris model
+- blue: sample A G1 and G2 peaks
+- orange: sample B G1 and G2 peaks
+- magenta: S-phase of sample A
+- turqoise: S-phase of sample B
+- red: the complete model
 
 We can see that the coarse initial estimates were indeed close enough to
 give us an acceptable model fitting. The numerical results are now
@@ -206,15 +209,15 @@ fh2 <- pickInit(fh2)
 ```{r fakingInteraction, echo = FALSE, fig.cap = "Histogram with Manually Selected Peaks"}
 ## This stuff is automatically done by the interactive function pickInit,
 ## which we can't actually use in the automated vignette.
-fh2 <- resetFlowHist(fh2)
+fh2 <- flowPloidy:::resetFlowHist(fh2)
 fh2@peaks <- structure(c(50.2623811329645, 139.061074258603,
                          258.242164238835, 178.771283080744),
                        .Dim = c(2L, 2L),
                        .Dimnames = list(NULL, c("mean", "height")))
 
-fh2 <- addComponents(fh2)
-fh2 <- makeModel(fh2)
-fh2 <- getInit(fh2)
+fh2 <- flowPloidy:::addComponents(fh2)
+fh2 <- flowPloidy:::makeModel(fh2)
+fh2 <- flowPloidy:::getInit(fh2)
 
 plot(fh2)
 points(fh2@init$Ma, 255, col = 2, cex = 3)

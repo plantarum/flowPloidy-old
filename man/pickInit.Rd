@@ -42,7 +42,4 @@ The normal use, \code{pickPeaks} is called from \code{pickInit}, rather
 \author{
 Tyler Smith
 }
-\seealso{
-\code{\link{flowInit}}
-}
 

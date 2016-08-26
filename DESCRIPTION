@@ -7,8 +7,9 @@ Description: Determine sample ploidy via flow cytometry histogram analysis.
     Reads Flow Cytometry Standard (FCS) files via the flowCore bioconductor
     package, and provides functions for determining the DNA ploidy of
     samples based on internal standards.
+biocViews: FlowCytometry, GUI
 Depends:
-    R (>= 3.2.4)
+    R (>= 3.3)
 License: GPL-3
 LazyData: true
 Imports:
@@ -18,7 +19,11 @@ Imports:
     knitr,
     rmarkdown,
     minpack.lm,
-    shiny
+    shiny,
+    methods,
+    graphics,
+    stats,
+    utils
 Suggests:
     flowPloidyData
 RoxygenNote: 5.0.1

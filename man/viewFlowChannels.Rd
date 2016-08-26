@@ -7,7 +7,7 @@
 viewFlowChannels(file)
 }
 \arguments{
-\item{file}{}
+\item{file}{character, the name of a FCS data file}
 }
 \value{
 A vector of column names from the FCS file.

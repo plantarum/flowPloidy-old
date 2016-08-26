@@ -31,6 +31,9 @@ to use for starting values. Otherwise (the default), starting values
 will be detected automatically.}
 
 \item{files}{character, a vector of file names to load}
+
+\item{verbose}{boolean; if TRUE, \code{histBatch} will list files as it
+processes them.}
 }
 \description{
 Creates a \code{FlowHist} object from an FCS file, setting up the

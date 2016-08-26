@@ -3,3 +3,4 @@
 ^.*\.git*$
 ^.*\.Rhistory$
 test-script.R
+.*pdf_document_files.*

@@ -18,6 +18,9 @@ NULL
 #' @importFrom utils write.table
 NULL
 
+#' @importFrom methods setClass setMethod new callNextMethod
+NULL
+
 setOldClass("nls")
 
 #' FlowHist
@@ -70,7 +73,9 @@ setOldClass("nls")
 #' @param pick boolean; if TRUE, the user will be prompted to select peaks
 #'   to use for starting values. Otherwise (the default), starting values
 #'   will be detected automatically.
-#'
+#' @param verbose boolean; if TRUE, \code{histBatch} will list files as it
+#' processes them. 
+#' 
 #' @slot raw a flowFrame object containing the raw data from the FCS file
 #' @slot channel character, the name of the data column to use
 #' @slot bins integer, the number of bins to use to aggregate events into a
@@ -163,7 +168,7 @@ FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
 #'   select one for the \code{channel} argument in \code{FlowHist}.
 #' 
 #' @title viewFlowChannels
-#' @param file 
+#' @param file character, the name of a FCS data file
 #' @return A vector of column names from the FCS file.
 #' @seealso \code{FlowHist}
 #' @author Tyler Smith
@@ -314,7 +319,7 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
              cex = 2, pch = 16, col = "orange")
       text(paste("Peak B: ", round(x@init$Mb, 0)), cex = 1,
            x = x@init$Mb, col = "orange", pos = 2,
-           y = grconvertY(0.9, from = "npc", to = "user"))
+           y = grconvertY(0.8, from = "npc", to = "user"))
       abline(v = 2 * x@init$Mb, col = "orange", lwd = 0.5)
     }
   }
@@ -509,8 +514,6 @@ NULL
 #' 
 #' @author Tyler Smith
 #'
-#' @seealso \code{\link{fhPeakPlot}}
-#' 
 #' @examples
 #' \dontrun{
 #' set.seed(123)
@@ -536,8 +539,6 @@ findPeaks <- function(fh, window, smooth = window / 2){
 }
 
 #' @rdname findPeaks
-#'
-#' @param peaks a matrix of peaks, as returned by \code{findPeaks}
 #'
 #' @details \code{cleanPeaks} filters the output of \code{findPeaks} to:  
 #' \itemize{
@@ -650,8 +651,6 @@ cleanPeaks <- function(fh, window){
 #' column.
 #'
 #' @author Tyler Smith
-#'
-#' @seealso \code{\link{flowInit}}
 #'
 #' @export
 pickInit <- function(fh){

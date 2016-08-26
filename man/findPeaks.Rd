@@ -17,8 +17,6 @@ identifying local maxima via \code{caTools::runmax}}
 
 \item{smooth}{an integer, the width of the moving window to use in
 removing noise via \code{caTools::runmean}}
-
-\item{peaks}{a matrix of peaks, as returned by \code{findPeaks}}
 }
 \value{
 Returns a matrix with two columns:
@@ -79,8 +77,5 @@ points(test.peaks, col = 'red', cex = 2)
 }
 \author{
 Tyler Smith
-}
-\seealso{
-\code{\link{fhPeakPlot}}
 }
 
