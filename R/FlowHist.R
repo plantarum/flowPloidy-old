@@ -9,7 +9,8 @@ NULL
 #' @importFrom rmarkdown render
 NULL
 
-#' @importFrom graphics hist lines locator plot points polygon grconvertX grconvertY text abline
+#' @importFrom graphics hist lines locator plot points polygon grconvertX
+#'   grconvertY text abline
 NULL
 
 #' @importFrom stats as.formula coef integrate predict pnorm
@@ -79,7 +80,7 @@ setOldClass("nls")
 #' @slot raw a flowFrame object containing the raw data from the FCS file
 #' @slot channel character, the name of the data column to use
 #' @slot bins integer, the number of bins to use to aggregate events into a
-#'   histogram 
+#'   histogram
 #' @slot histdata data.frame, the columns are the histogram bin number (x),
 #'   florescence intensity (intensity), and the raw single-cut debris model
 #'   values (SCVals, used in model fitting). Additional columns may be
@@ -88,7 +89,8 @@ setOldClass("nls")
 #'   calculcating initial parameter values.
 #' @slot comps a list of \code{modelComponent} objects included for these
 #'   data.
-#' @slot model the function (built from \code{comps}) to fit to these data.
+#' @slot model the function (built from \code{comps}) to fit to these
+#' data.
 #' @slot init a list of initial parameter estimates to use in fitting the
 #'   model.
 #' @slot nls the nls object produced by the model fitting
@@ -97,6 +99,7 @@ setOldClass("nls")
 #'   fitted model.
 #' @slot RCS numeric, the residual chi-square for the fitted model.
 #'
+#' @return \code{FlowHist} returns a \code{FlowHist} object.
 #' @author Tyler Smith
 setClass(
   Class = "FlowHist",
@@ -155,6 +158,10 @@ resetFlowHist <- function(fh){
 }
 
 #' @rdname FlowHist
+#' @examples
+#' library(flowPloidyData) 
+#' fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+#' fh1
 #' @export
 FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
                      pick = FALSE){
@@ -172,6 +179,9 @@ FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
 #' @return A vector of column names from the FCS file.
 #' @seealso \code{FlowHist}
 #' @author Tyler Smith
+#' @examples
+#' library(flowPloidyData) 
+#' viewFlowChannels(flowPloidyFiles[1])
 #' @export
 viewFlowChannels <- function(file){
   tmp <- read.FCS(file, alter.names = TRUE, dataset = 1)
@@ -181,7 +191,12 @@ viewFlowChannels <- function(file){
 }
 
 
-#' @rdname FlowHist 
+#' @rdname FlowHist
+#' @examples
+#' library(flowPloidyData) 
+#' batch1 <- batchFlowHist(flowPloidyFiles, channel = "FL3.INT.LIN")
+#' batch1
+#' @return \code{batchFlowHist} returns a list of \code{FlowHist} objects.
 #' @export
 batchFlowHist <- function(files, channel, bins = 256, verbose = TRUE,
                       window = 20, smooth = 20){ 
@@ -268,6 +283,10 @@ setMethod(
 #' @param ... additional parameters passed to \code{plot}
 #' @return Not applicable, used for plotting
 #' @author Tyler Smith
+#' @examples
+#' library(flowPloidyData) 
+#' fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+#' plotFH(fh1)
 #' @export
 plotFH <- function(fh, ...){
   ## plots the raw data for a FlowHist object
@@ -373,6 +392,11 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
 #' @param file character, the name of the file to save data to
 #' @return a data frame 
 #' @author Tyler Smith
+#' @examples
+#' library(flowPloidyData) 
+#' fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+#' fh1 <- fhAnalyze(fh1)
+#' tabulateFlowHist(fh1)
 #' @export
 tabulateFlowHist <- function(fh, file = NULL){
   if(class(fh) == "FlowHist")
@@ -442,6 +466,14 @@ exFlowHist <- function(fh){
 #'   the \code{histData} slot. Any previous analysis slots are removed:
 #'   \code{peaks, comps, model, init, nls, counts, CV, RCS}.
 #' @author Tyler Smith
+#' @examples
+#' ## defaults to 256 bins:
+#' library(flowPloidyData) 
+#' fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+#' plot(fh1)
+#' ## reset them to 512 bins:
+#' fh1 <- setBins(fh1, 512)
+#' plot(fh1)
 #' @export
 setBins <- function(fh, bins = 256){
   fh@bins = as.integer(bins)
@@ -652,6 +684,14 @@ cleanPeaks <- function(fh, window){
 #'
 #' @author Tyler Smith
 #'
+#' @examples
+#' library(flowPloidyData) 
+#' fh2 <- FlowHist(file = flowPloidyFiles[12], channel = "FL3.INT.LIN")
+#' plot(fh2, init = TRUE) ## automatic peak estimates
+#' \dontrun{
+#' fh2 <- pickInit(fh2)   ## hand-pick peak estimates
+#' }
+#' plot(fh2, init = TRUE) ## revised starting values
 #' @export
 pickInit <- function(fh){
   fh@peaks = matrix()
@@ -670,11 +710,9 @@ pickInit <- function(fh){
   fh
 }
 
-#' @describeIn pickInit
-#'
-#' Does the work of acutally plotting and selecting peaks for
-#'   \code{pickInit}
 pickPeaks <- function(fh){
+  ## Does the work of actually plotting and selecting peaks for
+  ##   \code{pickInit}
   if(class(fh) != "FlowHist")
     stop("fh must be a FlowHist object")
   message("plotting data...")

@@ -20,6 +20,11 @@ Complete non-linear regression analysis of FlowHist histogram data
 Completes the NLS analysis, and calculates the modelled events and CVs
 for the result.
 }
+\examples{
+library(flowPloidyData)
+fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+fh1 <- fhAnalyze(fh1)
+}
 \author{
 Tyler Smith
 }

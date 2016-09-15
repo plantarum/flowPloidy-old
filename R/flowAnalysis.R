@@ -17,6 +17,10 @@ NULL
 #'   RCS) slots filled.
 #' @seealso \code{\link{FlowHist}}
 #' @author Tyler Smith
+#' @examples
+#' library(flowPloidyData)
+#' fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+#' fh1 <- fhAnalyze(fh1)
 #' @export
 fhAnalyze <- function(fh){
   tryVal <- try(fh <- fhNLS(fh))

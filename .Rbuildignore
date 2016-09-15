@@ -3,4 +3,4 @@
 ^.*\.git*$
 ^.*\.Rhistory$
 test-script.R
-.*pdf_document_files.*
+^vignettes/.*pdf_document_files/

@@ -35,6 +35,11 @@ will be detected automatically.}
 \item{verbose}{boolean; if TRUE, \code{histBatch} will list files as it
 processes them.}
 }
+\value{
+\code{FlowHist} returns a \code{FlowHist} object.
+
+\code{batchFlowHist} returns a list of \code{FlowHist} objects.
+}
 \description{
 Creates a \code{FlowHist} object from an FCS file, setting up the
 histogram data for analysis.
@@ -92,7 +97,8 @@ calculcating initial parameter values.}
 \item{\code{comps}}{a list of \code{modelComponent} objects included for these
 data.}
 
-\item{\code{model}}{the function (built from \code{comps}) to fit to these data.}
+\item{\code{model}}{the function (built from \code{comps}) to fit to these
+data.}
 
 \item{\code{init}}{a list of initial parameter estimates to use in fitting the
 model.}
@@ -106,6 +112,14 @@ fitted model.}
 
 \item{\code{RCS}}{numeric, the residual chi-square for the fitted model.}
 }}
+\examples{
+library(flowPloidyData) 
+fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+fh1
+library(flowPloidyData) 
+batch1 <- batchFlowHist(flowPloidyFiles, channel = "FL3.INT.LIN")
+batch1
+}
 \author{
 Tyler Smith
 }

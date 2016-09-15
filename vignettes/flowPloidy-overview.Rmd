@@ -50,21 +50,24 @@ library("devtools")
 
 ## `flowPloidyData`
 
-The files we use in the vignettes and examples are provided in the `flowPloidyData` package:
+The files we use in the vignettes and examples are provided in the
+`flowPloidyData` package:
 
 ```{r, eval = FALSE}
 install_github("plantarum/flowPloidyData")
 ```
 
 ## `flowPloidy`
-`flowPloidy` is currently available from [BitBucket](https://bitbucket.org/tws/flowPloidy):
+`flowPloidy` is currently available
+from [BitBucket](https://bitbucket.org/tws/flowPloidy):
 
 ```{r, eval = FALSE}
 install_bitbucket("tws/flowPloidy")
 ```
 
 If you run into any errors, look for messages reporting missing packages,
-and install these. One that sometimes needs to be installed separately is `codetools`:
+and install these. One that sometimes needs to be installed separately is
+`codetools`:
 
 ```{r, eval = FALSE}
 install.packages("codetools", dependencies = TRUE)
@@ -128,11 +131,14 @@ A number of features are displayed on the histogram:
 
 Peak A G1 estimate
 
-: a thick vertical blue line with a label at the top indicates the estimated position of the first ('A') G1 peak. A blue circle indicates the actual position on the histogram used as the initial value.
+: a thick vertical blue line with a label at the top indicates the
+estimated position of the first ('A') G1 peak. A blue circle indicates the
+actual position on the histogram used as the initial value.
 
 Peak A G2 estimate
 
-: a thin vertical blue line without a label indicates the estimated position of the G2 peak corresponding to the A G1 peak.
+: a thin vertical blue line without a label indicates the estimated
+position of the G2 peak corresponding to the A G1 peak.
 
 Peak B G1 and G2 estimates
 
@@ -140,7 +146,8 @@ Peak B G1 and G2 estimates
 
 Initial model estimate
 
-: the thick, dotted black line indicates the initial parameters used for the model-fitting.
+: the thick, dotted black line indicates the initial parameters used for
+the model-fitting.
 
 The initial estimate is rough, but in this case it's close enough for the
 model-fitting routines to find a solution, so we can immediately proceed to
@@ -204,7 +211,8 @@ set the appropriate starting values with `pickInit`:
 fh2 <- pickInit(fh2)
 ```
 
-`flowHist` will prompt you to click on the peaks of the first and second peak manually, adding a circle to the plot at each point.
+`flowHist` will prompt you to click on the peaks of the first and second
+peak manually, adding a circle to the plot at each point.
 
 ```{r fakingInteraction, echo = FALSE, fig.cap = "Histogram with Manually Selected Peaks"}
 ## This stuff is automatically done by the interactive function pickInit,
@@ -253,27 +261,29 @@ To combine multiple objects in a single summary, combine them as a list:
 tabulateFlowHist(list(fh1, fh2))
 ```
 
-As a convenience, if you pass a file name to the `file` argument of `exportFlowHist`, the table will be saved to that file:
+As a convenience, if you pass a file name to the `file` argument of
+`exportFlowHist`, the table will be saved to that file:
 
 ```{r, eval = FALSE}
 tabulateFlowHist(list(fh1, fh2), file = "flow-results.csv")
 ```
 
-# Processing Directories with `histBatch`
+# Processing Directories with `batchFlowHist`
 
 ## Generating a file list in R
 
 If you have a large number of files to process, `flowHist` can read them
-all in together. The `histBatch` function provides this feature. To use it,
-you need a list of file names to process. The R function `list.files()` is
-helpful here. If your FCS files are in the directory "`datadir/`", you can
-collect all their names using:
+all in together. The `batchFlowHist` function provides this feature. To use
+it, you need a list of file names to process. The R function `list.files()`
+is helpful here. If your FCS files are in the directory "`datadir/`", you
+can collect all their names using:
 
 ```{r, eval = FALSE}
 my.files <- list.files("datadir/", full.names = TRUE)
 ```
 
-If you have a mix of FCS files and other files together, you can supply a pattern to match only your data:
+If you have a mix of FCS files and other files together, you can supply a
+pattern to match only your data:
 
 ```{r, eval = FALSE}
 my.files <- list.files("datadir/", pattern = ".LMD", full.names = TRUE)
@@ -290,9 +300,9 @@ For this example, I'll continue to use the sample data included with
 `flowPloidyData`. Here, we'll use all of them (i.e., `flowPloidyFiles`),
 not just one (e.g. `flowPloidyFiles[1]`).
 
-## Using `histBatch`
+## Using `batchFlowHist`
 
-The `histBatch()` function has two required arguments:
+The `batchFlowHist()` function has two required arguments:
 
 files
 
@@ -322,7 +332,8 @@ window
 
 smooth
 
-: numeric, the size of the moving window used to reduce noise in the histogram during peak detection (default: 20)
+: numeric, the size of the moving window used to reduce noise in the
+histogram during peak detection (default: 20)
 
 If you have clean, narrow peaks, you may want to lower the values of
 `window` and `smooth`, say to 16 and 8 respectively. Don't worry about
@@ -406,17 +417,24 @@ peak parameters. To do so:
 2. Click on the histogram where that peak should be
 3. Wait a moment while the model fitting is updated
 
-For example, if we move the A peak up to 76, the model-fitting is improved enough to clarify the distinction between the overlapping peaks, even without correcting the B peak:
+For example, if we move the A peak up to 76, the model-fitting is improved
+enough to clarify the distinction between the overlapping peaks, even
+without correcting the B peak:
 
 ![](./flowShiny03.png)
 
-You can move the B peak around as well, to convince yourself that the fitting isn't improved even with a better initial estimate.
+You can move the B peak around as well, to convince yourself that the
+fitting isn't improved even with a better initial estimate.
 
-Continue on to file 8, `337.LMD`. Here, the model fit is actually not too bad, but the G1 peak of sample A has been erroneously assigned to noise in the debris field:
+Continue on to file 8, `337.LMD`. Here, the model fit is actually not too
+bad, but the G1 peak of sample A has been erroneously assigned to noise in
+the debris field:
 
 ![](./flowShiny04.png)
 
-If we leave this uncorrected, the data summary will show the G1 peak with a size of 0, and the G2 peak being quite large. To fix this, move the A peak over:
+If we leave this uncorrected, the data summary will show the G1 peak with a
+size of 0, and the G2 peak being quite large. To fix this, move the A peak
+over:
 
 ![](./flowShiny05.png)
 
@@ -424,11 +442,18 @@ Let's take a look at one more. File 12, `734.LMD` has a bad fit:
 
 ![](./flowShiny06.png)
 
-The data is good, with nice clean peaks. However, the default `window` and `smooth` parameters are set to deal with noisier, broader peaks. We could fix this by repeating the analysis with new settings, but that would likely break the analysis of some of the other files. So instead, we reset the A peak to a better value:
+The data is good, with nice clean peaks. However, the default `window` and
+`smooth` parameters are set to deal with noisier, broader peaks. We could
+fix this by repeating the analysis with new settings, but that would likely
+break the analysis of some of the other files. So instead, we reset the A
+peak to a better value:
 
 ![](./flowShiny07.png)
 
-When you're done, click on `Return to R` to get back to the command line. (You can close the browser window **after** you click this, **not before**). Now all you're corrected analyses will be stored in the variable you passed the results of `flowShiny()` to. You can check this with:
+When you're done, click on `Return to R` to get back to the command line.
+(You can close the browser window **after** you click this, **not
+before**). Now all you're corrected analyses will be stored in the variable
+you passed the results of `flowShiny()` to. You can check this with:
 
 ```{r flowShiny-output, eval = FALSE}
 plot(batch1[["734.LMD"]])
@@ -436,7 +461,8 @@ plot(batch1[["734.LMD"]])
 
 ![](./flowShiny08.png)
 
-We have the corrected model fits, so we can export the data for further analysis:
+We have the corrected model fits, so we can export the data for further
+analysis:
 
 ```{r flowShiny-export, eval = FALSE}
 tabulateFlowHist(batch1)

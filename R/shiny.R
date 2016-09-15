@@ -1,4 +1,8 @@
-#' @importFrom shiny fluidPage nearPoints reactive radioButtons actionButton plotOutput reactive eventReactive shinyApp titlePanel sidebarLayout sidebarPanel htmlOutput fluidRow tags mainPanel renderPrint renderTable renderPlot renderText column observe runApp stopApp wellPanel
+#' @importFrom shiny fluidPage nearPoints reactive radioButtons
+#'   actionButton plotOutput reactive eventReactive shinyApp titlePanel
+#'   sidebarLayout sidebarPanel htmlOutput fluidRow tags mainPanel
+#'   renderPrint renderTable renderPlot renderText column observe runApp
+#'   stopApp wellPanel
 NULL
 
 #' @importFrom utils str
@@ -12,6 +16,12 @@ NULL
 #' @return Returns the list of \code{FlowHist} objects, updated by any
 #'   changes made in the GUI.
 #' @author Tyler Smith
+#' @examples
+#' library(flowPloidyData)
+#' batch1 <- batchFlowHist(flowPloidyFiles, channel = "FL3.INT.LIN")
+#' \dontrun{
+#' batch1 <- browseFlowHist(batch1)
+#' }
 #' @export
 browseFlowHist <- function(flowList){
   .fhI <- 1

@@ -27,6 +27,15 @@ FCS data into a histogram, and generates the corresponding data matrix.
 The \code{histData} matrix also contains the \code{SCvals} column. This
 is used to calculate the single-cut debris component in the NLS model.
 }
+\examples{
+## defaults to 256 bins:
+library(flowPloidyData) 
+fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+plot(fh1)
+## reset them to 512 bins:
+fh1 <- setBins(fh1, 512)
+plot(fh1)
+}
 \author{
 Tyler Smith
 }

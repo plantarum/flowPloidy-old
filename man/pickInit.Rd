@@ -2,12 +2,9 @@
 % Please edit documentation in R/FlowHist.R
 \name{pickInit}
 \alias{pickInit}
-\alias{pickPeaks}
 \title{Interactively select model starting values}
 \usage{
 pickInit(fh)
-
-pickPeaks(fh)
 }
 \arguments{
 \item{fh}{A \code{flowHist} object}
@@ -34,11 +31,15 @@ The raw histogram data are plotted, and the user is prompted to
 The normal use, \code{pickPeaks} is called from \code{pickInit}, rather
   than directly by the user.
 }
-\section{Functions}{
-\itemize{
-\item \code{pickPeaks}: Does the work of acutally plotting and selecting peaks for
-\code{pickInit}
-}}
+\examples{
+library(flowPloidyData) 
+fh2 <- FlowHist(file = flowPloidyFiles[12], channel = "FL3.INT.LIN")
+plot(fh2, init = TRUE) ## automatic peak estimates
+\dontrun{
+fh2 <- pickInit(fh2)   ## hand-pick peak estimates
+}
+plot(fh2, init = TRUE) ## revised starting values
+}
 \author{
 Tyler Smith
 }

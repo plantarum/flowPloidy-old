@@ -27,6 +27,12 @@ row for each object will be added to the data.frame.
 
 If a file name is provided, the data will be saved to that file.
 }
+\examples{
+library(flowPloidyData) 
+fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+fh1 <- fhAnalyze(fh1)
+tabulateFlowHist(fh1)
+}
 \author{
 Tyler Smith
 }

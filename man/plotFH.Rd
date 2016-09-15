@@ -19,6 +19,11 @@ Creates a simple plot of the raw histogram data. Used as a utility for
 other plotting functions, and perhaps useful for users who wish to
 create their own plotting routines.
 }
+\examples{
+library(flowPloidyData) 
+fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+plotFH(fh1)
+}
 \author{
 Tyler Smith
 }
