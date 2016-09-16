@@ -320,11 +320,9 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
                   args = c(list(SCvals = x@histData$SCvals,
                                 xx = x@histData$x),
                            x@init))
-
     lines(x = x@histData$x,
           y = yy, 
-          col = 1, lwd = 3, lty = 5)
-
+          col = "grey", lwd = 1, lty = 5)
     abline(v = x@init$Ma, col = "blue", lwd = 2)
     points(x = x@init$Ma, y  = x@histData$intensity[round(x@init$Ma, 0)],
            cex = 2, pch = 16, col = "blue")
@@ -344,10 +342,26 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
   }
 
   if(nls & (length(x@nls) > 0)){
+    dat <- tabulateFlowHist(x)
     lines(x = x@histData$x, y = predict(x@nls), col = 2)
-    text(paste("RCS: ", round(x@RCS, 3)), cex = 1, pos = 2,
-         x = grconvertX(0.9, from = "npc", to = "user"),
+    text(paste("RCS: ", round(dat$rcs, 3)), cex = 1, pos = 4,
+         x = grconvertX(0.8, from = "npc", to = "user"),
+         y = grconvertY(0.95, from = "npc", to = "user"))
+    text(paste("Peak A: ", round(dat$sizeA, 1), "/",
+               round(dat$countsA, 1), "/",
+               round(dat$cvA, 3)),
+         cex = 1, pos = 4, col = "blue",
+         x = grconvertX(0.8, from = "npc", to = "user"),
          y = grconvertY(0.9, from = "npc", to = "user"))
+    text(paste("Peak B: ", round(dat$sizeB, 1), "/",
+               round(dat$countsB, 1), "/",
+               round(dat$cvB, 3)),
+         cex = 1, pos = 4, col = "orange",
+         x = grconvertX(0.8, from = "npc", to = "user"),
+         y = grconvertY(0.85, from = "npc", to = "user"))
+    text(paste("A/B:  ", round(dat$ratioAB, 3)), cex = 1, pos = 4,
+         x = grconvertX(0.8, from = "npc", to = "user"),
+         y = grconvertY(0.8, from = "npc", to = "user"))
   }
 
   if(comps & (length(x@nls) > 0)){

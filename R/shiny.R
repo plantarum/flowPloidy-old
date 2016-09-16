@@ -137,42 +137,10 @@ sliderPeaks <- function(fh, peakA, peakB){
   
   fh@peaks <- as.matrix(rbind(pA, pB))
   colnames(fh@peaks) <- c("mean", "height")
-  #########################################################################
-  ## All this needs to do now is reset the peaks and repeat all the init ##
-  ## code, none of this other brittle testing code!!                     ##
-  #########################################################################
 
   fh <- addComponents(fh)
   fh <- makeModel(fh)
   fh <- getInit(fh)
-  ## fh@init$Ma <- pA[, "x"]
-  ## fh@init$Sa <- fh@init$Ma / 20
-  ## fh@init$a1 <- pA[, "intensity"] * fh@init$Sa / 0.45
 
-  ## if((pA[, "x"] * 2) <= max(fh@histData[ ,"x"])){
-  ##   fh@init$a2 <- fh@histData[fh@init$Ma * 2, "intensity"] *
-  ##     fh@init$Sa * 2 / 0.4
-  ##   fh@comps$fA2 <- fA2
-  ## } else {
-  ##   fh@init$a2 <- NULL
-  ##   fh@comps$fA2 <- NULL
-  ## }
-  
-  ## fh@init$Mb <- pB[, "x"]
-  ## fh@init$Sb <- fh@init$Mb / 20
-  ## fh@init$b1 <- pB[, "intensity"] * fh@init$Sb / 0.45
-
-  ## if((pB[, "x"] * 2) <= max(fh@histData[ ,"x"])){
-  ##   fh@init$b2 <- fh@histData[fh@init$Mb * 2, "intensity"] *
-  ##     fh@init$Sb * 2 / 0.4
-  ##   fh@comps$fB2 <- fB2
-  ## } else {
-  ##   fh@init$b2 <- NULL
-  ##   fh@comps$fB2 <- NULL
-  ## }
-
-  ## fh <- makeModel(fh)
-
-  ## fh@nls <- NULL
   return(fh)
 }

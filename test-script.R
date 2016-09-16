@@ -6,6 +6,16 @@ library(devtools)
 library(flowPloidyData)
 ##library(knitr)
 
+#######################
+## Linearity testing ##
+#######################
+
+linFiles <- list.files("~/research/flow/linearity_data/", "LMD",
+                       full.names = TRUE)
+lintest <- batchFlowHist(linFiles, channel = "FL3.INT.LIN")
+
+lintest <- browseFlowHist(lintest)
+
 fh1S4 <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
 
 plotFH(fh1S4)

@@ -132,7 +132,7 @@ fhComponents$fB1 <-
       )
 
 fhComponents$fB2 <-
-  new("ModelComponent", name = "fB2", color = "blue",
+  new("ModelComponent", name = "fB2", color = "orange",
       desc = "Gaussian curve for G2 peak of sample B",
       includeTest = function(fh){
         if(nrow(fh@peaks) > 1)
