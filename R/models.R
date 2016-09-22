@@ -15,10 +15,19 @@ setClass(
     func = "function",
     ## a single-line function that returns the value of the component.
     ## Can take multiple arguments, usually one of which will be 'xx'
-    initParams = "function"
-    ## a function that returns a named list of initial parameter
+    initParams = "function",
+        ## a function that returns a named list of initial parameter
     ## estimates, based on the single argument of the FlowHist object 
     ## list(param1 = param1, ...)
+    specialParams = "list"
+    ## A named list, the names are parameters to exclude from the default
+    ## argument list, as they aren't variables to fit in the NLS procedure.
+    ## the body of the list element is the object to insert into the model
+    ## formula to account for that variable. e.g., in the singleCut
+    ## component, the SCvals parameter is not a variable, and is instead
+    ## assigned to the SCvals column in the histData slot. Therefore, it
+    ## has a specialParams slot value of
+    ## `list(SCvals = substitute(SCvals))`
   )
 )
 
@@ -34,8 +43,38 @@ setMethod(
     pnames <- pnames[which(pnames != "xx")]
     cat(paste(pnames, collapse = ", "))
     cat("\n")
- }
+    if(length(object@specialParams) > 0){
+      cat("Special Parameters: ")
+      cat(paste(names(object@specialParams), collapse = ", "))
+      cat("\n")
+    }
+  }
 )
+
+setMethod(
+  f = "initialize",
+  signature = "ModelComponent",
+  definition = function(.Object, name, color, desc,
+                        includeTest, func, initParams,
+                        specialParams = list(xx = substitute(xx)), ...){
+    .Object@name <- name
+    .Object@color <- color
+    .Object@desc <- desc
+    .Object@includeTest <- includeTest
+    .Object@func <- func
+    .Object@initParams <- initParams
+    .Object@specialParams <- specialParams
+    callNextMethod(.Object, ...)
+  })
+
+ModelComponent <- function(name, color, desc, includeTest, func,
+                           initParams,
+                           specialParams = list(xx = substitute(xx))){
+  new("ModelComponent", name = name, color = color, desc = desc,
+      includeTest = includeTest, func = func, initParams = initParams,
+      specialParams = specialParams)
+}
+                          
 
 ######################
 ## Model Components ##
@@ -81,77 +120,81 @@ fhComponents <- list()
 #' @author Tyler Smith
 #' @name gauss
 fhComponents$fA1 <-
-  new("ModelComponent", name = "fA1", color = "blue",
-      desc = "Gaussian curve for G1 peak of sample A",
-      includeTest = function(fh) {TRUE},
-      func = function(a1, Ma, Sa, xx){
-        (a1 / (sqrt(2 * pi) * Sa) * exp(-((xx - Ma)^2)/(2 * Sa^2)))
-      },
-      initParams = function(fh){
-        Ma <- as.numeric(fh@peaks[1, "mean"])
-        Sa <- as.numeric(Ma / 20)
-        a1 <- as.numeric(fh@peaks[1, "height"] * Sa / 0.45)
-        list(Ma = Ma, Sa = Sa, a1 = a1)
-      }
-      )
+  ModelComponent(
+    name = "fA1", color = "blue",
+    desc = "Gaussian curve for G1 peak of sample A",
+    includeTest = function(fh) {TRUE},
+    func = function(a1, Ma, Sa, xx){
+      (a1 / (sqrt(2 * pi) * Sa) * exp(-((xx - Ma)^2)/(2 * Sa^2)))
+    },
+    initParams = function(fh){
+      Ma <- as.numeric(fh@peaks[1, "mean"])
+      Sa <- as.numeric(Ma / 20)
+      a1 <- as.numeric(fh@peaks[1, "height"] * Sa / 0.45)
+      list(Ma = Ma, Sa = Sa, a1 = a1)
+    }
+  )
 
 fhComponents$fA2 <-
-  new("ModelComponent", name = "fA2", color = "blue",
-      desc = "Gaussian curve for G2 peak of sample A",
-      includeTest = function(fh){
-        (fh@peaks[1, "mean"] * 2) <= nrow(fh@histData)
-      },
-      func = function(a2, Ma, Sa, xx){
-        (a2 / (sqrt(2 * pi) * Sa * 2) *
-         exp(-((xx - Ma * 2)^2)/(2 * (Sa * 2)^2))) 
-      },
-      initParams = function(fh){
-        Ma <- as.numeric(fh@peaks[1, "mean"])
-        Sa <- as.numeric(Ma / 20)
-        a2 <- as.numeric(fh@histData[Ma * 2, "intensity"] *
-                         Sa * 2 / 0.45)
-        list(a2 = a2)
-      }
-      )
+  ModelComponent(
+    name = "fA2", color = "blue",
+    desc = "Gaussian curve for G2 peak of sample A",
+    includeTest = function(fh){
+      (fh@peaks[1, "mean"] * 2) <= nrow(fh@histData)
+    },
+    func = function(a2, Ma, Sa, xx){
+      (a2 / (sqrt(2 * pi) * Sa * 2) *
+       exp(-((xx - Ma * 2)^2)/(2 * (Sa * 2)^2))) 
+    },
+    initParams = function(fh){
+      Ma <- as.numeric(fh@peaks[1, "mean"])
+      Sa <- as.numeric(Ma / 20)
+      a2 <- as.numeric(fh@histData[Ma * 2, "intensity"] *
+                       Sa * 2 / 0.45)
+      list(a2 = a2)
+    }
+  )
 
 fhComponents$fB1 <-
-  new("ModelComponent", name = "fB1", color = "orange",
-      desc = "Gaussian curve for G1 peak of sample B",
-      includeTest = function(fh){
-        nrow(fh@peaks) > 1
-      },
-      func = function(b1, Mb, Sb, xx){
-        (b1 / (sqrt(2 * pi) * Sb) * exp(-((xx - Mb)^2)/(2 * Sb^2)))
-      },
-      initParams = function(fh){
-        Mb <- as.numeric(fh@peaks[2, "mean"])
-        Sb <- as.numeric(Mb / 20)
-        b1 <- as.numeric(fh@peaks[2, "height"] * Sb / 0.45)
-        list(Mb = Mb, Sb = Sb, b1 = b1)
-      }
-      )
+  ModelComponent(
+    name = "fB1", color = "orange",
+    desc = "Gaussian curve for G1 peak of sample B",
+    includeTest = function(fh){
+      nrow(fh@peaks) > 1
+    },
+    func = function(b1, Mb, Sb, xx){
+      (b1 / (sqrt(2 * pi) * Sb) * exp(-((xx - Mb)^2)/(2 * Sb^2)))
+    },
+    initParams = function(fh){
+      Mb <- as.numeric(fh@peaks[2, "mean"])
+      Sb <- as.numeric(Mb / 20)
+      b1 <- as.numeric(fh@peaks[2, "height"] * Sb / 0.45)
+      list(Mb = Mb, Sb = Sb, b1 = b1)
+    }
+  )
 
 fhComponents$fB2 <-
-  new("ModelComponent", name = "fB2", color = "orange",
-      desc = "Gaussian curve for G2 peak of sample B",
-      includeTest = function(fh){
-        if(nrow(fh@peaks) > 1)
-          (fh@peaks[2, "mean"] * 2) <= nrow(fh@histData)
-        else
-          FALSE
-      },
-      func = function(b2, Mb, Sb, xx){
-        (b2 / (sqrt(2 * pi) * Sb * 2) *
-         exp(-((xx - Mb * 2)^2)/(2 * (Sb * 2)^2))) 
-      },
-      initParams = function(fh){
-        Mb <- fh@peaks[2, "mean"]
-        Sb <- Mb / 20
-        b2 <- as.numeric(fh@histData[fh@peaks[2, "mean"] * 2, "intensity"]
-          * Sb * 2 / 0.45)
-        list(b2 = b2)
-      }
-      )
+  ModelComponent(
+    name = "fB2", color = "orange",
+    desc = "Gaussian curve for G2 peak of sample B",
+    includeTest = function(fh){
+      if(nrow(fh@peaks) > 1)
+        (fh@peaks[2, "mean"] * 2) <= nrow(fh@histData)
+      else
+        FALSE
+    },
+    func = function(b2, Mb, Sb, xx){
+      (b2 / (sqrt(2 * pi) * Sb * 2) *
+       exp(-((xx - Mb * 2)^2)/(2 * (Sb * 2)^2))) 
+    },
+    initParams = function(fh){
+      Mb <- fh@peaks[2, "mean"]
+      Sb <- Mb / 20
+      b2 <- as.numeric(fh@histData[fh@peaks[2, "mean"] * 2, "intensity"]
+                       * Sb * 2 / 0.45)
+      list(b2 = b2)
+    }
+  )
 
 ## Single-cut debris model
 ##
@@ -240,18 +283,49 @@ getSingleCutValsBase <- function(intensity, xx){
 getSingleCutVals <- Vectorize(getSingleCutValsBase, "xx")
 
 fhComponents$SC <-
-  new("ModelComponent", name = "SC", color = "green",
-      desc = "The single-cut debris model.",
-      includeTest = function(fh){
-        TRUE
-      },
-      func = function(SCa, SCvals){
-        SCa * SCvals
-      },
-      initParams = function(fh){
-        list(SCa = 0.1)
-      }
-      )
+  ModelComponent(
+    name = "SC", color = "green",
+    desc = "The single-cut debris model.",
+    includeTest = function(fh){
+      "SC" %in% fh@opts
+    },
+    func = function(SCa, SCvals){
+      SCa * SCvals
+    },
+    initParams = function(fh){
+      list(SCa = 0.1)
+    },
+    specialParams = list(SCvals = substitute(SCvals)) 
+  )
+
+getMultipleCutVals <- function(intensity){
+  res <- sum(intensity) - cumsum(intensity)
+  res[which(intensity == 0)] <- 0
+  ## ugly temporary hack, fix this!!
+  res[which(res > 0)][1:2] <- 0
+  res
+}
+
+getMultipleCutValsBase <- function(a, xx, k){
+  a * exp(-k * xx)
+}
+
+fhComponents$MC <-
+  ModelComponent(
+    name = "MC", color = "green",
+    desc = "The single-cut debris model.",
+    includeTest = function(fh){
+      ## FALSE ## not ready yet!
+      ! "SC" %in% fh@opts
+    },
+    func = function(xx, MCa, k, MCvals){
+      MCa * exp(-k * xx) * MCvals[xx]
+    },
+    initParams = function(fh){
+      list(MCa = 0.01, k = 0.01)
+    },
+    specialParams = list(xx= substitute(xx), MCvals = substitute(MCvals))
+  )
 
 ## Broadened rectangles:
 ## simplified with a fixed sd of 1. Very little change in results with more
@@ -259,38 +333,40 @@ fhComponents$SC <-
 erf <- function(x) 2 * pnorm(x * sqrt(2)) - 1
 
 fhComponents$brA <-
-  new("ModelComponent", name = "brA", color = "magenta",
-      desc = "Broadened rectangle for S-phase of sample A",
-      includeTest = function(fh){
-        TRUE
-      },
-      func = function(BRA, Ma, xx){
-        ## 2 * 1 is a placeholder for 2 * sd, should we decide it's worth
-        ## adding sd as a separate parameter
-        BRA * ((flowPloidy:::erf(((2 * Ma) - xx)/sqrt(2 * 1)) -
-                flowPloidy:::erf((Ma - xx)/sqrt(2 * 1))) / 2)
-      },
-      initParams = function(fh){
-        list(BRA = 10)
-      }
-      )
+  ModelComponent(
+    name = "brA", color = "magenta",
+    desc = "Broadened rectangle for S-phase of sample A",
+    includeTest = function(fh){
+      TRUE
+    },
+    func = function(BRA, Ma, xx){
+      ## 2 * 1 is a placeholder for 2 * sd, should we decide it's worth
+      ## adding sd as a separate parameter
+      BRA * ((flowPloidy:::erf(((2 * Ma) - xx)/sqrt(2 * 1)) -
+              flowPloidy:::erf((Ma - xx)/sqrt(2 * 1))) / 2)
+    },
+    initParams = function(fh){
+      list(BRA = 10)
+    }
+  )
 
 fhComponents$brB <-
-  new("ModelComponent", name = "brB", color = "turquoise",
-      desc = "Broadened rectangle for S-phase of sample B",
-      includeTest = function(fh){
-        nrow(fh@peaks) > 1        
-      },
-      func = function(BRB, Mb, xx){
-        ## 2 * 1 is a placeholder for 2 * sd, should we decide it's worth
-        ## adding sd as a separate parameter
-        BRB * ((flowPloidy:::erf(((2 * Mb) - xx)/sqrt(2 * 1)) -
-                flowPloidy:::erf((Mb - xx)/sqrt(2 * 1))) / 2)
-      },
-      initParams = function(fh){
-        list(BRB = 10)
-      }
-      )
+  ModelComponent(
+    name = "brB", color = "turquoise",
+    desc = "Broadened rectangle for S-phase of sample B",
+    includeTest = function(fh){
+      nrow(fh@peaks) > 1        
+    },
+    func = function(BRB, Mb, xx){
+      ## 2 * 1 is a placeholder for 2 * sd, should we decide it's worth
+      ## adding sd as a separate parameter
+      BRB * ((flowPloidy:::erf(((2 * Mb) - xx)/sqrt(2 * 1)) -
+              flowPloidy:::erf((Mb - xx)/sqrt(2 * 1))) / 2)
+    },
+    initParams = function(fh){
+      list(BRB = 10)
+    }
+  )
 
 ## for testing the influence of sd:
 ## This isn't used in any other code, retained here for further study if
@@ -362,4 +438,23 @@ getInit <- function(fh){
     fh@init <- c(fh@init, i@initParams(fh))
   }
   fh
+}
+
+getSpecialParams <- function(fh){
+  res <- list()
+  for(i in fh@comps)
+    res <- c(res, i@specialParams)
+  res[-1 * which(duplicated(res))]
+}
+
+getSpecialParamArgs <- function(fh){
+  params <- getSpecialParams(fh)
+  res <- character()
+  for(i in seq_along(params))
+    res <- c(res, paste(names(params)[i], " = ", params[[i]]))
+  paste(res, collapse = ", ")
+}
+
+getSpecialParamsComp <- function(comp){
+  comp@specialParams
 }

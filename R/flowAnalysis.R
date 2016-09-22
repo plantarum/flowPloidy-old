@@ -38,9 +38,9 @@ fhNLS <- function(fh){
   model <- fh@model
   form1 <- paste("intensity ~ model(")
   args <- as.character(names(formals(fh@model)))
-  args <- args[!args %in% c("", "SCvals", "xx")]
+  args <- args[!args %in% c("", getSpecialParams(fh))]
   args <- paste(args, collapse = ", ")
-  form3 <- ", SCvals = SCvals, xx = x)"
+  form3 <- paste(", ", getSpecialParamArgs(fh), ")")
   form <- as.formula(paste(form1, args, form3))
 
   fh@nls <- eval(call("nlsLM", form, start = fh@init, data = fh@histData,
@@ -131,9 +131,10 @@ fhRCS <- function(fh){
   exp <- exp[!zeros]
   chi <- sum(((obs - exp)^2) / exp)
 
-  n <- length(obs)
-  m <- length(formals(fh@model)) - 2    # don't count xx or intensity as
-                                        # parameters
+  ## n <- length(obs)
+  ## m <- length(formals(fh@model)) - length(getSpecialParams(fh))
+  ## ## Don't count special parameters (xx, MCvals etc) or intensity in
+  ## ## determining the number of parameters fit in the NLS!
 
   fh@RCS <- chi/summary(fh@nls)$df[2]
   fh

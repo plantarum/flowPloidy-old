@@ -81,10 +81,11 @@ setOldClass("nls")
 #' @slot channel character, the name of the data column to use
 #' @slot bins integer, the number of bins to use to aggregate events into a
 #'   histogram
-#' @slot histdata data.frame, the columns are the histogram bin number (x),
-#'   florescence intensity (intensity), and the raw single-cut debris model
-#'   values (SCVals, used in model fitting). Additional columns may be
-#'   added if/when I add gating, so refer to columns by name, not position.
+#' @slot histdata data.frame, the columns are the histogram bin number
+#'   (xx), florescence intensity (intensity), and the raw single-cut debris
+#'   model values (SCVals, used in model fitting). Additional columns may
+#'   be added if/when I add gating, so refer to columns by name, not
+#'   position. 
 #' @slot peaks matrix, containing the coordinates used for peaks when
 #'   calculcating initial parameter values.
 #' @slot comps a list of \code{modelComponent} objects included for these
@@ -109,6 +110,7 @@ setClass(
     bins = "integer", ## the number of bins to use
     histData = "data.frame", ## binned histogram data
     peaks = "matrix", ## peak coordinates for initial values
+    opts = "list",    ## flags for selecting model components
     comps = "list", ## model components
     model = "function", ## model to fit
     init = "list", ## inital parameter estimates
@@ -127,7 +129,7 @@ setMethod(
   signature = "FlowHist",
   definition = function(.Object, file, channel, bins = 256,
                         window = 20, smooth = 20, pick = FALSE,
-                        ... ){
+                        opts = list(), ... ){
     .Object@raw <- read.FCS(file, dataset = 1, alter.names = TRUE)
     .Object@channel <- channel
     .Object <- setBins(.Object, bins)
@@ -138,6 +140,7 @@ setMethod(
                                   smooth = smooth)
       .Object <- cleanPeaks(.Object, window = window)
     }
+    .Object@opts <- opts
     .Object <- addComponents(.Object)
     .Object <- makeModel(.Object)
     .Object <- getInit(.Object)
@@ -164,9 +167,9 @@ resetFlowHist <- function(fh){
 #' fh1
 #' @export
 FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
-                     pick = FALSE){
+                     pick = FALSE, opts = list()){
   new("FlowHist", file = file, channel = channel, bins = as.integer(bins),
-      window = window, smooth = smooth, pick = pick)
+      window = window, smooth = smooth, pick = pick, opts = opts)
 }
 
 #' Displays the column names present in an FCS file
@@ -292,7 +295,7 @@ plotFH <- function(fh, ...){
   ## plots the raw data for a FlowHist object
   plot(fh@histData$intensity, type = 'n', main = getFHFile(fh),
        ylab = "Intensity", xlab = fh@channel, ...)
-  polygon(x = c(fh@histData$x, max(fh@histData$x) + 1),
+  polygon(x = c(fh@histData$xx, max(fh@histData$xx) + 1),
           y = c(fh@histData$intensity, 0),
           col = "lightgray", border = NA)
 }
@@ -316,11 +319,9 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
   plotFH(x, ...)
 
   if(init){
-    yy <- do.call(x@model,
-                  args = c(list(SCvals = x@histData$SCvals,
-                                xx = x@histData$x),
-                           x@init))
-    lines(x = x@histData$x,
+    yy <- with(x@histData,
+               do.call(x@model, args = c(getSpecialParams(x), x@init)))
+    lines(x = x@histData$xx,
           y = yy, 
           col = "grey", lwd = 1, lty = 5)
     abline(v = x@init$Ma, col = "blue", lwd = 2)
@@ -336,14 +337,14 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
              cex = 2, pch = 16, col = "orange")
       text(paste("Peak B: ", round(x@init$Mb, 0)), cex = 1,
            x = x@init$Mb, col = "orange", pos = 2,
-           y = grconvertY(0.8, from = "npc", to = "user"))
+           y = grconvertY(0.7, from = "npc", to = "user"))
       abline(v = 2 * x@init$Mb, col = "orange", lwd = 0.5)
     }
   }
 
   if(nls & (length(x@nls) > 0)){
     dat <- tabulateFlowHist(x)
-    lines(x = x@histData$x, y = predict(x@nls), col = 2)
+    lines(x = x@histData$xx, y = predict(x@nls), col = 2)
     text(paste("RCS: ", round(dat$rcs, 3)), cex = 1, pos = 4,
          x = grconvertX(0.8, from = "npc", to = "user"),
          y = grconvertY(0.95, from = "npc", to = "user"))
@@ -365,23 +366,20 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
   }
 
   if(comps & (length(x@nls) > 0)){
+    yy <- with(x@histData,
+               do.call(x@model, args = c(getSpecialParams(x), x@init)))
+  
+  
     for(i in seq_along(x@comps)){
-      if("SCvals" %in% names(formals(x@comps[[i]]@func))){
-        params <-
-          as.list(coef(x@nls)[names(formals(x@comps[[i]]@func))])
-        params <- params[! is.na(names(params))]
-        yy <- do.call(x@comps[[i]]@func,
-                      args = c(list(SCvals = x@histData$SCvals),
-                               params))
-        lines(x = x@histData$x, y = yy, col = x@comps[[i]]@color) 
-      } else {
-        params <-
-          as.list(coef(x@nls)[names(formals(x@comps[[i]]@func))])
-        params <- params[! is.na(names(params))]
-        yy <- do.call(x@comps[[i]]@func,
-                      args = c(list(xx = x@histData$x), params))
-        lines(x = x@histData$x, y = yy, col = x@comps[[i]]@color)
-      }
+      params <-
+        as.list(coef(x@nls)[names(formals(x@comps[[i]]@func))])
+      params <- params[! is.na(names(params))]
+      yy <-
+        with(x@histData,
+             do.call(x@comps[[i]]@func,
+                      args = c(getSpecialParamsComp(x@comps[[i]]),
+                               params)))
+        lines(x = x@histData$xx, y = yy, col = x@comps[[i]]@color) 
     }
   }
 }
@@ -509,9 +507,11 @@ setBins <- function(fh, bins = 256){
                    plot = FALSE)
 
   intensity <- histBins$counts
-  x <- 1:length(intensity)
-  SCvals <- getSingleCutVals(intensity, x)
-  fh@histData <- data.frame(x = x , intensity = intensity, SCvals = SCvals)
+  xx <- 1:length(intensity)
+  SCvals <- getSingleCutVals(intensity, xx)
+  MCvals <- getMultipleCutVals(intensity)
+  fh@histData <- data.frame(xx = xx, intensity = intensity,
+                            SCvals = SCvals, MCvals = MCvals)
   
   fh <- resetFlowHist(fh)
   fh

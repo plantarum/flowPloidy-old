@@ -55,7 +55,7 @@ browseFlowHist <- function(flowList){
     
     fhInitPlot <- reactive({
       xPt <- nearPoints(.fhList[[fhCurrent()]]@histData,
-                        input$pointPicker, "x", "intensity",
+                        input$pointPicker, "xx", "intensity",
                         threshold = 25, maxpoints = 1)
       if(nrow(xPt) > 0){
         if(input$peakPicker == "A"){
@@ -102,7 +102,7 @@ browseFlowHist <- function(flowList){
 
     output$plot_clickedpoints <- renderTable({
       res <- nearPoints(.fhList[[fhCurrent()]]@histData,
-                        input$pointPicker, "x", "intensity",
+                        input$pointPicker, "xx", "intensity",
                         threshold = 25, maxpoints = 1)
       if (nrow(res) == 0)
         return()
@@ -130,12 +130,17 @@ browseFlowHist <- function(flowList){
 ## shinyApp(ui = ui, server = server)     
    
 sliderPeaks <- function(fh, peakA, peakB){
-  pA <- fh@histData[round(peakA, 0), c("x", "intensity")]
-  pB <- fh@histData[round(peakB, 0), c("x", "intensity")]
-
-  fh <- resetFlowHist(fh)
+  pA <- fh@histData[round(peakA, 0), c("xx", "intensity")]
+  if(is.numeric(peakB))                 
+    pB <- fh@histData[round(peakB, 0), c("xx", "intensity")]
   
-  fh@peaks <- as.matrix(rbind(pA, pB))
+  fh <- resetFlowHist(fh)
+
+  if(is.numeric(peakB))
+    fh@peaks <- as.matrix(rbind(pA, pB))
+  else
+    fh@peaks <- as.matrix(rbind(pA))
+  
   colnames(fh@peaks) <- c("mean", "height")
 
   fh <- addComponents(fh)

@@ -1,10 +1,6 @@
 library(devtools)
-## library(flowCore)
-## library(caTools)
-## library(minpack.lm)
-## library(car)
 library(flowPloidyData)
-##library(knitr)
+load_all()
 
 #######################
 ## Linearity testing ##
@@ -16,20 +12,24 @@ lintest <- batchFlowHist(linFiles, channel = "FL3.INT.LIN")
 
 lintest <- browseFlowHist(lintest)
 
-fh1S4 <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+fh1mc <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+fh1sc <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN",
+                 opts = list("SC"))
 
-plotFH(fh1S4)
-plot(fh1S4, init = TRUE)
+plotFH(fh1)
+plot(fh1, init = TRUE)
 
-fh1S4 <- fhAnalyze(fh1S4)
+fh1sc <- fhAnalyze(fh1sc)
+plot(fh1sc)
 
-plot(fh1S4)
+fh1mc <- fhAnalyze(fh1mc)
+plot(fh1mc)
 
 batch1 <-batchFlowHist(files = flowPloidyFiles, channel = "FL3.INT.LIN")
 
 tabulateFlowHist(batch1)
 
-tmp <- flowShiny(batch1)
+tmp <- browseFlowHist(batch1)
 
 fh4S4 <-FlowHist(file = flowPloidyFiles[4], channel = "FL3.INT.LIN")
 plot(fh4S4, init = TRUE)
