@@ -288,7 +288,7 @@ fhComponents$fB2 <-
 ##
 ## @author Tyler Smith
 ## @rdname singleCut
-getSingleCutValsBase <- function(intensity, xx){
+getSingleCutValsBase <- function(intensity, xx, first.channel){
   ## compute the single cut debris model values
   
   ## Do not extend the model below/beyond the data
@@ -296,7 +296,7 @@ getSingleCutValsBase <- function(intensity, xx){
   ## which gives a better fit. Perhaps set first.channel to 2-4? Need to
   ## test this and determine best fit. Possibly use an extra parameter to
   ## tune this for each data set individually.
-  first.channel <- which(intensity > 0)[2]
+  ##first.channel <- which(intensity > 0)[2]
 
   res <- 0
   if(xx >= first.channel & xx < length(intensity)){
@@ -329,11 +329,11 @@ fhComponents$SC <-
     }
   )
 
-getMultipleCutVals <- function(intensity){
-  res <- sum(intensity) - cumsum(intensity)
-  res[which(intensity == 0)] <- 0
-  ## ugly temporary hack, fix this!!
-  res[which(res > 0)][1:2] <- 0
+getMultipleCutVals <- function(intensity, startBin){
+  tmpI <- intensity
+  tmpI[1:(startBin - 1)] <- 0
+  res <- sum(tmpI) - cumsum(tmpI)
+  res[1:(startBin - 1)] <- 0
   res
 }
 

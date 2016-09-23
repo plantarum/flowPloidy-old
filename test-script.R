@@ -14,7 +14,7 @@ lintest <- browseFlowHist(lintest)
 
 fh1m <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN",
                  analyze = TRUE)
-fh1s <- updateFlowHist(fh1mc, opts = list("SC"), analyze = TRUE)
+fh1s <- updateFlowHist(fh1m, opts = list("SC"), analyze = TRUE)
 fh1sl<- updateFlowHist(fh1s, linearity = "variable", analyze = TRUE)
 fh1ml<- updateFlowHist(fh1mc, linearity = "variable", analyze = TRUE)
 

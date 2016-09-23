@@ -549,11 +549,12 @@ setBins <- function(fh, bins = 256){
 
   intensity <- histBins$counts
   xx <- 1:length(intensity)
-  SCvals <- getSingleCutVals(intensity, xx)
-  MCvals <- getMultipleCutVals(intensity)
+  startMax <- max(intensity[which(intensity != 0)][1:20])
+  startBin <- which(intensity == startMax)[1]
+  SCvals <- getSingleCutVals(intensity, xx, startBin)
+  MCvals <- getMultipleCutVals(intensity, startBin)
   fh@histData <- data.frame(xx = xx, intensity = intensity,
                             SCvals = SCvals, MCvals = MCvals)
-  
   fh <- resetFlowHist(fh)
   fh
 }
