@@ -12,18 +12,39 @@ lintest <- batchFlowHist(linFiles, channel = "FL3.INT.LIN")
 
 lintest <- browseFlowHist(lintest)
 
-fh1mc <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+fh1m <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN",
+                 analyze = TRUE)
+fh1s <- updateFlowHist(fh1mc, opts = list("SC"), analyze = TRUE)
+fh1sl<- updateFlowHist(fh1s, linearity = "variable", analyze = TRUE)
+fh1ml<- updateFlowHist(fh1mc, linearity = "variable", analyze = TRUE)
+
+plot(fh1m)
+dev.new()
+##dev.set()
+plot(fh1s)
+dev.new()
+plot(fh1ml)
+dev.new()
+##dev.set()
+plot(fh1sl)
+
+
+fh1mcl <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN",
+                  linearity = "variable")
 fh1sc <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN",
                  opts = list("SC"))
 
-plotFH(fh1)
-plot(fh1, init = TRUE)
+plotFH(fh1mcl)
+plot(fh1mcl, init = TRUE)
 
 fh1sc <- fhAnalyze(fh1sc)
 plot(fh1sc)
 
 fh1mc <- fhAnalyze(fh1mc)
 plot(fh1mc)
+
+fh1mcl <- fhAnalyze(fh1mcl)
+plot(fh1mcl)
 
 batch1 <-batchFlowHist(files = flowPloidyFiles, channel = "FL3.INT.LIN")
 

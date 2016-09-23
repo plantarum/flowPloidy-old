@@ -38,7 +38,7 @@ fhNLS <- function(fh){
   model <- fh@model
   form1 <- paste("intensity ~ model(")
   args <- as.character(names(formals(fh@model)))
-  args <- args[!args %in% c("", getSpecialParams(fh))]
+  args <- args[!args %in% c("", names(getSpecialParams(fh)))]
   args <- paste(args, collapse = ", ")
   form3 <- paste(", ", getSpecialParamArgs(fh), ")")
   form <- as.formula(paste(form1, args, form3))

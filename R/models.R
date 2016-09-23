@@ -19,15 +19,22 @@ setClass(
         ## a function that returns a named list of initial parameter
     ## estimates, based on the single argument of the FlowHist object 
     ## list(param1 = param1, ...)
-    specialParams = "list"
+    specialParams = "list",
     ## A named list, the names are parameters to exclude from the default
     ## argument list, as they aren't variables to fit in the NLS procedure.
     ## the body of the list element is the object to insert into the model
     ## formula to account for that variable. e.g., in the singleCut
     ## component, the SCvals parameter is not a variable, and is instead
     ## assigned to the SCvals column in the histData slot. Therefore, it
-    ## has a specialParams slot value of
-    ## `list(SCvals = substitute(SCvals))`
+    ## has a specialParams slot value of `list(SCvals =
+    ## substitute(SCvals))`
+    specialParamSetter = "function"
+    ## function with one argument, the FlowHist object, used to set the
+    ## value of specialParams. This allows parameters to be declared
+    ## "special" based on values in the fh. i.e., if it fh@linearity is
+    ## "fixed", we can declare the parameter d special with a set value of
+    ## 2; with linearity == "variable", d is a regular parameter to fit in
+    ## the model.
   )
 )
 
@@ -51,30 +58,30 @@ setMethod(
   }
 )
 
-setMethod(
-  f = "initialize",
-  signature = "ModelComponent",
-  definition = function(.Object, name, color, desc,
-                        includeTest, func, initParams,
-                        specialParams = list(xx = substitute(xx)), ...){
-    .Object@name <- name
-    .Object@color <- color
-    .Object@desc <- desc
-    .Object@includeTest <- includeTest
-    .Object@func <- func
-    .Object@initParams <- initParams
-    .Object@specialParams <- specialParams
-    callNextMethod(.Object, ...)
-  })
+## setMethod(
+##   f = "initialize",
+##   signature = "ModelComponent",
+##   definition = function(.Object, name, color, desc,
+##                         includeTest, func, initParams,
+##                         specialParams = list(xx = substitute(xx)), ...){
+##     .Object@name <- name
+##     .Object@color <- color
+##     .Object@desc <- desc
+##     .Object@includeTest <- includeTest
+##     .Object@func <- func
+##     .Object@initParams <- initParams
+##     .Object@specialParams <- specialParams
+##     callNextMethod(.Object, ...)
+##   })
 
 ModelComponent <- function(name, color, desc, includeTest, func,
                            initParams,
-                           specialParams = list(xx = substitute(xx))){
+                           specialParamSetter = function(fh)
+                             list(xx = substitute(xx))){ 
   new("ModelComponent", name = name, color = color, desc = desc,
       includeTest = includeTest, func = func, initParams = initParams,
-      specialParams = specialParams)
+      specialParamSetter = specialParamSetter)
 }
-                          
 
 ######################
 ## Model Components ##
@@ -135,6 +142,16 @@ fhComponents$fA1 <-
     }
   )
 
+setLinearity <- function(fh){
+  ## Helper function for components that include the linearity parameter d
+  if(fh@linearity == "fixed")
+    return(list(xx = substitute(xx), d = 2))
+  else if(fh@linearity == "variable")
+    return(list(xx = substitute(xx)))
+  else
+    stop("Incorrect setting for linearity")
+}
+
 fhComponents$fA2 <-
   ModelComponent(
     name = "fA2", color = "blue",
@@ -142,16 +159,22 @@ fhComponents$fA2 <-
     includeTest = function(fh){
       (fh@peaks[1, "mean"] * 2) <= nrow(fh@histData)
     },
-    func = function(a2, Ma, Sa, xx){
+    func = function(a2, Ma, Sa, d, xx){
       (a2 / (sqrt(2 * pi) * Sa * 2) *
-       exp(-((xx - Ma * 2)^2)/(2 * (Sa * 2)^2))) 
+       exp(-((xx - Ma * d)^2)/(2 * (Sa * 2)^2))) 
     },
     initParams = function(fh){
       Ma <- as.numeric(fh@peaks[1, "mean"])
       Sa <- as.numeric(Ma / 20)
       a2 <- as.numeric(fh@histData[Ma * 2, "intensity"] *
                        Sa * 2 / 0.45)
-      list(a2 = a2)
+      res <- list(a2 = a2)
+      if(fh@linearity == "variable")
+        res <- c(res, d = 2)
+      res
+    },
+    specialParamSetter = function(fh){
+      setLinearity(fh)
     }
   )
 
@@ -183,16 +206,22 @@ fhComponents$fB2 <-
       else
         FALSE
     },
-    func = function(b2, Mb, Sb, xx){
+    func = function(b2, Mb, Sb, d, xx){
       (b2 / (sqrt(2 * pi) * Sb * 2) *
-       exp(-((xx - Mb * 2)^2)/(2 * (Sb * 2)^2))) 
+       exp(-((xx - Mb * d)^2)/(2 * (Sb * 2)^2))) 
     },
     initParams = function(fh){
       Mb <- fh@peaks[2, "mean"]
       Sb <- Mb / 20
       b2 <- as.numeric(fh@histData[fh@peaks[2, "mean"] * 2, "intensity"]
                        * Sb * 2 / 0.45)
-      list(b2 = b2)
+      res <- list(b2 = b2)
+      if(fh@linearity == "variable")
+        res <- c(res, d = 2)
+      res
+    },
+    specialParamSetter = function(fh){
+      setLinearity(fh)
     }
   )
 
@@ -295,7 +324,9 @@ fhComponents$SC <-
     initParams = function(fh){
       list(SCa = 0.1)
     },
-    specialParams = list(SCvals = substitute(SCvals)) 
+    specialParamSetter = function(fh){
+      list(SCvals = substitute(SCvals))
+    }
   )
 
 getMultipleCutVals <- function(intensity){
@@ -324,7 +355,9 @@ fhComponents$MC <-
     initParams = function(fh){
       list(MCa = 0.01, k = 0.01)
     },
-    specialParams = list(xx= substitute(xx), MCvals = substitute(MCvals))
+    specialParamSetter = function(fh){
+      list(xx= substitute(xx), MCvals = substitute(MCvals))
+    }
   )
 
 ## Broadened rectangles:
@@ -407,8 +440,11 @@ fhComponents$brB <-
 ##############################
 addComponents <- function(fh){
   for(i in fhComponents)
-    if(i@includeTest(fh))
-      fh@comps[[i@name]] <- i
+    if(i@includeTest(fh)){
+      newComp <- i
+      newComp@specialParams <- newComp@specialParamSetter(fh)
+      fh@comps[[i@name]] <- newComp
+    }
   fh
 }
 

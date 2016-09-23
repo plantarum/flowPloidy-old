@@ -108,6 +108,9 @@ setClass(
     raw = "flowFrame", ## raw data, object defined in flowCore
     channel = "character", ## data channel to use for histogram
     bins = "integer", ## the number of bins to use
+    linearity = "character", ## "fixed" or "variable", to determine whether
+    ## or not linearity is fixed at 2, or allowed to vary as a model
+    ## parameter 
     histData = "data.frame", ## binned histogram data
     peaks = "matrix", ## peak coordinates for initial values
     opts = "list",    ## flags for selecting model components
@@ -129,7 +132,7 @@ setMethod(
   signature = "FlowHist",
   definition = function(.Object, file, channel, bins = 256,
                         window = 20, smooth = 20, pick = FALSE,
-                        opts = list(), ... ){
+                        linearity = "fixed", opts = list(), ... ){
     .Object@raw <- read.FCS(file, dataset = 1, alter.names = TRUE)
     .Object@channel <- channel
     .Object <- setBins(.Object, bins)
@@ -137,9 +140,10 @@ setMethod(
       .Object <- pickPeaks(.Object)
     } else {
       .Object <- findPeaks(.Object, window = window,
-                                  smooth = smooth)
+                           smooth = smooth)
       .Object <- cleanPeaks(.Object, window = window)
     }
+    .Object@linearity <- linearity
     .Object@opts <- opts
     .Object <- addComponents(.Object)
     .Object <- makeModel(.Object)
@@ -147,18 +151,37 @@ setMethod(
     callNextMethod(.Object, ...)
   })
 
-resetFlowHist <- function(fh){
-  ## Clear all analysis slots
-  fh@peaks = matrix()
-  fh@comps = list()
-  fh@model = function(){}
-  fh@init = list()
-  fh@nls = structure(list(), class = "nls")
-  fh@counts = list()
-  fh@CV = list()
-  fh@RCS = NA_real_
+resetFlowHist <- function(fh, from = "peaks"){
+  ## Clear analysis slots
+  ## Default is to clear everything from peaks onwards
+  removeFrom <- c("peaks", "comps")
+  ## Dependencies
+  ## - changing peaks changes everything
+  ## - changing comps changes model, init, nls
+
+  ## coded to allow for further refinement, if/when additions to the
+  ## FlowHist class makes it sensible to change the granularity of slot
+  ## resetting. 
+  
+  removeNum <- which(removeFrom == from)
+
+  rmF <- function(x)
+    removeNum <= which(removeFrom == x)
+  
+  if(rmF("peaks"))
+    fh@peaks = matrix()
+  if(rmF("comps")){
+    fh@comps = list()
+    fh@model = function(){}
+    fh@init = list()
+    fh@nls = structure(list(), class = "nls")
+    fh@counts = list()
+    fh@CV = list()
+    fh@RCS = NA_real_
+  }
   fh
 }
+
 
 #' @rdname FlowHist
 #' @examples
@@ -167,9 +190,14 @@ resetFlowHist <- function(fh){
 #' fh1
 #' @export
 FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
-                     pick = FALSE, opts = list()){
-  new("FlowHist", file = file, channel = channel, bins = as.integer(bins),
-      window = window, smooth = smooth, pick = pick, opts = opts)
+                     pick = FALSE, linearity = "fixed", opts = list(),
+                     analyze = FALSE){
+  fh <-  new("FlowHist", file = file, channel = channel,
+             bins = as.integer(bins), window = window, smooth = smooth,
+             pick = pick, linearity = linearity, opts = opts)
+  if(analyze)
+    fh <- fhAnalyze(fh)
+  return(fh)
 }
 
 #' Displays the column names present in an FCS file
@@ -363,6 +391,10 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
     text(paste("A/B:  ", round(dat$ratioAB, 3)), cex = 1, pos = 4,
          x = grconvertX(0.8, from = "npc", to = "user"),
          y = grconvertY(0.8, from = "npc", to = "user"))
+    text(paste("Linearity:  ", round(dat$linearity, 3)), cex = 1, pos = 4,
+         x = grconvertX(0.8, from = "npc", to = "user"),
+         y = grconvertY(0.75, from = "npc", to = "user"))
+
   }
 
   if(comps & (length(x@nls) > 0)){
@@ -427,6 +459,11 @@ tabulateFlowHist <- function(fh, file = NULL){
 
 exFlowHist <- function(fh){
   if(!is.null(fh@nls)){
+    if(fh@linearity == "variable")
+      linearity = coef(fh@nls)["d"]
+    else
+      linearity = NA
+             
     data.frame(file = getFHFile(fh), channel = fh@channel,
              components = paste(names(fh@comps), collapse = ";"),
              totalEvents = sum(fh@histData$intensity),
@@ -441,7 +478,9 @@ exFlowHist <- function(fh){
                                      fh@CV$CI[1])),
              ratioSE = unlist(ifelse(is.null(fh@CV$CI[2]), NA,
                                      fh@CV$CI[2])),
-             rcs = fh@RCS, row.names = NULL)
+             rcs = fh@RCS,
+             linearity = linearity,
+             row.names = NULL)
   } else {
     data.frame(file = getFHFile(fh), channel = fh@channel,
                components = paste(names(fh@comps), collapse = ";"),
@@ -454,7 +493,9 @@ exFlowHist <- function(fh){
                cvB = NA,
                ratioAB = NA,
                ratioSE = NA,
-               rcs = NA, row.names = NULL)
+               rcs = NA,
+               linearity = NA,
+               row.names = NULL)
   }
 }
 
@@ -741,5 +782,26 @@ pickPeaks <- function(fh){
   colnames(res) <- c("mean", "height")
   rownames(res) <- NULL
   fh@peaks <- res
+  fh
+}
+
+##########################
+## Change Model Options ##
+##########################
+updateFlowHist <- function(fh, linearity = NULL, opts = NULL,
+                           analyze = FALSE){
+  ## keep the existing peaks, as they may have already been tweaked by the
+  ## user
+  if(!is.null(linearity))
+    fh@linearity <- linearity
+  if(!is.null(opts))
+    fh@opts <- opts
+  
+  fh <- resetFlowHist(fh, from = "comps")
+  fh <- addComponents(fh)
+  fh <- makeModel(fh)
+  fh <- getInit(fh)
+  if(analyze)
+    fh <- fhAnalyze(fh)
   fh
 }
