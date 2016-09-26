@@ -473,6 +473,7 @@ getInit <- function(fh){
   for(i in fh@comps){
     fh@init <- c(fh@init, i@initParams(fh))
   }
+  fh@init <- fh@init[unique(names(fh@init))]
   fh
 }
 

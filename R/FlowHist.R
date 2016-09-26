@@ -230,12 +230,13 @@ viewFlowChannels <- function(file){
 #' @return \code{batchFlowHist} returns a list of \code{FlowHist} objects.
 #' @export
 batchFlowHist <- function(files, channel, bins = 256, verbose = TRUE,
-                      window = 20, smooth = 20){ 
+                      window = 20, smooth = 20, linearity = "fixed"){ 
   res <- list()
   for(i in seq_along(files)){
     if(verbose) message("processing ", files[i])
     tmpRes <- FlowHist(file = files[i], channel = channel, bins = bins,
-                       window = window, smooth = smooth, pick = FALSE)
+                       window = window, smooth = smooth, pick = FALSE,
+                       linearity = linearity)
     res[[getFHFile(tmpRes)]] <- tmpRes
     res[[getFHFile(tmpRes)]] <- fhAnalyze(res[[getFHFile(tmpRes)]])
   }              
@@ -577,7 +578,7 @@ NULL
 #' value.
 #'
 #' Utility functions for use internally by flowPloidy; not exported and
-#' won't be visible to users. Usually invoked from within \code{flowHist}.
+#' won't be visible to users. Usually invoked from within \code{FlowHist}.
 #'
 #' Note that there is a trade-off between accuracy in detected peaks, and
 #' avoiding noise. Increasing the value of \code{smooth} will reduce the
@@ -793,6 +794,7 @@ updateFlowHist <- function(fh, linearity = NULL, opts = NULL,
                            analyze = FALSE){
   ## keep the existing peaks, as they may have already been tweaked by the
   ## user
+  message("updating FlowHist")
   if(!is.null(linearity))
     fh@linearity <- linearity
   if(!is.null(opts))

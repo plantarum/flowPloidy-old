@@ -9,8 +9,10 @@ load_all()
 linFiles <- list.files("~/research/flow/linearity_data/", "LMD",
                        full.names = TRUE)
 lintest <- batchFlowHist(linFiles, channel = "FL3.INT.LIN")
+lintest <- batchFlowHist(linFiles, channel = "FL3.INT.LIN",
+                         linearity = "variable")
 
-lintest <- browseFlowHist(lintest)
+lintestv <- browseFlowHist(lintest)
 
 fh1m <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN",
                  analyze = TRUE)

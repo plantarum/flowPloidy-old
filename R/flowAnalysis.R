@@ -23,6 +23,7 @@ NULL
 #' fh1 <- fhAnalyze(fh1)
 #' @export
 fhAnalyze <- function(fh){
+  message("analyzing ", getFHFile(fh))
   tryVal <- try(fh <- fhNLS(fh))
   if(inherits(tryVal, "try-error")){
     message("\n*** Analysis Failed: ", getFHFile(fh), " ***\n")
