@@ -215,6 +215,7 @@ produce useful starting values:
 fh2 <- FlowHist(file = flowPloidyFiles["734.LMD"], channel = "FL3.INT.LIN")
 plot(fh2, init = TRUE)
 ```
+
 Here we can see that high spike around bin 50 was ignored, resulting in
 both the A and B peaks being placed together near bin 136. We can manually
 set the appropriate starting values with `pickInit`: 
