@@ -10,7 +10,7 @@ NULL
 NULL
 
 #' @importFrom graphics hist lines locator plot points polygon grconvertX
-#'   grconvertY text abline
+#'   grconvertY text abline par
 NULL
 
 #' @importFrom stats as.formula coef integrate predict pnorm
@@ -391,27 +391,33 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
   if(nls & (length(x@nls) > 0)){
     dat <- tabulateFlowHist(x)
     lines(x = x@histData$xx, y = predict(x@nls), col = 2)
-    text(paste("RCS: ", round(dat$rcs, 3)), cex = 1, pos = 4,
-         x = grconvertX(0.8, from = "npc", to = "user"),
+    text(paste("RCS: ", round(dat$rcs, 3)), cex = 1, pos = 2,
+         x = grconvertX(0.975, from = "npc", to = "user"),
          y = grconvertY(0.95, from = "npc", to = "user"))
-    text(paste("Samp. A: ", round(dat$sizeA, 1), "/",
+    text(paste("A: ", round(dat$sizeA, 1), "/",
                round(dat$countsA, 1), "/",
                round(dat$cvA, 3)),
-         cex = 1, pos = 4, col = "blue",
-         x = grconvertX(0.8, from = "npc", to = "user"),
-         y = grconvertY(0.9, from = "npc", to = "user"))
-    text(paste("Samp. B: ", round(dat$sizeB, 1), "/",
+         cex = 1, pos = 2, col = "blue",
+         x = grconvertX(0.975, from = "npc", to = "user"),
+         y = grconvertY(0.95, from = "npc", to = "user") - par("cxy")[2])
+    text(paste("B: ", round(dat$sizeB, 1), "/",
                round(dat$countsB, 1), "/",
                round(dat$cvB, 3)),
-         cex = 1, pos = 4, col = "orange",
-         x = grconvertX(0.8, from = "npc", to = "user"),
-         y = grconvertY(0.85, from = "npc", to = "user"))
-    text(paste("A/B:  ", round(dat$ratioAB, 3)), cex = 1, pos = 4,
-         x = grconvertX(0.8, from = "npc", to = "user"),
-         y = grconvertY(0.8, from = "npc", to = "user"))
-    text(paste("Linearity:  ", round(dat$linearity, 3)), cex = 1, pos = 4,
-         x = grconvertX(0.8, from = "npc", to = "user"),
-         y = grconvertY(0.75, from = "npc", to = "user"))
+         cex = 1, pos = 2, col = "orange",
+         x = grconvertX(0.975, from = "npc", to = "user"),
+         y = grconvertY(0.95, from = "npc", to = "user") -
+           par("cxy")[2] * 2)
+    text(paste("A/B:  ",
+               round(dat$ratioAB, 3)), cex = 1, pos = 2,
+         x = grconvertX(0.975, from = "npc", to = "user"),
+         y = grconvertY(0.95, from = "npc", to = "user") -
+           par("cxy")[2] * 3)
+    text(paste("Linearity: ",
+               round(dat$linearity, 3)), cex = 1,
+         pos = 2, 
+         x = grconvertX(0.975, from = "npc", to = "user"),
+         y = grconvertY(0.95, from = "npc", to = "user") -
+           par("cxy")[2] * 4) 
 
   }
 
