@@ -67,6 +67,15 @@ setOldClass("nls")
 #' @param channel character, the name of the data column to use
 #' @param bins integer, the number of bins to use to aggregate events into
 #'   a histogram 
+#' @param linearity character, either "variable", the default, or "fixed".
+#'   If "fixed", linearity is fixed at 2; if "variable", linearity is fit
+#'   as a model parameter.
+#' @param debris character, either "SC", the default, or "MC", to set the
+#'   debris model component to the Single-Cut or Multi-Cut models.
+#' @param analyze boolean, if TRUE the  model will be analyzed
+#'   immediately
+#' @param opts list, currently not used, but maybe in future as a way to
+#'   test additional model options
 #' @param window the width of the moving window used to identify local
 #'   maxima for peak detection via \code{caTools:runmax}
 #' @param smooth the width of the moving window used to reduce noise in
@@ -803,6 +812,30 @@ pickPeaks <- function(fh){
 ##########################
 ## Change Model Options ##
 ##########################
+#' Update, and optionally re-analyze, a FlowHist object
+#'
+#' Allows users to switch the debris model from Single-Cut to Multi-Cut (or
+#'   vice-versa), or to toggle linearity between fixed and variable.
+#' @title updateFlowHist
+#' @param fh a \code{FlowHist} object
+#' @param linearity character, either "variable", the default, or "fixed".
+#'   If "fixed", linearity is fixed at 2; if "variable", linearity is fit
+#'   as a model parameter.
+#' @param debris character, either "SC", the default, or "MC", to set the
+#'   debris model component to the Single-Cut or Multi-Cut models.
+#' @param analyze boolean, if TRUE the updated model will be analyzed
+#'   immediately 
+#' @return a \code{FlowHist} object with the modified values of linearity
+#'   and/or debris, and, if \code{analyze} was TRUE, a new NLS fitting
+#' @author Tyler Smith
+#' @examples
+#' ## defaults to 256 bins:
+#' library(flowPloidyData) 
+#' fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+#' ## default is Single-Cut, change that to Multi-Cut:
+#' fh1mc <- updateFlowHist(fh1, debris = "MC")
+#' plot(fh1)
+#' @export
 updateFlowHist <- function(fh, linearity = NULL, debris = NULL,
                            analyze = TRUE){
   ## keep the existing peaks, as they may have already been tweaked by the

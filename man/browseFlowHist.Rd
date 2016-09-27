@@ -4,10 +4,12 @@
 \alias{browseFlowHist}
 \title{browseFlowHist}
 \usage{
-browseFlowHist(flowList)
+browseFlowHist(flowList, debug = FALSE)
 }
 \arguments{
 \item{flowList}{a list of \code{FlowHist} objects}
+
+\item{debug}{boolean, turns on debugging messages}
 }
 \value{
 Returns the list of \code{FlowHist} objects, updated by any

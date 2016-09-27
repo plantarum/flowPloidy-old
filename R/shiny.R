@@ -2,7 +2,7 @@
 #'   actionButton plotOutput reactive eventReactive shinyApp titlePanel
 #'   sidebarLayout sidebarPanel htmlOutput fluidRow tags mainPanel
 #'   renderPrint renderTable renderPlot renderText column observe runApp
-#'   stopApp wellPanel
+#'   stopApp wellPanel updateRadioButtons
 NULL
 
 #' @importFrom utils str
@@ -13,6 +13,7 @@ NULL
 #' Visually assess histogram fits
 #' @title browseFlowHist
 #' @param flowList a list of \code{FlowHist} objects
+#' @param debug boolean, turns on debugging messages
 #' @return Returns the list of \code{FlowHist} objects, updated by any
 #'   changes made in the GUI.
 #' @author Tyler Smith

@@ -7,10 +7,11 @@
 \title{FlowHist}
 \usage{
 FlowHist(file, channel, bins = 256, window = 20, smooth = 20,
-  pick = FALSE)
+  pick = FALSE, linearity = "variable", debris = "SC", opts = list(),
+  analyze = TRUE)
 
 batchFlowHist(files, channel, bins = 256, verbose = TRUE, window = 20,
-  smooth = 20)
+  smooth = 20, linearity = "variable", debris = "SC")
 }
 \arguments{
 \item{file}{character, the name of the file to load}
@@ -29,6 +30,19 @@ the histogram via \code{caTools::runmean}}
 \item{pick}{boolean; if TRUE, the user will be prompted to select peaks
 to use for starting values. Otherwise (the default), starting values
 will be detected automatically.}
+
+\item{linearity}{character, either "variable", the default, or "fixed".
+If "fixed", linearity is fixed at 2; if "variable", linearity is fit
+as a model parameter.}
+
+\item{debris}{character, either "SC", the default, or "MC", to set the
+debris model component to the Single-Cut or Multi-Cut models.}
+
+\item{opts}{list, currently not used, but maybe in future as a way to
+test additional model options}
+
+\item{analyze}{boolean, if TRUE the  model will be analyzed
+immediately}
 
 \item{files}{character, a vector of file names to load}
 
@@ -86,10 +100,11 @@ or pick the peaks visually yourself with \code{pick = TRUE}.
 \item{\code{bins}}{integer, the number of bins to use to aggregate events into a
 histogram}
 
-\item{\code{histdata}}{data.frame, the columns are the histogram bin number (x),
-florescence intensity (intensity), and the raw single-cut debris model
-values (SCVals, used in model fitting). Additional columns may be
-added if/when I add gating, so refer to columns by name, not position.}
+\item{\code{histdata}}{data.frame, the columns are the histogram bin number
+(xx), florescence intensity (intensity), and the raw single-cut debris
+model values (SCVals, used in model fitting). Additional columns may
+be added if/when I add gating, so refer to columns by name, not
+position.}
 
 \item{\code{peaks}}{matrix, containing the coordinates used for peaks when
 calculcating initial parameter values.}

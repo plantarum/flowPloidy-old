@@ -36,7 +36,7 @@ starting values - accuracy isn't important, we just need something
 value.
 
 Utility functions for use internally by flowPloidy; not exported and
-won't be visible to users. Usually invoked from within \code{flowHist}.
+won't be visible to users. Usually invoked from within \code{FlowHist}.
 
 Note that there is a trade-off between accuracy in detected peaks, and
 avoiding noise. Increasing the value of \code{smooth} will reduce the
