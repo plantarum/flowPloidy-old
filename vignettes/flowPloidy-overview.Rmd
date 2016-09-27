@@ -110,8 +110,14 @@ With all the necessary packages installed, and the name of the channel of
 interest identified, we are ready to proceed with a `flowPloidy` analysis.
 
 ```{r}
-fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN",
+                analyze = FALSE)
 ```
+
+(Note that we used the `analyze = FALSE` option, to delay analysis until we
+have inspected the data, for the purposes of this tutorial. This is not
+necessary, and if you omit the `analyze` argument analysis will proceed
+automatically.)
 
 Now that we have our data loaded, `plot` will display it for us:
 
@@ -129,25 +135,25 @@ plot(fh1, init = TRUE)
 
 A number of features are displayed on the histogram:
 
-Peak A G1 estimate
+Sample A G1 estimate
 
 : a thick vertical blue line with a label at the top indicates the
-estimated position of the first ('A') G1 peak. A blue circle indicates the
-actual position on the histogram used as the initial value.
+estimated position of the first sample ('A') G1 peak. A blue circle
+indicates the actual position on the histogram used as the initial value.
 
-Peak A G2 estimate
+Sample A G2 estimate
 
 : a thin vertical blue line without a label indicates the estimated
 position of the G2 peak corresponding to the A G1 peak.
 
-Peak B G1 and G2 estimates
+Sample B G1 and G2 estimates
 
 : as for Peak A, but orange
 
 Initial model estimate
 
-: the thick, dotted black line indicates the initial parameters used for
-the model-fitting.
+: the thin, dashed grey line indicates the initial parameters used for the
+model-fitting.
 
 The initial estimate is rough, but in this case it's close enough for the
 model-fitting routines to find a solution, so we can immediately proceed to
@@ -172,16 +178,22 @@ plot(fh1)
 The plot has been updated to include the fitted model components in
 different colours:
 
-- green: single-cut debris model
+- green: debris model (by default the Single-Cut model, but see below)
 - blue: sample A G1 and G2 peaks
 - orange: sample B G1 and G2 peaks
 - magenta: S-phase of sample A
 - turqoise: S-phase of sample B
+- purple: aggregates
 - red: the complete model
 
-We can see that the coarse initial estimates were indeed close enough to
-give us an acceptable model fitting. The numerical results are now
-available by printing the `FlowHist` object:
+The aggregate and S-phase components may be quite small, and therefore
+difficult to see. 
+
+In the upper right corner, we see a brief summary of the numerical results.
+For Sample A and Sample B, peak statistics are reported as `position / cell
+counts / coefficient of variation`. We can see that the coarse initial
+estimates were indeed close enough to give us a reasonable model fitting.
+The numerical results are now available by printing the `FlowHist` object:
 
 ```{r, output = "hold"}
 fh1
@@ -200,7 +212,7 @@ Sometimes, particularly with noisy histograms, `flowPloidy` will not
 produce useful starting values:
 
 ```{r noisyData, fig.cap = "Histogram with Bad Initial Values"}
-fh2 <- FlowHist(file = flowPloidyFiles[12], channel = "FL3.INT.LIN")
+fh2 <- FlowHist(file = flowPloidyFiles["734.LMD"], channel = "FL3.INT.LIN")
 plot(fh2, init = TRUE)
 ```
 Here we can see that high spike around bin 50 was ignored, resulting in
@@ -245,6 +257,48 @@ fh2 <- fhAnalyze(fh2)
 plot(fh2)
 fh2
 ```
+
+# Model Options
+
+## Debris Models
+By default, the histogram analysis uses the Single-Cut Debris model,
+[described in @bagwell_mayo_ea_1991]. This works well for most of our data.
+However, @bagwell_1993 recommends the Multi-Cut model for fresh material,
+and in some cases it provides better RCS values (although peak parameters
+rarely change significantly).
+
+There are a few ways to switch to the Multi-Cut model. You can update a `FlowHist` object with the function `updateFlowHist`:
+
+```{r multi-cut model}
+fh2MC <- updateFlowHist(fh2, debris = "MC")
+plot(fh2MC)
+```
+
+In this case, the Multi-Cut model produced a RCS value nearly twice that of
+the Single-Cut model. Note, however, that the peak parameters hardly
+changed, and the A/B ratio is identical.
+
+You may also choose which debris model to use as an argument to `FlowHist`
+(and the related `batchFlowHist` discussed below):
+
+```{r FlowHist multi-cut, eval = FALSE}
+fh2MC <- FlowHist(file = flowPloidyFiles["734.LMD"],
+                  channel = "FL3.INT.LIN", debris = "MC")
+```
+
+A third option for changing the debris model is to use the interactive
+plotting function `browseFlowHist`, described below.
+
+## Linearity
+By default, linearity (the ratio between the G1 and G2 peaks of the same
+sample) is fit as a parameter. Ideally, linearity should be 2, but due to
+issues with the running of the flow cytometer, it frequently varies between
+ca 1.95 and 2.05. If you want to force linearity to be fixed at 2, you can
+use the `linearity` argument to `updateFlowHist` or `FlowHist`, as we did
+for `debris` above. In this case, possible values for `linearity` are
+`fixed` (fixed at 2), or `variable` (fit as a parameter). When `linearity`
+is `fixed`, it is reported as `NA` in plot and summary functions. You may
+also set/change `linearity` with the `browseFlowHist` GUI described below.
 
 # Exporting Results
 
@@ -335,10 +389,21 @@ smooth
 : numeric, the size of the moving window used to reduce noise in the
 histogram during peak detection (default: 20)
 
+debris
+
+: character, either "SC" or "MC" to use the Single-Cut or Multi-Cut debris
+model, as described above. (default: "SC")
+
+linearity
+
+: character, either "fixed" or "variable" to set the linearity parameter to
+2, or allow it to be fit as a model parameter, as described above.
+(default: "variable")
+
 If you have clean, narrow peaks, you may want to lower the values of
 `window` and `smooth`, say to 16 and 8 respectively. Don't worry about
-finding perfect values, the point of the interface is to allow for quick
-and painless correction of peak detection.
+finding perfect values, we provide a GUI interface (below) to allow for
+quick and painless correction of peak detection.
 
 ```{r histBatch}
 batch1 <- batchFlowHist(flowPloidyFiles, channel = "FL3.INT.LIN")
@@ -361,8 +426,9 @@ par(parOld)
 
 However, that's a bit tedious if you need to tweak the parameters for any
 of the individual `FlowHist` datasets in the list. A more covenient
-approach is provided by the `browseFlowHist` function, described in the
-next section.
+approach is provided by the `browseFlowHist` function, which also allows us
+to address the histograms for which our analysis failed. This is described
+in the next section.
 
 # `browseFlowHist`
 
@@ -390,76 +456,75 @@ At this point, R should respond with:
 Listening on http://127.0.0.1:3459
 ```
 
+(the number after the `:` will probably be different!)
 and your web browser will open to display something like this:
 
 ![](./flowShiny01.png)
 
 (You may need to maximize your browser window for the layout to look
-'correct'. I'm still working on this.)
+'correct')
 
-In the upper-left corner you will find the navigation. Click on 'Next' and
-'Previous' to move forwards and backwards over your list of files. Note the
+In the upper-left corner you will find the navigation. Click on `Next` and
+`Prev` to move forwards and backwards over your list of files. Note the
 counter - you can't move past the first or last files, of course.
 
 For the first histogram, file `188-15.LMD`, the model fit is quite good, so
-we don't need to worry about improving the initial parameters. In fact, the
-first 4 files all look fine. However, the fifth file, `240+S.LMD` is not
-good:
+we don't need to worry about improving the initial parameters. Click on the
+`Linearity` or `Debris Model` buttons to see how much difference these
+options make (not much in this case). Notice that as you change the
+options, the model fit updates automatically. **The last selections you
+make before moving on to the next plot are the ones that will be saved!**
+
+The second plot, for `222.LMD`, doesn't show a fitted model:
 
 ![](./flowShiny02.png)
 
-Here, the peak-finding algorithm has failed to distinguish among the two
-overlapping peaks around 162, and the smoothing has resulted in the first
-peak being misplaced near 70. We can reset either or both of the initial
-peak parameters. To do so:
+This is due to bad initial peak estimates, despite the fact that they look
+ok. To fix this, move the `Samp. A` peak estimate by clicking around near
+the top of the highest peak. You might need to try a few different spots
+before you find one that works (I don't know why this sample is so
+tricky!).
 
-1. Check the 'Move Peak' button for the peak you want to move
-2. Click on the histogram where that peak should be
-3. Wait a moment while the model fitting is updated
+As you click on the plot, the analysis updates using the new initial peak
+estimate. If you want to move the peak for sample B, select that in the
+checkbox above the plot.
 
-For example, if we move the A peak up to 76, the model-fitting is improved
-enough to clarify the distinction between the overlapping peaks, even
-without correcting the B peak:
+Once a good initial peak is selected, the analysis succeeds with a good
+fit:
 
 ![](./flowShiny03.png)
 
-You can move the B peak around as well, to convince yourself that the
-fitting isn't improved even with a better initial estimate.
-
-Continue on to file 8, `337.LMD`. Here, the model fit is actually not too
-bad, but the G1 peak of sample A has been erroneously assigned to noise in
-the debris field:
+The analysis for `240+S.LMD` succeeded, and even produced a not-terrible
+RCS value:
 
 ![](./flowShiny04.png)
 
-If we leave this uncorrected, the data summary will show the G1 peak with a
-size of 0, and the G2 peak being quite large. To fix this, move the A peak
-over:
+However, a quick inspection of the plot shows that it's not a very good fit
+at all. So we need to move the `A` and/or `B` peaks until we get something
+sensible:
 
-![](./flowShiny05.png)
+![](.flowShiny05.png)
 
-Let's take a look at one more. File 12, `734.LMD` has a bad fit:
+That's better. However, in this case, the Multi-Cut debris model fits even
+better:
 
-![](./flowShiny06.png)
+![](.flowShiny06.png)
 
-The data is good, with nice clean peaks. However, the default `window` and
-`smooth` parameters are set to deal with noisier, broader peaks. We could
-fix this by repeating the analysis with new settings, but that would likely
-break the analysis of some of the other files. So instead, we reset the A
-peak to a better value:
-
-![](./flowShiny07.png)
+Browse through the rest of the histograms to see which ones succeeded, and
+which ones need correction. You should be able to get acceptable fits (RCS
+< 4) for all of them, despite the fact that some of these files are poor
+quality data.
 
 When you're done, click on `Return to R` to get back to the command line.
 (You can close the browser window **after** you click this, **not
 before**). Now all you're corrected analyses will be stored in the variable
-you passed the results of `flowShiny()` to. You can check this with:
+you passed the results of `browseFlowHist()` to. You can check this with:
 
 ```{r flowShiny-output, eval = FALSE}
-plot(batch1[["734.LMD"]])
+plot(batch1[["240+S.LMD"]])
 ```
 
-![](./flowShiny08.png)
+![](.flowShiny07.png)
 
 We have the corrected model fits, so we can export the data for further
 analysis:
