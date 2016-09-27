@@ -364,7 +364,7 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
     abline(v = x@init$Ma, col = "blue", lwd = 2)
     points(x = x@init$Ma, y  = x@histData$intensity[round(x@init$Ma, 0)],
            cex = 2, pch = 16, col = "blue")
-    text(paste("Peak A: ", round(x@init$Ma, 0)), cex = 1,
+    text(paste("Samp. A: ", round(x@init$Ma, 0)), cex = 1,
          x = x@init$Ma, col = "blue", pos = 2,
          y = grconvertY(0.9, from = "npc", to = "user"))
     abline(v = 2 * x@init$Ma, col = "blue", lwd = 0.5)
@@ -372,7 +372,7 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
       abline(v = x@init$Mb, col = "orange", lwd = 2)
       points(x = x@init$Mb, y  = x@histData$intensity[round(x@init$Mb, 0)],
              cex = 2, pch = 16, col = "orange")
-      text(paste("Peak B: ", round(x@init$Mb, 0)), cex = 1,
+      text(paste("Samp. B: ", round(x@init$Mb, 0)), cex = 1,
            x = x@init$Mb, col = "orange", pos = 2,
            y = grconvertY(0.7, from = "npc", to = "user"))
       abline(v = 2 * x@init$Mb, col = "orange", lwd = 0.5)
@@ -385,13 +385,13 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
     text(paste("RCS: ", round(dat$rcs, 3)), cex = 1, pos = 4,
          x = grconvertX(0.8, from = "npc", to = "user"),
          y = grconvertY(0.95, from = "npc", to = "user"))
-    text(paste("Peak A: ", round(dat$sizeA, 1), "/",
+    text(paste("Samp. A: ", round(dat$sizeA, 1), "/",
                round(dat$countsA, 1), "/",
                round(dat$cvA, 3)),
          cex = 1, pos = 4, col = "blue",
          x = grconvertX(0.8, from = "npc", to = "user"),
          y = grconvertY(0.9, from = "npc", to = "user"))
-    text(paste("Peak B: ", round(dat$sizeB, 1), "/",
+    text(paste("Samp. B: ", round(dat$sizeB, 1), "/",
                round(dat$countsB, 1), "/",
                round(dat$cvB, 3)),
          cex = 1, pos = 4, col = "orange",
@@ -467,7 +467,7 @@ tabulateFlowHist <- function(fh, file = NULL){
 }
 
 exFlowHist <- function(fh){
-  if(!is.null(fh@nls)){
+  if(length(fh@nls) > 0){
     if(fh@linearity == "variable")
       linearity = coef(fh@nls)["d"]
     else
@@ -493,7 +493,7 @@ exFlowHist <- function(fh){
   } else {
     data.frame(file = getFHFile(fh), channel = fh@channel,
                components = paste(names(fh@comps), collapse = ";"),
-               totalEvents = sum(fh@data$intensity),
+               totalEvents = sum(fh@histData$intensity),
                countsA = NA,
                countsB = NA,
                sizeA = NA,
@@ -782,10 +782,10 @@ pickPeaks <- function(fh){
     stop("fh must be a FlowHist object")
   message("plotting data...")
   plotFH(fh)
-  message("select peak A:")
+  message("select sample A peak:")
   peakA <- unlist(locator(1))
   points(peakA[1], peakA[2], col = 2, cex = 3)
-  message("select peak B:")
+  message("select sample B peak:")
   peakB <- unlist(locator(1))
   points(peakB[1], peakB[2], col = 3, cex = 3)
   res <- rbind(peakA, peakB)
