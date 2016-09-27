@@ -59,10 +59,10 @@ install_github("plantarum/flowPloidyData")
 
 ## `flowPloidy`
 `flowPloidy` is currently available
-from [BitBucket](https://bitbucket.org/tws/flowPloidy):
+from [GitHub](https://githumb.com/plantarum/flowPloidy):
 
 ```{r, eval = FALSE}
-install_bitbucket("tws/flowPloidy")
+install_github("plantarum/flowPloidy")
 ```
 
 If you run into any errors, look for messages reporting missing packages,

@@ -1,4 +1,4 @@
-* Code clean-up [6/7]
+* Code clean-up [7/7]
   - [X] break up flowHist into smaller reusable chunks, to facilitate
     stepping through the init process, and redoing individual steps
   - [X] use consistent names for flowHist objects: pick one of fh, self etc
@@ -20,10 +20,12 @@
     Can initial value functions also be added as attributes? Yes, and also
     functions to check if a component should be added to a FlowHist object.
     All self contained now!
-  - [ ] update vignettes and examples to use flowPloidyData package to
+  - [X] update vignettes and examples to use flowPloidyData package to
     access sample files
 
-* Features [6/7]
+* Features [6/8]
+  - [ ] Gating
+  - [ ] save and restore parameter estimates from nls
   - [X] S-phase
     After considering broadened trapezoids and broadened rectangles, and
     looking at the resulting parameter values and the influence of the
@@ -46,6 +48,5 @@
     Different smoothing algorithms just shift the trade-offs between
     accuracy and noise in the data. Tried kza:kz, kernalapply, rollapply.
   - [X] export results as a table for saving to disk
-  - [ ] save and restore parameter estimates from nls
   - [X] batch processing
   - [X] switch to nlsLM for regressions

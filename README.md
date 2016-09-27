@@ -29,14 +29,14 @@ installing [RStudio](https://www.rstudio.com).
 
 ```{r}
 library(devtools)
-install_bitbucket("tws/flowPloidy", dependencies = TRUE, 
+install_github("plantarum/flowPloidy", dependencies = TRUE, 
                   build_vignettes = TRUE)
 ```
 
 If you don't have the necessary tools to build the vignettes, you can omit them:
 
 ```{r}
-install_bitbucket("tws/flowPloidy", dependencies = TRUE)
+install_github("plantarum/flowPloidy", dependencies = TRUE)
 ```
 
 ## Getting Started
