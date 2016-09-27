@@ -58,22 +58,6 @@ setMethod(
   }
 )
 
-## setMethod(
-##   f = "initialize",
-##   signature = "ModelComponent",
-##   definition = function(.Object, name, color, desc,
-##                         includeTest, func, initParams,
-##                         specialParams = list(xx = substitute(xx)), ...){
-##     .Object@name <- name
-##     .Object@color <- color
-##     .Object@desc <- desc
-##     .Object@includeTest <- includeTest
-##     .Object@func <- func
-##     .Object@initParams <- initParams
-##     .Object@specialParams <- specialParams
-##     callNextMethod(.Object, ...)
-##   })
-
 ModelComponent <- function(name, color, desc, includeTest, func,
                            initParams,
                            specialParamSetter = function(fh)
@@ -108,6 +92,11 @@ fhComponents <- list()
 ##
 ##       }
 ##       )
+## 
+## specialParamSetter is optional - it will default to a function that
+## returns "xx = xx", indicating that all other parameters will be fit. If
+## the component doesn't include xx, or includes other fixed parameters,
+## then specialParamSetter will need to be provided.
 
 #' Gaussian model components
 #'
@@ -316,7 +305,7 @@ fhComponents$SC <-
     name = "SC", color = "green",
     desc = "The single-cut debris model.",
     includeTest = function(fh){
-      "SC" %in% fh@opts
+      fh@debris == "SC"
     },
     func = function(SCa, SCvals){
       SCa * SCvals
@@ -346,17 +335,65 @@ fhComponents$MC <-
     name = "MC", color = "green",
     desc = "The single-cut debris model.",
     includeTest = function(fh){
-      ## FALSE ## not ready yet!
-      ! "SC" %in% fh@opts
+      fh@debris == "MC"
     },
     func = function(xx, MCa, k, MCvals){
       MCa * exp(-k * xx) * MCvals[xx]
     },
     initParams = function(fh){
-      list(MCa = 0.01, k = 0.01)
+      list(MCa = 0.01, k = 0.001)
     },
     specialParamSetter = function(fh){
       list(xx= substitute(xx), MCvals = substitute(MCvals))
+    }
+  )
+
+getDoubletVals <- function(intensity){
+  doublets <- numeric(length(intensity))
+  for(i in seq_along(intensity)[-1])
+    for(j in 1:floor(i/2))
+      doublets[i] <-
+        doublets[i] +
+        intensity[j] * intensity[i-j] * (j * (i - j))^(2/3)
+
+  doublets
+}
+
+getTripletVals <- function(intensity, doublets){
+  triplets <- numeric(length(intensity))
+  for(i in seq_along(intensity)[-1])
+    for(j in 1:floor(i/2))
+      triplets[i] <-
+        intensity[j] * doublets[i-j] * (j * (i - j))^(2/3)
+  triplets
+}
+
+getQuadrupletVals <- function(intensity, doublets, triplets){
+  quadruplets <- numeric(length(intensity))
+  for(i in seq_along(intensity)[-1])
+    for(j in 1:floor(i/2))
+      quadruplets[i] <-
+        intensity[j] * triplets[i - j] * (j * (i - j))^(2/3) +
+        doublets[j] + doublets[i - j] * (j * (i - j))^(2/3)
+  quadruplets
+}
+
+fhComponents$AG <-
+  ModelComponent(
+    name = "AG", color = "purple",
+    desc = "Continuous Aggregate",
+    includeTest = function(fh){
+      TRUE
+    },
+    func = function(Ap, DBvals, TRvals, QDvals){
+      Ap * DBvals + Ap * Ap * TRvals + Ap * Ap * Ap * QDvals
+    },
+    initParams = function(fh){
+      list(Ap = 1e-9)
+    },
+    specialParamSetter = function(fh){
+      list(DBvals = substitute(DBvals), TRvals = substitute(TRvals),
+           QDvals = substitute(QDvals))
     }
   )
 

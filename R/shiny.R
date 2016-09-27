@@ -23,7 +23,7 @@ NULL
 #' batch1 <- browseFlowHist(batch1)
 #' }
 #' @export
-browseFlowHist <- function(flowList){
+browseFlowHist <- function(flowList, debug = FALSE){
   .fhI <- 1
   .fhList <- flowList
 
@@ -33,50 +33,57 @@ browseFlowHist <- function(flowList){
   else
     initialLinearity <- "OFF"
 
-  initialDebris <- .fhList[[1]]@opts
-  if("SC" %in% initialDebris)
-    initialDebris <- "SC"
-  else
-    initialDebris <- "MC"
+  if(debug) message("init Linearity: ", initialLinearity)
+  
+  initialDebris <- .fhList[[1]]@debris
 
+  if(debug) message("init Debris: ", initialDebris)
+  
   ui <- fluidPage(
     ## sidebarLayout(
-      fluidRow(
-        column(3,
+    fluidRow(
+      column(2,
+             fluidRow(
                wellPanel(
-               htmlOutput("flowNumber", align = "center"),
-               fluidRow(
-                 column(5, actionButton("prev", label = "Previous")),
-                 column(5, actionButton("nxt", label = "Next"))))),
+                 htmlOutput("flowNumber", align = "center"),
+                 tags$br(),
+                 fluidRow(
+                   column(6, actionButton("prev", label = "Prev")),
+                   column(6, actionButton("nxt", label = "Next")))))
+             ),
+      ## tags$hr(),
+      column(10,
+             fluidRow(
+               column(3, 
+                      wellPanel(radioButtons(inputId = "peakPicker",
+                                             label = "Move peak:", 
+                                             choices = list("A" = "A",
+                                                            "B" = "B"), 
+                                             selected = "A", inline =
+                                                               TRUE))), 
+               column(4,
+                      wellPanel(radioButtons(inputId = "linearity",
+                                             label = "Linearity",
+                                             choices =
+                                               list("Fixed" = "ON",
+                                                    "Variable" = "OFF"), 
+                                             inline = TRUE,
+                                             selected =
+                                               initialLinearity))),
+               column(3,
+                      wellPanel(radioButtons(inputId = "debris",
+                                             label = "Debris Model",
+                                             choices =
+                                               list("MC" = "MC",
+                                                    "SC" = "SC"),  
+                                             inline = TRUE,
+                                             selected =
+                                               initialDebris))),
+               column(2,
+                      tags$br(),
+                      actionButton("exit", label = "Return to R")
+                      )))),
         ## tags$hr(),
-        column(5,
-               fluidRow(
-                 column(4, 
-                        wellPanel(radioButtons(inputId = "peakPicker",
-                                               label = "Move peak:", 
-                                               choices = list("A" = "A",
-                                                              "B" = "B"), 
-                                               selected = "A", inline =
-                                                                 TRUE))), 
-                 column(4,
-                        wellPanel(radioButtons(inputId = "linearity",
-                                               label = "Fixed linearity?",
-                                               choices =
-                                                 list("ON" = "ON",
-                                                      "OFF" = "OFF"), 
-                                               inline = TRUE,
-                                               selected =
-                                                 initialLinearity))),
-                 column(4,
-                        wellPanel(radioButtons(inputId = "debris",
-                                               label = "Debris Model",
-                                               choices =
-                                                 list("MC" = "MC", "SC" =
-                                                                     "SC"),  
-                                               inline = TRUE,
-                                               selected = initialDebris))))),
-        ## tags$hr(),
-        column(2, actionButton("exit", label = "Return to R"))),
     fluidRow(
       plotOutput("init", click = "pointPicker"))
   )
@@ -87,17 +94,19 @@ browseFlowHist <- function(flowList){
     prefix <- ""
     
     fhInitPlot <- reactive({
-      message(prefix, "fhInitPlot ", environmentName(environment()))
-      prefix <<- paste(prefix, " ", sep = "")
+      if(debug){
+        message(prefix, "fhInitPlot ",
+                        environmentName(environment())) 
+        prefix <<- paste(prefix, " ", sep = "")}
       tmp <- .fhList[[fhCurrent()]]
-      message(prefix, "fh@linearity = ", tmp@linearity)
-      message(prefix, "button value = ", input$linearity)
+      if(debug) message(prefix, "fh@linearity = ", tmp@linearity)
+      if(debug) message(prefix, "button value = ", input$linearity)
       xPt <- nearPoints(.fhList[[fhCurrent()]]@histData,
                         input$pointPicker, "xx", "intensity",
                         threshold = 25, maxpoints = 1)
-      message(prefix, "xPt set")
+      if(debug) message(prefix, "xPt set")
       if(nrow(xPt) > 0){
-        message(prefix, "peak Picker")
+        if(debug) message(prefix, "peak Picker")
         if(input$peakPicker == "A"){
           .fhList[[fhCurrent()]] <<-
             selectPeaks(.fhList[[fhCurrent()]], xPt[1,1],
@@ -111,11 +120,11 @@ browseFlowHist <- function(flowList){
         }
       }
 
-      message(prefix, "checking linearity for element ", .fhI)
+      if(debug) message(prefix, "checking linearity for element ", .fhI)
       if(input$linearity == "ON" &&
          .fhList[[fhCurrent()]]@linearity != "fixed")
       {
-        message(prefix, "fixing linearity")
+        if(debug) message(prefix, "fixing linearity")
         .fhList[[fhCurrent()]] <<-
           updateFlowHist(.fhList[[fhCurrent()]],
                          linearity = "fixed", analyze = TRUE)
@@ -123,51 +132,53 @@ browseFlowHist <- function(flowList){
       else 
         if(input$linearity == "OFF" &&
            .fhList[[fhCurrent()]]@linearity != "variable") { 
-          message(prefix, "modeling linearity")
+          if(debug) message(prefix, "modeling linearity")
           .fhList[[fhCurrent()]] <<-
             updateFlowHist(.fhList[[fhCurrent()]], 
                            linearity = "variable", analyze = TRUE)
         }
-      prefix <<- substring(prefix, 2)
-      message(prefix, "returning from fhInitPlot")
 
+      if(debug) message(prefix, "input$debris: ", input$debris)
       if(input$debris == "SC" &&
-         ! "SC" %in% .fhList[[fhCurrent()]]@opts)
+         .fhList[[fhCurrent()]]@debris != "SC")
       {
-        message(prefix, "switchint to SC")
+        if(debug) message(prefix, "switching to SC")
         .fhList[[fhCurrent()]] <<-
           updateFlowHist(.fhList[[fhCurrent()]],
-                         opts = list("SC"), analyze = TRUE)
+                         debris = "SC", analyze = TRUE)
       }
       else 
         if(input$debris == "MC" &&
-           "SC" %in% .fhList[[fhCurrent()]]@opts) { 
-          message(prefix, "switching to MC")
+           .fhList[[fhCurrent()]]@debris != "MC") { 
+          if(debug) message(prefix, "switching to MC")
           .fhList[[fhCurrent()]] <<-
             updateFlowHist(.fhList[[fhCurrent()]], 
-                           opts = list(), analyze = TRUE)
+                           debris = "MC", analyze = TRUE)
         }
-      prefix <<- substring(prefix, 2)
-      message(prefix, "returning from fhInitPlot")
+      if(debug){
+        prefix <<- substring(prefix, 2)
+        message(prefix, "returning from fhInitPlot")
+      }
       
       .fhList[[fhCurrent()]]
     })
 
     fhCurrent <- reactive({
-      message(prefix, "fhCurrent, starting at ", .fhI)
-      prefix <<- paste(prefix, " ", sep = "")
+      if(debug) {
+        message(prefix, "fhCurrent, starting at ", .fhI)
+        prefix <<- paste(prefix, " ", sep = "")}
       if(input$nxt > nxtVal){
-        message(prefix, "moving forwards to ", .fhI + 1)
+        if(debug) message(prefix, "moving forwards to ", .fhI + 1)
         nxtVal <<- input$nxt
         if(.fhI < length(.fhList))
           .fhI <<- .fhI + 1
 
-        message(prefix, "updating linval forward")
+        if(debug) message(prefix, "updating linval forward")
         if(.fhList[[.fhI]]@linearity == "fixed"){
-          message(prefix, "turning button ON")
+          if(debug) message(prefix, "turning button ON")
           linVal <- "ON"
         } else {
-          message(prefix, "turning button OFF")
+          if(debug) message(prefix, "turning button OFF")
           linVal <- "OFF"
         }
         
@@ -177,36 +188,40 @@ browseFlowHist <- function(flowList){
       }
 
       if(input$prev > prevVal){
-        message(prefix, "moving backwards to ", .fhI - 1)
-        prevVal <<- input$prev      
+        if(debug){
+          message(prefix, "moving backwards to ", .fhI - 1)
+        }
+        prevVal <<- input$prev
         if(.fhI > 1)
           .fhI <<- .fhI - 1
 
-        message(prefix, "updating linval backwards")
+        if(debug) message(prefix, "updating linval backwards")
         if(.fhList[[.fhI]]@linearity == "fixed"){
-          message(prefix, "turning button ON")
+          if(debug) message(prefix, "turning button ON")
           linVal <- "ON"
         } else {
-          message(prefix, "turning button OFF")
+          if(debug) message(prefix, "turning button OFF")
           linVal <- "OFF"
         }
         updateRadioButtons(session, "linearity",
                            selected = linVal)
       }
 
-      if("SC" %in% .fhList[[.fhI]]@opts){
-        message(prefix, "Switching to SC")
+      if(.fhList[[.fhI]]@debris == "SC" ){
+        if(debug) message(prefix, "Switching to SC")
         debVal <- "SC"
       } else {
-        message(prefix, "Switching to MC")
+        if(debug) message(prefix, "Switching to MC")
         debVal <- "MC"
       }
       
       updateRadioButtons(session, "debris",
                          selected = debVal)
       
-      prefix <<- substring(prefix, 2)
-      message(prefix, "returning from fhCurrent")
+      if(debug){
+              prefix <<- substring(prefix, 2)
+              message(prefix, "returning from fhCurrent")
+      }
       .fhI
     })
     
@@ -218,15 +233,19 @@ browseFlowHist <- function(flowList){
     })
 
     output$init <- renderPlot({
-      message(prefix, "renderPlot")
-      prefix <<- paste(prefix, " ", sep = "")
+      if(debug){
+        message(prefix, "renderPlot")
+        prefix <<- paste(prefix, " ", sep = "")
+      }
       plot(fhInitPlot(), init = TRUE, nls = TRUE, comps = TRUE)
-      prefix <<- substring(prefix, 2)
-      message(prefix, "returning from renderPlot")
+      if(debug){
+        prefix <<- substring(prefix, 2)
+        message(prefix, "returning from renderPlot")
+      }
     })
 
     output$flowNumber <- renderText({
-      message(prefix, "flowNumber")
+      if(debug) message(prefix, "flowNumber")
       paste("File", tags$b(fhCurrent()), "of", length(.fhList))
     })
 

@@ -109,6 +109,7 @@ setClass(
     channel = "character", ## data channel to use for histogram
     bins = "integer", ## the number of bins to use
     linearity = "character", ## "fixed" or "variable", to determine whether
+    debris = "character", ## "SC" or "MC", to set the debris model. 
     ## or not linearity is fixed at 2, or allowed to vary as a model
     ## parameter 
     histData = "data.frame", ## binned histogram data
@@ -123,7 +124,7 @@ setClass(
     RCS = "numeric" ## residual chi-square
   ),
   prototype = prototype(
-    ## TODO complete this
+    ## TODO complete this?
   )
 )
 
@@ -132,7 +133,8 @@ setMethod(
   signature = "FlowHist",
   definition = function(.Object, file, channel, bins = 256,
                         window = 20, smooth = 20, pick = FALSE,
-                        linearity = "fixed", opts = list(), ... ){
+                        linearity = "variable", debris = "SC",
+                        opts = list(), ... ){
     .Object@raw <- read.FCS(file, dataset = 1, alter.names = TRUE)
     .Object@channel <- channel
     .Object <- setBins(.Object, bins)
@@ -144,6 +146,7 @@ setMethod(
       .Object <- cleanPeaks(.Object, window = window)
     }
     .Object@linearity <- linearity
+    .Object@debris = debris
     .Object@opts <- opts
     .Object <- addComponents(.Object)
     .Object <- makeModel(.Object)
@@ -190,11 +193,12 @@ resetFlowHist <- function(fh, from = "peaks"){
 #' fh1
 #' @export
 FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
-                     pick = FALSE, linearity = "fixed", opts = list(),
-                     analyze = FALSE){
+                     pick = FALSE, linearity = "variable", debris = "SC",
+                     opts = list(), analyze = TRUE){
   fh <-  new("FlowHist", file = file, channel = channel,
              bins = as.integer(bins), window = window, smooth = smooth,
-             pick = pick, linearity = linearity, opts = opts)
+             pick = pick, linearity = linearity, debris = debris,
+             opts = opts)
   if(analyze)
     fh <- fhAnalyze(fh)
   return(fh)
@@ -230,15 +234,15 @@ viewFlowChannels <- function(file){
 #' @return \code{batchFlowHist} returns a list of \code{FlowHist} objects.
 #' @export
 batchFlowHist <- function(files, channel, bins = 256, verbose = TRUE,
-                      window = 20, smooth = 20, linearity = "fixed"){ 
+                      window = 20, smooth = 20, linearity = "variable",
+                      debris = "SC"){ 
   res <- list()
   for(i in seq_along(files)){
     if(verbose) message("processing ", files[i])
     tmpRes <- FlowHist(file = files[i], channel = channel, bins = bins,
                        window = window, smooth = smooth, pick = FALSE,
-                       linearity = linearity)
+                       linearity = linearity, debris = debris)
     res[[getFHFile(tmpRes)]] <- tmpRes
-    res[[getFHFile(tmpRes)]] <- fhAnalyze(res[[getFHFile(tmpRes)]])
   }              
   return(res)
 }
@@ -255,13 +259,17 @@ setMethod(
     cat(getFHFile(object)); cat("'\n")
     cat("channel: "); cat(object@channel); cat("\n")
     cat("bins: "); cat(object@bins); cat("\n")
+    cat("linearity: "); cat(object@linearity); cat("\n")
+    cat("debris: "); cat(object@debris); cat("\n")
     cat(length(object@comps)); cat(" model components: ")
     cat(paste(names(object@comps), collapse = ", ")); cat("\n")
     pnames <- names(formals(object@model))
-    pnames <- pnames[which(! pnames %in% c("xx", "SCvals"))]
+    specialP <- names(getSpecialParams(object))
+    pnames <- pnames[which(! pnames %in% specialP)]
     cat(length(pnames)); cat(" parameters: ");
-    cat(paste(pnames, collapse = ", "))
-    cat("\n")
+    cat(paste(pnames, collapse = ", ")); cat("\n")
+    cat(length(specialP)); cat(" special parameters: ");
+    cat(paste(specialP, collapse = ", ")); cat("\n")    
     if(length(object@nls) == 0)
       cat("Model fitting not complete\n")
     else
@@ -790,15 +798,21 @@ pickPeaks <- function(fh){
 ##########################
 ## Change Model Options ##
 ##########################
-updateFlowHist <- function(fh, linearity = NULL, opts = NULL,
-                           analyze = FALSE){
+updateFlowHist <- function(fh, linearity = NULL, debris = NULL,
+                           analyze = TRUE){
   ## keep the existing peaks, as they may have already been tweaked by the
   ## user
   message("updating FlowHist")
   if(!is.null(linearity))
-    fh@linearity <- linearity
-  if(!is.null(opts))
-    fh@opts <- opts
+    if(linearity %in% c("fixed", "variable"))
+      fh@linearity <- linearity
+    else
+      stop("Invalid linearity value")
+  if(!is.null(debris))
+    if(debris %in% c("SC", "MC"))
+      fh@debris <- debris
+    else
+      stop("Invalid debris value")
   
   fh <- resetFlowHist(fh, from = "comps")
   fh <- addComponents(fh)
