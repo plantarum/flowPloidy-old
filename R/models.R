@@ -265,7 +265,7 @@ fhComponents$fB2 <-
 ##   channel 
 ## @param xx an integer vector, the ordered channels corresponding to the
 ##   values in `intensity'.
-## @param SCvals a numeric vector, stored in the \code{flowHist} object
+## @param SCvals a numeric vector, stored in the \code{\link{FlowHist}} object
 ##   slot `SCvals`. Users shouldn't need this.
 ## @return NA
 ##

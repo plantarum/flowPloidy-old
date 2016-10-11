@@ -12,8 +12,8 @@ NULL
 #' for the result.
 #' 
 #' @title fhAnalyze
-#' @param fh a \code{FlowHist} object
-#' @return a \code{FlowHist} object with the analysis (nls, counts, cv,
+#' @param fh a \code{\link{FlowHist}} object
+#' @return a \code{\link{FlowHist}} object with the analysis (nls, counts, cv,
 #'   RCS) slots filled.
 #' @seealso \code{\link{FlowHist}}
 #' @author Tyler Smith

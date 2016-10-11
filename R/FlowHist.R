@@ -26,11 +26,11 @@ setOldClass("nls")
 
 #' FlowHist
 #'
-#' Creates a \code{FlowHist} object from an FCS file, setting up the
+#' Creates a \code{\link{FlowHist}} object from an FCS file, setting up the
 #' histogram data for analysis.
 #'
-#' Starting with a \code{flowFrame} object, read from a FCS file,
-#' \code{FlowHist} will:
+#' Starting with a \code{\link{flowFrame}} object, read from a FCS file,
+#' \code{\link{FlowHist}} will:
 #'
 #' \enumerate{
 #' \item Extract the intensity data from \code{channel}.
@@ -43,7 +43,7 @@ setOldClass("nls")
 #' also try 128 or 512. Any integer is technically acceptable, but I
 #' wouldn't stray from the default without a good reason.
 #'
-#' \item identify model components to include. All \code{FlowHist} objects
+#' \item identify model components to include. All \code{\link{FlowHist}} objects
 #' will have the single-cut debris model and the G1 peak for sample A, and
 #' the broadened rectangle for the S-phase of sample A. Depending on the
 #' data, additional components for the G2 peak and sample B (G1, G2,
@@ -54,7 +54,7 @@ setOldClass("nls")
 #'
 #' \item Identify starting values for Gaussian (G1 and G2 peaks) model
 #' components. For reasonably clean data, the built-in peak detection is
-#' fine. You can evaluate this by plotting the \code{FlowHist} object with
+#' fine. You can evaluate this by plotting the \code{\link{FlowHist}} object with
 #' the argument \code{init = TRUE}. If it doesn't look good, you can play
 #' with the \code{window} and \code{smooth} arguments (which is tedious!),
 #' or pick the peaks visually yourself with \code{pick = TRUE}.
@@ -77,13 +77,13 @@ setOldClass("nls")
 #' @param opts list, currently not used, but maybe in future as a way to
 #'   test additional model options
 #' @param window the width of the moving window used to identify local
-#'   maxima for peak detection via \code{caTools:runmax}
+#'   maxima for peak detection via \code{\link{caTools::runmax}}
 #' @param smooth the width of the moving window used to reduce noise in
-#'   the histogram via \code{caTools::runmean}
+#'   the histogram via \code{\link{caTools::runmean}}
 #' @param pick boolean; if TRUE, the user will be prompted to select peaks
 #'   to use for starting values. Otherwise (the default), starting values
 #'   will be detected automatically.
-#' @param verbose boolean; if TRUE, \code{histBatch} will list files as it
+#' @param verbose boolean; if TRUE, \code{\link{histBatch}} will list files as it
 #' processes them. 
 #' 
 #' @slot raw a flowFrame object containing the raw data from the FCS file
@@ -97,7 +97,7 @@ setOldClass("nls")
 #'   position. 
 #' @slot peaks matrix, containing the coordinates used for peaks when
 #'   calculcating initial parameter values.
-#' @slot comps a list of \code{modelComponent} objects included for these
+#' @slot comps a list of \code{\link{modelComponent}} objects included for these
 #'   data.
 #' @slot model the function (built from \code{comps}) to fit to these
 #' data.
@@ -109,7 +109,7 @@ setOldClass("nls")
 #'   fitted model.
 #' @slot RCS numeric, the residual chi-square for the fitted model.
 #'
-#' @return \code{FlowHist} returns a \code{FlowHist} object.
+#' @return \code{\link{FlowHist}} returns a \code{\link{FlowHist}} object.
 #' @author Tyler Smith
 setClass(
   Class = "FlowHist",
@@ -216,12 +216,12 @@ FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
 #' Displays the column names present in an FCS file
 #'
 #' A convenience function for viewing column names in an FCS, in order to
-#'   select one for the \code{channel} argument in \code{FlowHist}.
+#'   select one for the \code{channel} argument in \code{\link{FlowHist}}.
 #' 
 #' @title viewFlowChannels
 #' @param file character, the name of a FCS data file
 #' @return A vector of column names from the FCS file.
-#' @seealso \code{FlowHist}
+#' @seealso \code{\link{FlowHist}}
 #' @author Tyler Smith
 #' @examples
 #' library(flowPloidyData) 
@@ -240,7 +240,7 @@ viewFlowChannels <- function(file){
 #' library(flowPloidyData) 
 #' batch1 <- batchFlowHist(flowPloidyFiles, channel = "FL3.INT.LIN")
 #' batch1
-#' @return \code{batchFlowHist} returns a list of \code{FlowHist} objects.
+#' @return \code{\link{batchFlowHist}} returns a list of \code{\link{FlowHist}} objects.
 #' @export
 batchFlowHist <- function(files, channel, bins = 256, verbose = TRUE,
                       window = 20, smooth = 20, linearity = "variable",
@@ -328,8 +328,8 @@ setMethod(
 #' other plotting functions, and perhaps useful for users who wish to
 #' create their own plotting routines.
 #' 
-#' @param fh a \code{FlowHist} object
-#' @param ... additional parameters passed to \code{plot}
+#' @param fh a \code{\link{FlowHist}} object
+#' @param ... additional parameters passed to \code{\link{plot}}
 #' @return Not applicable, used for plotting
 #' @author Tyler Smith
 #' @examples
@@ -350,7 +350,7 @@ plotFH <- function(fh, ...){
 #'
 #' Plot histograms for FlowHist objects
 #'
-#' @param x a \code{FlowHist} object
+#' @param x a \code{\link{FlowHist}} object
 #' @param init boolean; if TRUE, plot the regression model using the
 #'   initial parameter estimates over the raw data. 
 #' @param nls boolean; if TRUE, plot the fitted regression model over the
@@ -450,7 +450,7 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
 #'   curve-fitting analysis on a flowHist object.
 #'
 #' If \code{fh} is a single FlowHist object, a data.frame with a single
-#' row is returned. If \code{fh} is a list of \code{FlowHist} objects, a
+#' row is returned. If \code{fh} is a list of \code{\link{FlowHist}} objects, a
 #' row for each object will be added to the data.frame.
 #'
 #' If a file name is provided, the data will be saved to that file.
@@ -536,9 +536,9 @@ exFlowHist <- function(fh){
 #' is used to calculate the single-cut debris component in the NLS model.
 #' 
 #' @title setBins
-#' @param fh a \code{FlowHist} object
+#' @param fh a \code{\link{FlowHist}} object
 #' @param bins integer, the number of bins to use in aggregating FCS data
-#' @return a \code{FlowHist} object, with the \code{bins} slot set to
+#' @return a \code{\link{FlowHist}} object, with the \code{bins} slot set to
 #'   \code{bins}, and the corresonding binned data stored in a matrix in
 #'   the \code{histData} slot. Any previous analysis slots are removed:
 #'   \code{peaks, comps, model, init, nls, counts, CV, RCS}.
@@ -606,7 +606,7 @@ NULL
 #' value.
 #'
 #' Utility functions for use internally by flowPloidy; not exported and
-#' won't be visible to users. Usually invoked from within \code{FlowHist}.
+#' won't be visible to users. Usually invoked from within \code{\link{FlowHist}}.
 #'
 #' Note that there is a trade-off between accuracy in detected peaks, and
 #' avoiding noise. Increasing the value of \code{smooth} will reduce the
@@ -617,11 +617,11 @@ NULL
 #' values. If you'd like to explore this, the internal (unexported)
 #' function \code{fhPeakPlot} may be useful.
 #' 
-#' @param fh a \code{FlowHist} object
+#' @param fh a \code{\link{FlowHist}} object
 #' @param window an integer, the width of the moving window to use in
-#'   identifying local maxima via \code{caTools::runmax}
+#'   identifying local maxima via \code{\link{caTools::runmax}}
 #' @param smooth an integer, the width of the moving window to use in
-#'   removing noise via \code{caTools::runmean}
+#'   removing noise via \code{\link{caTools::runmean}}
 #' 
 #' @return Returns a matrix with two columns:
 #' \describe{
@@ -657,12 +657,12 @@ findPeaks <- function(fh, window, smooth = window / 2){
 
 #' @rdname findPeaks
 #'
-#' @details \code{cleanPeaks} filters the output of \code{findPeaks} to:  
+#' @details \code{\link{cleanPeaks}} filters the output of \code{\link{findPeaks}} to:  
 #' \itemize{
 #'
 #' \item remove duplicates, ie., peaks with the same intensity that occur
 #' within \code{window} positions of each other. Otherwise,
-#' \code{findPeaks} will consider noisy peaks without a single highest
+#' \code{\link{findPeaks}} will consider noisy peaks without a single highest
 #' point to be multiple distinct peaks.
 #'
 #' \item drop G2 peaks. In some cases the G2 peak for one sample will have
@@ -755,15 +755,15 @@ cleanPeaks <- function(fh, window){
 #'   fails to discriminate between overlapping peaks, or is confused by
 #'   noise.
 #'
-#' The normal use, \code{pickPeaks} is called from \code{pickInit}, rather
+#' The normal use, \code{\link{pickPeaks}} is called from \code{\link{pickInit}}, rather
 #'   than directly by the user.
 #'
-#' @param fh A \code{flowHist} object
+#' @param fh A \code{\link{FlowHist}} object
 #' 
-#' @return \code{pickInit} returns the \code{flowHist} object with its
+#' @return \code{\link{pickInit}} returns the \code{\link{FlowHist}} object with its
 #'   initial value slot updated.
 #'
-#' \code{pickPeaks} returns a matrix with each peak as a row, with the mean
+#' \code{\link{pickPeaks}} returns a matrix with each peak as a row, with the mean
 #' (position) in the first column, and the height (intensity) in the second
 #' column.
 #'
@@ -797,7 +797,7 @@ pickInit <- function(fh){
 
 pickPeaks <- function(fh){
   ## Does the work of actually plotting and selecting peaks for
-  ##   \code{pickInit}
+  ##   \code{\link{pickInit}}
   if(class(fh) != "FlowHist")
     stop("fh must be a FlowHist object")
   message("plotting data...")
@@ -823,7 +823,7 @@ pickPeaks <- function(fh){
 #' Allows users to switch the debris model from Single-Cut to Multi-Cut (or
 #'   vice-versa), or to toggle linearity between fixed and variable.
 #' @title updateFlowHist
-#' @param fh a \code{FlowHist} object
+#' @param fh a \code{\link{FlowHist}} object
 #' @param linearity character, either "variable", the default, or "fixed".
 #'   If "fixed", linearity is fixed at 2; if "variable", linearity is fit
 #'   as a model parameter.
@@ -831,7 +831,7 @@ pickPeaks <- function(fh){
 #'   debris model component to the Single-Cut or Multi-Cut models.
 #' @param analyze boolean, if TRUE the updated model will be analyzed
 #'   immediately 
-#' @return a \code{FlowHist} object with the modified values of linearity
+#' @return a \code{\link{FlowHist}} object with the modified values of linearity
 #'   and/or debris, and, if \code{analyze} was TRUE, a new NLS fitting
 #' @author Tyler Smith
 #' @examples

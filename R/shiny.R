@@ -12,9 +12,9 @@ NULL
 #'
 #' Visually assess histogram fits
 #' @title browseFlowHist
-#' @param flowList a list of \code{FlowHist} objects
+#' @param flowList a list of \code{\link{FlowHist}} objects
 #' @param debug boolean, turns on debugging messages
-#' @return Returns the list of \code{FlowHist} objects, updated by any
+#' @return Returns the list of \code{\link{FlowHist}} objects, updated by any
 #'   changes made in the GUI.
 #' @author Tyler Smith
 #' @examples
