@@ -28,7 +28,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
   .fhI <- 1
   .fhList <- flowList
 
-  initialLinearity <- .fhList[[1]]@linearity
+  initialLinearity <- fhLinearity(.fhList[[1]])
   if(initialLinearity == "fixed")
     initialLinearity <- "ON"
   else
@@ -36,7 +36,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
 
   if(debug) message("init Linearity: ", initialLinearity)
   
-  initialDebris <- .fhList[[1]]@debris
+  initialDebris <- fhDebris(.fhList[[1]])
 
   if(debug) message("init Debris: ", initialDebris)
   
@@ -100,9 +100,9 @@ browseFlowHist <- function(flowList, debug = FALSE){
                         environmentName(environment())) 
         prefix <<- paste(prefix, " ", sep = "")}
       tmp <- .fhList[[fhCurrent()]]
-      if(debug) message(prefix, "fh@linearity = ", tmp@linearity)
+      if(debug) message(prefix, "fh@linearity = ", fhLinearity(tmp))
       if(debug) message(prefix, "button value = ", input$linearity)
-      xPt <- nearPoints(.fhList[[fhCurrent()]]@histData,
+      xPt <- nearPoints(fhHistData(.fhList[[fhCurrent()]]),
                         input$pointPicker, "xx", "intensity",
                         threshold = 25, maxpoints = 1)
       if(debug) message(prefix, "xPt set")
@@ -111,19 +111,19 @@ browseFlowHist <- function(flowList, debug = FALSE){
         if(input$peakPicker == "A"){
           .fhList[[fhCurrent()]] <<-
             selectPeaks(.fhList[[fhCurrent()]], xPt[1,1],
-                        .fhList[[fhCurrent()]]@init$Mb) 
+                        fhInit(.fhList[[fhCurrent()]])$Mb) 
           .fhList[[fhCurrent()]] <<- fhAnalyze(.fhList[[fhCurrent()]])
         } else {
           .fhList[[fhCurrent()]] <<-
             selectPeaks(.fhList[[fhCurrent()]],
-                        .fhList[[fhCurrent()]]@init$Ma, xPt[1,1])
+                        fhInit(.fhList[[fhCurrent()]])$Ma, xPt[1,1])
           .fhList[[fhCurrent()]] <<- fhAnalyze(.fhList[[fhCurrent()]])
         }
       }
 
       if(debug) message(prefix, "checking linearity for element ", .fhI)
       if(input$linearity == "ON" &&
-         .fhList[[fhCurrent()]]@linearity != "fixed")
+         fhLinearity(.fhList[[fhCurrent()]]) != "fixed")
       {
         if(debug) message(prefix, "fixing linearity")
         .fhList[[fhCurrent()]] <<-
@@ -132,7 +132,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
       }
       else 
         if(input$linearity == "OFF" &&
-           .fhList[[fhCurrent()]]@linearity != "variable") { 
+           fhLinearity(.fhList[[fhCurrent()]]) != "variable") { 
           if(debug) message(prefix, "modeling linearity")
           .fhList[[fhCurrent()]] <<-
             updateFlowHist(.fhList[[fhCurrent()]], 
@@ -141,7 +141,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
 
       if(debug) message(prefix, "input$debris: ", input$debris)
       if(input$debris == "SC" &&
-         .fhList[[fhCurrent()]]@debris != "SC")
+         fhDebris(.fhList[[fhCurrent()]]) != "SC")
       {
         if(debug) message(prefix, "switching to SC")
         .fhList[[fhCurrent()]] <<-
@@ -150,7 +150,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
       }
       else 
         if(input$debris == "MC" &&
-           .fhList[[fhCurrent()]]@debris != "MC") { 
+           fhDebris(.fhList[[fhCurrent()]]) != "MC") { 
           if(debug) message(prefix, "switching to MC")
           .fhList[[fhCurrent()]] <<-
             updateFlowHist(.fhList[[fhCurrent()]], 
@@ -175,7 +175,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
           .fhI <<- .fhI + 1
 
         if(debug) message(prefix, "updating linval forward")
-        if(.fhList[[.fhI]]@linearity == "fixed"){
+        if(fhLinearity(.fhList[[.fhI]]) == "fixed"){
           if(debug) message(prefix, "turning button ON")
           linVal <- "ON"
         } else {
@@ -197,7 +197,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
           .fhI <<- .fhI - 1
 
         if(debug) message(prefix, "updating linval backwards")
-        if(.fhList[[.fhI]]@linearity == "fixed"){
+        if(fhLinearity(.fhList[[.fhI]]) == "fixed"){
           if(debug) message(prefix, "turning button ON")
           linVal <- "ON"
         } else {
@@ -208,7 +208,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
                            selected = linVal)
       }
 
-      if(.fhList[[.fhI]]@debris == "SC" ){
+      if(fhDebris(.fhList[[.fhI]]) == "SC" ){
         if(debug) message(prefix, "Switching to SC")
         debVal <- "SC"
       } else {
@@ -256,19 +256,21 @@ browseFlowHist <- function(flowList, debug = FALSE){
 }
 
 selectPeaks <- function(fh, peakA, peakB){
-  pA <- fh@histData[round(peakA, 0), c("xx", "intensity")]
+  pA <- fhHistData(fh)[round(peakA, 0), c("xx", "intensity")]
   if(is.numeric(peakB))                 
-    pB <- fh@histData[round(peakB, 0), c("xx", "intensity")]
+    pB <- fhHistData(fh)[round(peakB, 0), c("xx", "intensity")]
   
   fh <- resetFlowHist(fh)
 
   if(is.numeric(peakB))
-    fh@peaks <- as.matrix(rbind(pA, pB))
+    newPeaks <- as.matrix(rbind(pA, pB))
   else
-    fh@peaks <- as.matrix(rbind(pA))
+    newPeaks <- as.matrix(rbind(pA))
   
-  colnames(fh@peaks) <- c("mean", "height")
+  colnames(newPeaks) <- c("mean", "height")
 
+  fhPeaks(fh) <- newPeaks
+  
   fh <- addComponents(fh)
   fh <- makeModel(fh)
   fh <- getInit(fh)

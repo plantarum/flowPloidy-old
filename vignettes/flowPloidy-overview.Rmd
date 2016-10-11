@@ -31,15 +31,16 @@ biocLite()
 
 Then install `flowPloidy`:
 
-```{r, eval=False}
+```{r, eval=FALSE}
 biocLite("flowPloidy")
 ```
 
 The examples in this vignette, and the `flowPloidy` help files, use data in
 the `flowPloidyData` package, which is also on BioConductor. (You don't
-need `flowPloidyData` to use `flowPloidy` on your own data, only for the examples).
+need `flowPloidyData` to use `flowPloidy` on your own data, only for the
+examples).
 
-```{r, eval=False}
+```{r, eval=FALSE}
 biocLite("flowPloidy")
 ```
 
@@ -242,19 +243,21 @@ peak manually, adding a circle to the plot at each point.
 ```{r fakingInteraction, echo = FALSE, fig.cap = "Histogram with Manually Selected Peaks"}
 ## This stuff is automatically done by the interactive function pickInit,
 ## which we can't actually use in the automated vignette.
+## Using internal functions here, not intended for use by users
+
 fh2 <- flowPloidy:::resetFlowHist(fh2)
-fh2@peaks <- structure(c(50.2623811329645, 139.061074258603,
-                         258.242164238835, 178.771283080744),
-                       .Dim = c(2L, 2L),
-                       .Dimnames = list(NULL, c("mean", "height")))
+flowPloidy:::fhPeaks(fh2) <-
+  structure(c(50.2623811329645, 139.061074258603, 258.242164238835,
+              178.771283080744), .Dim = c(2L, 2L),
+                          .Dimnames = list(NULL, c("mean", "height")))
 
 fh2 <- flowPloidy:::addComponents(fh2)
 fh2 <- flowPloidy:::makeModel(fh2)
 fh2 <- flowPloidy:::getInit(fh2)
 
 plot(fh2)
-points(fh2@init$Ma, 255, col = 2, cex = 3)
-points(fh2@init$Mb, 175, col = 3, cex = 3)
+points(flowPloidy:::fhInit(fh2)$Ma, 255, col = 2, cex = 3)
+points(flowPloidy:::fhInit(fh2)$Mb, 175, col = 3, cex = 3)
 ```
 
 The new peak values are used to recalculate the initial values:

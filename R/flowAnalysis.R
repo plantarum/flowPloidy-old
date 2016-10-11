@@ -23,42 +23,43 @@ NULL
 #' fh1 <- fhAnalyze(fh1)
 #' @export
 fhAnalyze <- function(fh){
-  message("analyzing ", getFHFile(fh))
-  tryVal <- try(fh <- fhNLS(fh))
+  message("analyzing ", fhFile(fh))
+  tryVal <- try(fh <- fhDoNLS(fh))
   if(inherits(tryVal, "try-error")){
-    message("\n*** Analysis Failed: ", getFHFile(fh), " ***\n")
+    message("\n*** Analysis Failed: ", fhFile(fh), " ***\n")
   } else {
-    fh <- fhCount(fh)
-    fh <- fhCV(fh)
-    fh <- fhRCS(fh)
+    fh <- fhDoCounts(fh)
+    fh <- fhDoCV(fh)
+    fh <- fhDoRCS(fh)
   }
   return(fh)
 }
 
-fhNLS <- function(fh){
-  model <- fh@model
+fhDoNLS <- function(fh){
+  model <- fhModel(fh)
   form1 <- paste("intensity ~ model(")
-  args <- as.character(names(formals(fh@model)))
+  args <- as.character(names(formals(fhModel(fh))))
   args <- args[!args %in% c("", names(getSpecialParams(fh)))]
   args <- paste(args, collapse = ", ")
   form3 <- paste(", ", getSpecialParamArgs(fh), ")")
   form <- as.formula(paste(form1, args, form3))
 
-  fh@nls <- eval(call("nlsLM", form, start = fh@init, data = fh@histData,
-                      lower = rep(0, length = length(fh@init)),
-                      control = list(ftol = .Machine$double.xmin,
-                                     ptol = .Machine$double.xmin,
-                                     maxiter = 1024)))
+  fhNLS(fh) <- eval(call("nlsLM", form, start = fhInit(fh),
+                         data = fhHistData(fh), 
+                         lower = rep(0, length = length(fhInit(fh))),
+                         control = list(ftol = .Machine$double.xmin,
+                                        ptol = .Machine$double.xmin,
+                                        maxiter = 1024)))
   return(fh)
 }
 
-fhCount <- function(fh){
+fhDoCounts <- function(fh){
   ## lower was originally an argument to fhCount, but I don't think it will
   ## ever be anything other than 0?
   lower = 0
   ## similarly, upper was an argument, but it should always be the number
   ## of bins 
-  upper = nrow(fh@histData)
+  upper = nrow(fhHistData(fh))
   ## I think anything >= the number of bins should be fine for
   ## subdivisions: 
   subdivisions = upper * 2
@@ -75,40 +76,40 @@ fhCount <- function(fh){
   ##             lower = lower, upper = upper,
   ##             subdivisions = subdivisions))
   firstPeak <-
-    integrate(fh@comps$fA1@func, a1 = coef(fh@nls)["a1"],
-              Ma = coef(fh@nls)["Ma"],
-              Sa = coef(fh@nls)["Sa"],
+    integrate(mcFunc(fhComps(fh)$fA1), a1 = coef(fhNLS(fh))["a1"],
+              Ma = coef(fhNLS(fh))["Ma"],
+              Sa = coef(fhNLS(fh))["Sa"],
               lower = lower, upper = upper,
               subdivisions = 1000)
-  if("fB1" %in% names(fh@comps)){
+  if("fB1" %in% names(fhComps(fh))){
     secondPeak <-
-      integrate(fh@comps$fB1@func, b1 = coef(fh@nls)["b1"],
-                Mb = coef(fh@nls)["Mb"],
-                Sb = coef(fh@nls)["Sb"],
+      integrate(mcFunc(fhComps(fh)$fB1), b1 = coef(fhNLS(fh))["b1"],
+                Mb = coef(fhNLS(fh))["Mb"],
+                Sb = coef(fhNLS(fh))["Sb"],
                 lower = lower, upper = upper,
                 subdivisions = 1000)
   } else {
     secondPeak <- NULL
   }
 
-  fh@counts <- list(firstPeak = firstPeak, secondPeak = secondPeak)
+  fhCounts(fh) <- list(firstPeak = firstPeak, secondPeak = secondPeak)
 
   fh
 }  
 
-fhCV <- function(fh){
-  CVa <- coef(fh@nls)["Sa"]/coef(fh@nls)["Ma"]
-  if("fB1" %in% names(fh@comps)){
-    CVb <- coef(fh@nls)["Sb"]/coef(fh@nls)["Mb"]
-    CI <- deltaMethod(fh@nls, "Ma/Mb")
+fhDoCV <- function(fh){
+  CVa <- coef(fhNLS(fh))["Sa"]/coef(fhNLS(fh))["Ma"]
+  if("fB1" %in% names(fhComps(fh))){
+    CVb <- coef(fhNLS(fh))["Sb"]/coef(fhNLS(fh))["Mb"]
+    CI <- deltaMethod(fhNLS(fh), "Ma/Mb")
   } else {
     CVb <- CI <- NULL
   }
-  fh@CV <- list(CVa = CVa, CVb = CVb, CI = CI)
+  fhCV(fh) <- list(CVa = CVa, CVb = CVb, CI = CI)
   fh
 }
 
-fhRCS <- function(fh){
+fhDoRCS <- function(fh){
   #########################################################################
   ## This may not be a useful measure of analysis quality. It is heavily ##
   ## influenced by the highest channels, where the expected value is     ##
@@ -125,8 +126,8 @@ fhRCS <- function(fh){
   ## within the histogram.                                               ##
   #########################################################################
 
-  obs <- fh@histData$intensity
-  exp <- predict(fh@nls)
+  obs <- fhHistData(fh)$intensity
+  exp <- predict(fhNLS(fh))
   zeros <- zapsmall(exp, digits = 5) == 0
   obs <- obs[!zeros]
   exp <- exp[!zeros]
@@ -137,6 +138,6 @@ fhRCS <- function(fh){
   ## ## Don't count special parameters (xx, MCvals etc) or intensity in
   ## ## determining the number of parameters fit in the NLS!
 
-  fh@RCS <- chi/summary(fh@nls)$df[2]
+  fhRCS(fh) <- chi/summary(fhNLS(fh))$df[2]
   fh
 }

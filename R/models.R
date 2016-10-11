@@ -43,20 +43,61 @@ setMethod(
   signature = "ModelComponent",
   def = function(object){
     cat("** flowHist model component: ")
-    cat(object@name); cat(" ** \n")
-    cat(object@desc); cat(" \n")
+    cat(mcName(object)); cat(" ** \n")
+    cat(mcDesc(object)); cat(" \n")
     cat("Parameters: ")
-    pnames <- names(formals(object@func))
+    pnames <- names(formals(mcFunc(object)))
     pnames <- pnames[which(pnames != "xx")]
     cat(paste(pnames, collapse = ", "))
     cat("\n")
-    if(length(object@specialParams) > 0){
+    if(length(mcSpecialParams(object)) > 0){
       cat("Special Parameters: ")
-      cat(paste(names(object@specialParams), collapse = ", "))
+      cat(paste(names(mcSpecialParams(object)), collapse = ", "))
       cat("\n")
     }
   }
 )
+
+###############
+## Accessors ##
+###############
+
+mcFunc <- function(mc){
+  mc@func
+}
+
+mcColor <- function(mc){
+  mc@color
+}
+
+mcName <- function(mc){
+  mc@name
+}
+
+mcDesc <- function(mc){
+  mc@desc
+}
+
+mcSpecialParams <- function(mc){
+  mc@specialParams
+}
+
+`mcSpecialParams<-` <- function(mc, value){
+  mc@specialParams <- value
+  mc
+}
+
+mcSpecialParamSetter <- function(mc){
+  mc@specialParamSetter
+}
+
+mcIncludeTest <- function(mc){
+  mc@includeTest
+}
+
+mcInitParams <- function(mc){
+  mc@initParams
+}
 
 ModelComponent <- function(name, color, desc, includeTest, func,
                            initParams,
@@ -124,9 +165,9 @@ fhComponents$fA1 <-
       (a1 / (sqrt(2 * pi) * Sa) * exp(-((xx - Ma)^2)/(2 * Sa^2)))
     },
     initParams = function(fh){
-      Ma <- as.numeric(fh@peaks[1, "mean"])
+      Ma <- as.numeric(fhPeaks(fh)[1, "mean"])
       Sa <- as.numeric(Ma / 20)
-      a1 <- as.numeric(fh@peaks[1, "height"] * Sa / 0.45)
+      a1 <- as.numeric(fhPeaks(fh)[1, "height"] * Sa / 0.45)
       list(Ma = Ma, Sa = Sa, a1 = a1)
     }
   )
@@ -146,19 +187,19 @@ fhComponents$fA2 <-
     name = "fA2", color = "blue",
     desc = "Gaussian curve for G2 peak of sample A",
     includeTest = function(fh){
-      (fh@peaks[1, "mean"] * 2) <= nrow(fh@histData)
+      (fhPeaks(fh)[1, "mean"] * 2) <= nrow(fhHistData(fh))
     },
     func = function(a2, Ma, Sa, d, xx){
       (a2 / (sqrt(2 * pi) * Sa * 2) *
        exp(-((xx - Ma * d)^2)/(2 * (Sa * 2)^2))) 
     },
     initParams = function(fh){
-      Ma <- as.numeric(fh@peaks[1, "mean"])
+      Ma <- as.numeric(fhPeaks(fh)[1, "mean"])
       Sa <- as.numeric(Ma / 20)
-      a2 <- as.numeric(fh@histData[Ma * 2, "intensity"] *
+      a2 <- as.numeric(fhHistData(fh)[Ma * 2, "intensity"] *
                        Sa * 2 / 0.45)
       res <- list(a2 = a2)
-      if(fh@linearity == "variable")
+      if(fhLinearity(fh) == "variable")
         res <- c(res, d = 2)
       res
     },
@@ -172,15 +213,15 @@ fhComponents$fB1 <-
     name = "fB1", color = "orange",
     desc = "Gaussian curve for G1 peak of sample B",
     includeTest = function(fh){
-      nrow(fh@peaks) > 1
+      nrow(fhPeaks(fh)) > 1
     },
     func = function(b1, Mb, Sb, xx){
       (b1 / (sqrt(2 * pi) * Sb) * exp(-((xx - Mb)^2)/(2 * Sb^2)))
     },
     initParams = function(fh){
-      Mb <- as.numeric(fh@peaks[2, "mean"])
+      Mb <- as.numeric(fhPeaks(fh)[2, "mean"])
       Sb <- as.numeric(Mb / 20)
-      b1 <- as.numeric(fh@peaks[2, "height"] * Sb / 0.45)
+      b1 <- as.numeric(fhPeaks(fh)[2, "height"] * Sb / 0.45)
       list(Mb = Mb, Sb = Sb, b1 = b1)
     }
   )
@@ -190,8 +231,8 @@ fhComponents$fB2 <-
     name = "fB2", color = "orange",
     desc = "Gaussian curve for G2 peak of sample B",
     includeTest = function(fh){
-      if(nrow(fh@peaks) > 1)
-        (fh@peaks[2, "mean"] * 2) <= nrow(fh@histData)
+      if(nrow(fhPeaks(fh)) > 1)
+        (fhPeaks(fh)[2, "mean"] * 2) <= nrow(fhHistData(fh))
       else
         FALSE
     },
@@ -200,12 +241,12 @@ fhComponents$fB2 <-
        exp(-((xx - Mb * d)^2)/(2 * (Sb * 2)^2))) 
     },
     initParams = function(fh){
-      Mb <- fh@peaks[2, "mean"]
+      Mb <- fhPeaks(fh)[2, "mean"]
       Sb <- Mb / 20
-      b2 <- as.numeric(fh@histData[fh@peaks[2, "mean"] * 2, "intensity"]
+      b2 <- as.numeric(fhHistData(fh)[fhPeaks(fh)[2, "mean"] * 2, "intensity"]
                        * Sb * 2 / 0.45)
       res <- list(b2 = b2)
-      if(fh@linearity == "variable")
+      if(fhLinearity(fh) == "variable")
         res <- c(res, d = 2)
       res
     },
@@ -305,7 +346,7 @@ fhComponents$SC <-
     name = "SC", color = "green",
     desc = "The single-cut debris model.",
     includeTest = function(fh){
-      fh@debris == "SC"
+      fhDebris(fh) == "SC"
     },
     func = function(SCa, SCvals){
       SCa * SCvals
@@ -335,7 +376,7 @@ fhComponents$MC <-
     name = "MC", color = "green",
     desc = "The single-cut debris model.",
     includeTest = function(fh){
-      fh@debris == "MC"
+      fhDebris(fh) == "MC"
     },
     func = function(xx, MCa, k, MCvals){
       MCa * exp(-k * xx) * MCvals[xx]
@@ -425,7 +466,7 @@ fhComponents$brB <-
     name = "brB", color = "turquoise",
     desc = "Broadened rectangle for S-phase of sample B",
     includeTest = function(fh){
-      nrow(fh@peaks) > 1        
+      nrow(fhPeaks(fh)) > 1        
     },
     func = function(BRB, Mb, xx){
       ## 2 * 1 is a placeholder for 2 * sd, should we decide it's worth
@@ -477,21 +518,21 @@ fhComponents$brB <-
 ##############################
 addComponents <- function(fh){
   for(i in fhComponents)
-    if(i@includeTest(fh)){
+    if(mcIncludeTest(i)(fh)){
       newComp <- i
-      newComp@specialParams <- newComp@specialParamSetter(fh)
-      fh@comps[[i@name]] <- newComp
+      mcSpecialParams(newComp) <- mcSpecialParamSetter(newComp)(fh)
+      fhComps(fh)[[mcName(i)]] <- newComp
     }
   fh
 }
 
 makeModel <- function(fh, env = parent.frame()){
-  components <- fh@comps
+  components <- fhComps(fh)
   names(components) <- NULL
-  args <- unlist(lapply(components, FUN = function(x) formals(x@func)))
+  args <- unlist(lapply(components, FUN = function(x) formals(mcFunc(x))))
   args <- args[unique(names(args))]
 
-  bodList <- lapply(components, FUN = function(x) body(x@func))
+  bodList <- lapply(components, FUN = function(x) body(mcFunc(x)))
   bod <- bodList[[1]]
   bodList <- bodList[-1]
 
@@ -500,24 +541,24 @@ makeModel <- function(fh, env = parent.frame()){
     bodList <- bodList[-1]
   }
 
-  fh@model <- eval(call("function", as.pairlist(args), bod), env)
-  fh@nls <- structure(list(), class = "nls")
+  fhModel(fh) <- eval(call("function", as.pairlist(args), bod), env)
+  fhNLS(fh) <- structure(list(), class = "nls")
   fh
 }
 
 getInit <- function(fh){
   fh@init <- list()
-  for(i in fh@comps){
-    fh@init <- c(fh@init, i@initParams(fh))
+  for(i in fhComps(fh)){
+    fhInit(fh) <- c(fhInit(fh), mcInitParams(i)(fh))
   }
-  fh@init <- fh@init[unique(names(fh@init))]
+  fhInit(fh) <- fhInit(fh)[unique(names(fhInit(fh)))]
   fh
 }
 
 getSpecialParams <- function(fh){
   res <- list()
-  for(i in fh@comps)
-    res <- c(res, i@specialParams)
+  for(i in fhComps(fh))
+    res <- c(res, mcSpecialParams(i))
   res[-1 * which(duplicated(res))]
 }
 
@@ -530,5 +571,5 @@ getSpecialParamArgs <- function(fh){
 }
 
 getSpecialParamsComp <- function(comp){
-  comp@specialParams
+  mcSpecialParams(comp)
 }
