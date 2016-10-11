@@ -331,10 +331,9 @@ getSingleCutValsBase <- function(intensity, xx, first.channel){
   res <- 0
   if(xx >= first.channel & xx < length(intensity)){
     channels = (xx + 1):length(intensity)
-    for(j in channels){
-      res <- res + j^(1/3) * intensity[j] * 2 /
-        (pi * j * sqrt(xx/j * (1 - xx/j)))
-    }
+    denominator = pi * channels * sqrt(xx/channels * (1 - xx/channels))
+    res <- res + sum(channels^(1/3) * intensity[channels] * 2 /
+                        denominator)
   }
   res
 }
@@ -361,15 +360,14 @@ fhComponents$SC <-
 
 getMultipleCutVals <- function(intensity, startBin){
   tmpI <- intensity
-  tmpI[1:(startBin - 1)] <- 0
   res <- sum(tmpI) - cumsum(tmpI)
   res[1:(startBin - 1)] <- 0
   res
 }
 
-getMultipleCutValsBase <- function(a, xx, k){
-  a * exp(-k * xx)
-}
+## getMultipleCutValsBase <- function(a, xx, k){
+##   a * exp(-k * xx)
+## }
 
 fhComponents$MC <-
   ModelComponent(
@@ -391,31 +389,32 @@ fhComponents$MC <-
 
 getDoubletVals <- function(intensity){
   doublets <- numeric(length(intensity))
-  for(i in seq_along(intensity)[-1])
-    for(j in 1:floor(i/2))
-      doublets[i] <-
-        doublets[i] +
-        intensity[j] * intensity[i-j] * (j * (i - j))^(2/3)
-
+  for(i in seq_along(intensity)[-1]){
+    j <- 1:floor(i/2)
+    doublets[i] <-
+      sum(intensity[j] * intensity[i-j] * (j * (i - j))^(2/3))
+  }
   doublets
 }
 
 getTripletVals <- function(intensity, doublets){
   triplets <- numeric(length(intensity))
-  for(i in seq_along(intensity)[-1])
-    for(j in 1:floor(i/2))
-      triplets[i] <-
-        intensity[j] * doublets[i-j] * (j * (i - j))^(2/3)
+  for(i in seq_along(intensity)[-1]){
+    j <- 1:floor(i/2)
+    triplets[i] <- 
+      sum(intensity[j] * doublets[i-j] * (j * (i - j))^(2/3))
+  }
   triplets
 }
 
 getQuadrupletVals <- function(intensity, doublets, triplets){
   quadruplets <- numeric(length(intensity))
-  for(i in seq_along(intensity)[-1])
-    for(j in 1:floor(i/2))
-      quadruplets[i] <-
-        intensity[j] * triplets[i - j] * (j * (i - j))^(2/3) +
-        doublets[j] + doublets[i - j] * (j * (i - j))^(2/3)
+  for(i in seq_along(intensity)[-1]){
+    j <- 1:floor(i/2)
+    quadruplets[i] <-
+      sum(intensity[j] * triplets[i - j] * (j * (i - j))^(2/3) +
+          doublets[j] + doublets[i - j] * (j * (i - j))^(2/3))
+  }
   quadruplets
 }
 
