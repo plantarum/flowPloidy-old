@@ -43,10 +43,10 @@ setOldClass("nls")
 #' also try 128 or 512. Any integer is technically acceptable, but I
 #' wouldn't stray from the default without a good reason.
 #'
-#' \item identify model components to include. All \code{\link{FlowHist}} objects
-#' will have the single-cut debris model and the G1 peak for sample A, and
-#' the broadened rectangle for the S-phase of sample A. Depending on the
-#' data, additional components for the G2 peak and sample B (G1, G2,
+#' \item identify model components to include. All \code{\link{FlowHist}}
+#' objects will have the single-cut debris model and the G1 peak for sample
+#' A, and the broadened rectangle for the S-phase of sample A. Depending on
+#' the data, additional components for the G2 peak and sample B (G1, G2,
 #' s-phase) may also be added.
 #' 
 #' \item Build the NLS model. All the components are combined into a single
