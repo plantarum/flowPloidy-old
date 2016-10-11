@@ -28,13 +28,16 @@ setClass(
     ## assigned to the SCvals column in the histData slot. Therefore, it
     ## has a specialParams slot value of `list(SCvals =
     ## substitute(SCvals))`
-    specialParamSetter = "function"
+    specialParamSetter = "function",
     ## function with one argument, the FlowHist object, used to set the
     ## value of specialParams. This allows parameters to be declared
     ## "special" based on values in the fh. i.e., if it fh@linearity is
     ## "fixed", we can declare the parameter d special with a set value of
     ## 2; with linearity == "variable", d is a regular parameter to fit in
     ## the model.
+    paramLimits = "list"
+    ## A list with the lower and upper limits of each parameter in the
+    ## function
   )
 )
 
@@ -99,13 +102,18 @@ mcInitParams <- function(mc){
   mc@initParams
 }
 
+mcParamLimits <- function(mc){
+  mc@paramLimits
+}
+
 ModelComponent <- function(name, color, desc, includeTest, func,
                            initParams,
                            specialParamSetter = function(fh)
-                             list(xx = substitute(xx))){ 
+                             list(xx = substitute(xx)),
+                           paramLimits = list()){ 
   new("ModelComponent", name = name, color = color, desc = desc,
       includeTest = includeTest, func = func, initParams = initParams,
-      specialParamSetter = specialParamSetter)
+      specialParamSetter = specialParamSetter, paramLimits = paramLimits)
 }
 
 ######################
@@ -169,7 +177,8 @@ fhComponents$fA1 <-
       Sa <- as.numeric(Ma / 20)
       a1 <- as.numeric(fhPeaks(fh)[1, "height"] * Sa / 0.45)
       list(Ma = Ma, Sa = Sa, a1 = a1)
-    }
+    },
+    paramLimits = list(Ma = c(0, Inf), Sa = c(0, Inf), a1 = c(0, Inf))
   )
 
 setLinearity <- function(fh){
@@ -203,6 +212,8 @@ fhComponents$fA2 <-
         res <- c(res, d = 2)
       res
     },
+    paramLimits = list(Ma = c(0, Inf), Sa = c(0, Inf), a2 = c(0, Inf),
+                       d = c(1.9, 2.1)),
     specialParamSetter = function(fh){
       setLinearity(fh)
     }
@@ -223,7 +234,8 @@ fhComponents$fB1 <-
       Sb <- as.numeric(Mb / 20)
       b1 <- as.numeric(fhPeaks(fh)[2, "height"] * Sb / 0.45)
       list(Mb = Mb, Sb = Sb, b1 = b1)
-    }
+    },
+    paramLimits = list(Mb = c(0, Inf), Sb = c(0, Inf), b1 = c(0, Inf)),
   )
 
 fhComponents$fB2 <-
@@ -243,13 +255,16 @@ fhComponents$fB2 <-
     initParams = function(fh){
       Mb <- fhPeaks(fh)[2, "mean"]
       Sb <- Mb / 20
-      b2 <- as.numeric(fhHistData(fh)[fhPeaks(fh)[2, "mean"] * 2, "intensity"]
+      b2 <- as.numeric(fhHistData(fh)[fhPeaks(fh)[2, "mean"] * 2,
+                                      "intensity"]
                        * Sb * 2 / 0.45)
       res <- list(b2 = b2)
       if(fhLinearity(fh) == "variable")
         res <- c(res, d = 2)
       res
     },
+    paramLimits = list(Mb = c(0, Inf), Sb = c(0, Inf), b2 = c(0, Inf),
+                       d = c(1.9, 2.1)),
     specialParamSetter = function(fh){
       setLinearity(fh)
     }
@@ -353,6 +368,7 @@ fhComponents$SC <-
     initParams = function(fh){
       list(SCa = 0.1)
     },
+    paramLimits = list(SCa = c(0, Inf)),
     specialParamSetter = function(fh){
       list(SCvals = substitute(SCvals))
     }
@@ -382,6 +398,7 @@ fhComponents$MC <-
     initParams = function(fh){
       list(MCa = 0.01, k = 0.001)
     },
+    paramLimits = list(MCa = c(0, Inf), k = c(0, Inf)),
     specialParamSetter = function(fh){
       list(xx= substitute(xx), MCvals = substitute(MCvals))
     }
@@ -431,6 +448,7 @@ fhComponents$AG <-
     initParams = function(fh){
       list(Ap = 1e-9)
     },
+    paramLimits = list(Ap = c(0, Inf)),
     specialParamSetter = function(fh){
       list(DBvals = substitute(DBvals), TRvals = substitute(TRvals),
            QDvals = substitute(QDvals))
@@ -457,7 +475,8 @@ fhComponents$brA <-
     },
     initParams = function(fh){
       list(BRA = 10)
-    }
+    },
+    paramLimits = list(BRA = c(0, Inf))
   )
 
 fhComponents$brB <-
@@ -475,7 +494,8 @@ fhComponents$brB <-
     },
     initParams = function(fh){
       list(BRB = 10)
-    }
+    },
+    paramLimits = list(BRB = c(0, Inf))
   )
 
 ## for testing the influence of sd:
@@ -521,6 +541,11 @@ addComponents <- function(fh){
       newComp <- i
       mcSpecialParams(newComp) <- mcSpecialParamSetter(newComp)(fh)
       fhComps(fh)[[mcName(i)]] <- newComp
+      lims <- mcParamLimits(i)
+      newLims <- fhLimits(fh)
+      for(j in names(lims))
+        newLims[[j]] <- lims[[j]]
+      fhLimits(fh) <- newLims
     }
   fh
 }
@@ -546,7 +571,7 @@ makeModel <- function(fh, env = parent.frame()){
 }
 
 getInit <- function(fh){
-  fh@init <- list()
+  fhInit(fh) <- list()
   for(i in fhComps(fh)){
     fhInit(fh) <- c(fhInit(fh), mcInitParams(i)(fh))
   }

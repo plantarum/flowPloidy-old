@@ -127,6 +127,7 @@ setClass(
     comps = "list", ## model components
     model = "function", ## model to fit
     init = "list", ## inital parameter estimates
+    limits = "list", ## parameter limits
     nls = "nls", ## nls output
     counts = "list", ## cell counts in each peak
     CV = "list", ## CVs
@@ -155,7 +156,7 @@ setMethod(
       .Object <- cleanPeaks(.Object, window = window)
     }
     .Object@linearity <- linearity
-    .Object@debris = debris
+    .Object@debris <- debris
     .Object@opts <- opts
     .Object <- addComponents(.Object)
     .Object <- makeModel(.Object)
@@ -166,6 +167,15 @@ setMethod(
 ###############
 ## Accessors ##
 ###############
+
+fhLimits <- function(fh){
+  fh@limits
+}
+
+`fhLimits<-` <- function(fh, value){
+  fh@limits <- value
+  fh
+}
 
 fhPeaks <- function(fh){
   fh@peaks
@@ -327,6 +337,7 @@ resetFlowHist <- function(fh, from = "peaks"){
     fhPeaks(fh) <- matrix()
   if(rmF("comps")){
     fhComps(fh) <- list()
+    fhLimits(fh) <- list()
     fhModel(fh) <- function(){}
     fhInit(fh) <- list()
     fhNLS(fh) <- structure(list(), class = "nls")

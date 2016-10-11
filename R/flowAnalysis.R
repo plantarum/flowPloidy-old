@@ -40,13 +40,16 @@ fhDoNLS <- function(fh){
   form1 <- paste("intensity ~ model(")
   args <- as.character(names(formals(fhModel(fh))))
   args <- args[!args %in% c("", names(getSpecialParams(fh)))]
+  pLims <- fhLimits(fh)
+  lLims <- sapply(pLims, function(x) x[1])
+  uLims <- sapply(pLims, function(x) x[2])
   args <- paste(args, collapse = ", ")
   form3 <- paste(", ", getSpecialParamArgs(fh), ")")
   form <- as.formula(paste(form1, args, form3))
 
   fhNLS(fh) <- nlsLM(formula = form, start = fhInit(fh),
                      data = fhHistData(fh), 
-                     lower = rep(0, length = length(fhInit(fh))),
+                     lower = lLims, upper = uLims,
                      control = list(ftol = .Machine$double.xmin,
                                     ptol = .Machine$double.xmin,
                                     maxiter = 1024))

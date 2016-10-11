@@ -1,4 +1,12 @@
 
+Changes in version 0.99.2 (unreleased)
+--------------------------------------
+
+Internal Changes
+
+    * added a new slot to ModelComponents, `paramLimits`, which allows
+      lower and upper limits to be set for each model parameter. 
+
 Changes in version 0.99.1 (2016-10-11)
 --------------------------------------
 
