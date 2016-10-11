@@ -44,12 +44,12 @@ fhDoNLS <- function(fh){
   form3 <- paste(", ", getSpecialParamArgs(fh), ")")
   form <- as.formula(paste(form1, args, form3))
 
-  fhNLS(fh) <- eval(call("nlsLM", form, start = fhInit(fh),
-                         data = fhHistData(fh), 
-                         lower = rep(0, length = length(fhInit(fh))),
-                         control = list(ftol = .Machine$double.xmin,
-                                        ptol = .Machine$double.xmin,
-                                        maxiter = 1024)))
+  fhNLS(fh) <- nlsLM(formula = form, start = fhInit(fh),
+                     data = fhHistData(fh), 
+                     lower = rep(0, length = length(fhInit(fh))),
+                     control = list(ftol = .Machine$double.xmin,
+                                    ptol = .Machine$double.xmin,
+                                    maxiter = 1024))
   return(fh)
 }
 
