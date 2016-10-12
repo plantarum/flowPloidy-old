@@ -41,7 +41,7 @@ need `flowPloidyData` to use `flowPloidy` on your own data, only for the
 examples).
 
 ```{r, eval=FALSE}
-biocLite("flowPloidy")
+biocLite("flowPloidyData")
 ```
 
 ## Development Version 
@@ -60,31 +60,6 @@ Note that the developmental version of `flowPloidy` is also available
 directly from BioConductor, *if* you are using the development branch.
 Instructions on how to do so are available on the [BioConductor 
     website](http://bioconductor.org/developers/how-to/useDevel/).
-
-## `flowPloidyData`
-
-The files we use in the vignettes and examples are provided in the
-`flowPloidyData` package:
-
-```{r, eval = FALSE}
-install_github("plantarum/flowPloidyData")
-```
-
-## `flowPloidy`
-`flowPloidy` is currently available
-from [GitHub](https://githumb.com/plantarum/flowPloidy):
-
-```{r, eval = FALSE}
-install_github("plantarum/flowPloidy")
-```
-
-If you run into any errors, look for messages reporting missing packages,
-and install these. One that sometimes needs to be installed separately is
-`codetools`:
-
-```{r, eval = FALSE}
-install.packages("codetools", dependencies = TRUE)
-```
 
 # Preliminaries
 
@@ -425,6 +400,9 @@ quick and painless correction of peak detection.
 ```{r histBatch}
 batch1 <- batchFlowHist(flowPloidyFiles, channel = "FL3.INT.LIN")
 ```
+
+(You will see some **Error** messages in the output. That's ok, we'll fix
+the problems shortly!)
 
 You can export the results with `tabulateFlowHist()`:
 
