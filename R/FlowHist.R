@@ -94,13 +94,12 @@ setOldClass("nls")
 #'   (xx), florescence intensity (intensity), and the raw single-cut debris
 #'   model values (SCVals, used in model fitting). Additional columns may
 #'   be added if/when I add gating, so refer to columns by name, not
-#'   position. 
+#'   position.
 #' @slot peaks matrix, containing the coordinates used for peaks when
 #'   calculcating initial parameter values.
-#' @slot comps a list of \code{\link{modelComponent}} objects included for these
-#'   data.
-#' @slot model the function (built from \code{comps}) to fit to these
-#' data.
+#' @slot comps a list of \code{\link{modelComponent}} objects included for
+#'   these data.
+#' @slot model the function (built from \code{comps}) to fit to these data.
 #' @slot init a list of initial parameter estimates to use in fitting the
 #'   model.
 #' @slot nls the nls object produced by the model fitting
@@ -118,9 +117,9 @@ setClass(
     channel = "character", ## data channel to use for histogram
     bins = "integer", ## the number of bins to use
     linearity = "character", ## "fixed" or "variable", to determine whether
-    debris = "character", ## "SC" or "MC", to set the debris model. 
     ## or not linearity is fixed at 2, or allowed to vary as a model
     ## parameter 
+    debris = "character", ## "SC" or "MC", to set the debris model. 
     histData = "data.frame", ## binned histogram data
     peaks = "matrix", ## peak coordinates for initial values
     opts = "list",    ## flags for selecting model components
