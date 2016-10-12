@@ -544,7 +544,9 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
 
   if(nls & (length(fhNLS(x)) > 0)){
     dat <- tabulateFlowHist(x)
-    lines(x = fhHistData(x)$xx, y = predict(fhNLS(x)), col = 2)
+    lines(x = fhHistData(x)$xx[-(1:(fhStart(fhHistData(x)$intensity) -
+                                    1))], 
+          y = predict(fhNLS(x)), col = 2)
     text(paste("RCS: ", round(dat$rcs, 3)), cex = 1, pos = 2,
          x = grconvertX(0.975, from = "npc", to = "user"),
          y = grconvertY(0.95, from = "npc", to = "user"))
@@ -728,8 +730,7 @@ setBins <- function(fh, bins = 256){
 
   intensity <- histBins$counts
   xx <- 1:length(intensity)
-  startMax <- max(intensity[which(intensity != 0)][1:20])
-  startBin <- which(intensity == startMax)[1]
+  startBin <- fhStart(intensity)
   SCvals <- getSingleCutVals(intensity, xx, startBin)
   MCvals <- getMultipleCutVals(intensity, startBin)
   DBvals <- getDoubletVals(intensity)
@@ -742,6 +743,18 @@ setBins <- function(fh, bins = 256){
   fh <- resetFlowHist(fh)
   fh
 }
+
+fhStart <- function(intensity){
+  ## Returns the first channel to include in the modelling process. We
+  ## start on the first peak, ignoring any noise in lower channels. This
+  ## is the same general principle applied in ModFit. I implement this idea
+  ## by picking the highest point in the first 20 non-zero channels in the
+  ## histogram.
+  startMax <- max(intensity[which(intensity != 0)][1:20])
+  startBin <- which(intensity == startMax)[1]
+  startBin
+}
+  
 
 #' @importFrom caTools runmean runmax
 NULL
