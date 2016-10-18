@@ -50,6 +50,8 @@ plot(fh1mcl)
 
 batch1 <-batchFlowHist(files = flowPloidyFiles, channel = "FL3.INT.LIN")
 
+batch2 <-batchFlowHist(files = flowPloidyFiles, channel = "FL3.INT.LIN")
+
 tabulateFlowHist(batch1)
 
 tmp <- browseFlowHist(batch1)
