@@ -2,9 +2,12 @@ library(devtools)
 library(flowPloidyData)
 load_all()
 
-
 batch1 <-batchFlowHist(files = flowPloidyFiles, channel = "FL3.INT.LIN")
 batch1b <- browseFlowHist(batch1)
+
+fh1 <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN",
+               analyze = TRUE)
+
 
 thresh = 0.0002
 par(mfrow = c(2,2))

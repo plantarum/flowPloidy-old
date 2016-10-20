@@ -67,6 +67,9 @@ setOldClass("nls")
 #' @param channel character, the name of the data column to use
 #' @param bins integer, the number of bins to use to aggregate events into
 #'   a histogram
+#' @param gate logical, a vector of events to exclude from analysis. In
+#'   normal usage this will be set interactively, not as a function
+#'   argument.
 #' @param linearity character, either "variable", the default, or "fixed".
 #'   If "fixed", linearity is fixed at 2; if "variable", linearity is fit
 #'   as a model parameter.
@@ -90,6 +93,9 @@ setOldClass("nls")
 #' @slot channel character, the name of the data column to use
 #' @slot bins integer, the number of bins to use to aggregate events into a
 #'   histogram
+#' @slot gate logical, a vector indicating events to exclude from the
+#'   analysis. In normal use, the gate will be modified via interactive
+#'   functions, not set directly by users. 
 #' @slot histdata data.frame, the columns are the histogram bin number
 #'   (xx), florescence intensity (intensity), and the raw single-cut debris
 #'   model values (SCVals, used in model fitting). Additional columns may
@@ -120,6 +126,8 @@ setClass(
     ## or not linearity is fixed at 2, or allowed to vary as a model
     ## parameter 
     debris = "character", ## "SC" or "MC", to set the debris model. 
+    gate = "logical", ## vector indicating which events to exclude from
+    ## analysis, i.e., the gate
     histData = "data.frame", ## binned histogram data
     peaks = "matrix", ## peak coordinates for initial values
     opts = "list",    ## flags for selecting model components
@@ -143,9 +151,10 @@ setMethod(
   definition = function(.Object, file, channel, bins = 256,
                         window = 20, smooth = 20, pick = FALSE,
                         linearity = "variable", debris = "SC",
-                        opts = list(), ... ){
+                        gate = logical(), opts = list(), ... ){
     .Object@raw <- read.FCS(file, dataset = 1, alter.names = TRUE)
     .Object@channel <- channel
+    .Object@gate <- gate
     .Object <- setBins(.Object, bins)
     if(pick){
       .Object <- pickPeaks(.Object)
@@ -166,6 +175,15 @@ setMethod(
 ###############
 ## Accessors ##
 ###############
+
+fhGate <- function(fh){
+  fh@gate
+}
+
+`fhGate<-` <- function(fh, value){
+  fh@gate <- value
+  fh
+}
 
 fhLimits <- function(fh){
   fh@limits
@@ -356,11 +374,11 @@ resetFlowHist <- function(fh, from = "peaks"){
 #' @export
 FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
                      pick = FALSE, linearity = "variable", debris = "SC",
-                     opts = list(), analyze = TRUE){
+                     opts = list(), analyze = TRUE, gate = logical()){
   fh <-  new("FlowHist", file = file, channel = channel,
              bins = as.integer(bins), window = window, smooth = smooth,
              pick = pick, linearity = linearity, debris = debris,
-             opts = opts)
+             opts = opts, gate = gate)
   if(analyze)
     fh <- fhAnalyze(fh)
   return(fh)
@@ -368,12 +386,15 @@ FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
 
 #' Displays the column names present in an FCS file
 #'
-#' A convenience function for viewing column names in an FCS, in order to
-#'   select one for the \code{channel} argument in \code{\link{FlowHist}}.
+#' A convenience function for viewing column names in a FCS data file, or a
+#' FlowHist object. Used to select one for the \code{channel} argument
+#' in \code{\link{FlowHist}}, or for viewing additional channels for use in
+#' gating.
 #' 
 #' @title viewFlowChannels
-#' @param file character, the name of a FCS data file
-#' @return A vector of column names from the FCS file.
+#' @param file character, the name of a FCS data file; or the name of a
+#'   FlowHist object.
+#' @return A vector of column names from the FCS file/FlowHist object.
 #' @seealso \code{\link{FlowHist}}
 #' @author Tyler Smith
 #' @examples
@@ -381,10 +402,14 @@ FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
 #' viewFlowChannels(flowPloidyFiles[1])
 #' @export
 viewFlowChannels <- function(file){
-  tmp <- read.FCS(file, alter.names = TRUE, dataset = 1)
-  cnames <- colnames(exprs(tmp))
-  names(cnames) <- NULL
-  cnames
+  if(class(file) == "FlowHist"){
+    res <- colnames(exprs(fhRaw(file)))
+  } else {
+    tmp <- read.FCS(file, alter.names = TRUE, dataset = 1)
+    res <- colnames(exprs(tmp))
+  }
+  names(res) <- NULL
+  res
 }
 
 
@@ -714,7 +739,10 @@ setBins <- function(fh, bins = 256){
 
   ## Extract the data channel
   chanDat <- exprs(fhRaw(fh))[, fhChannel(fh)]
-
+  if(sum(fhGate(fh)) != 0){
+    chanDat <- chanDat[fhGate(fh)]
+  }
+  
   ## remove the top bin - this contains clipped values representing all
   ## out-of-range data, not true values
   chanTrim <- chanDat[chanDat < max(chanDat)]
