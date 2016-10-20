@@ -11,3 +11,5 @@ vignettes/*_files/
 */*pdf
 s3/
 .svn
+/NOTES.org
+svn-commit*
