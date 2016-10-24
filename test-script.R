@@ -8,6 +8,42 @@ batch1b <- browseFlowHist(batch1)
 fh1 <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN",
                analyze = TRUE)
 
+viewFlowChannels(file = "/home/tws/research/flow/gating examples/Vac.ON.DL.02.022")
+
+gateFlowHist(fh1)
+
+vac2 <- FlowHist(file =
+                   "/home/tws/research/flow/gating examples/Vac.ON.DL.14.026",
+                 channel = "FL2.A")
+vac2 <- setBins(vac2, 256)
+dat <- exprs(fhRaw(vac2))
+
+plot(dat[, "FL2.A"], dat[ , "SSC.H"] /dat[ , "FL2.A"], pch = 16,
+     ylim = c(0, 1.5),
+     col = "#11111150", cex = 0.75, main = fhFile(vac2)) 
+
+
+par(mfrow=c(2,2))
+plot(vac2, sub = "ungated")
+plot(dat[, "FL2.A"], dat[ , "FL3.H"]/ dat[, "FL2.A"], pch = 16,
+     ylim = c(0, 0.08),
+     col = "#11111130", cex = 0.5, main = fhFile(vac2))
+thresh <- 0.05
+abline(h = thresh, col = 2)
+test <- dat[ , "FL3.H"]/ dat[, "FL2.A"] < thresh
+vac2g <- setGate(vac2, test)
+plotFH(vac2g, sub= "gated")
+plotResid(vac2g)
+
+vac2g <- findPeaks(vac2g)
+vac2g <- cleanPeaks(vac2g, window = 20)
+vac2g <- addComponents(vac2g)
+vac2g <- makeModel(vac2g)
+vac2g <- getInit(vac2g)
+vac2g <- pickInit(vac2g)
+
+plot(vac2g, init = TRUE)
+
 
 thresh = 0.0002
 par(mfrow = c(2,2))
