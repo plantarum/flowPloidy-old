@@ -739,14 +739,18 @@ setBins <- function(fh, bins = 256){
 
   ## Extract the data channel
   chanDat <- exprs(fhRaw(fh))[, fhChannel(fh)]
-  if(sum(fhGate(fh)) != 0){
-    chanDat <- chanDat[fhGate(fh)]
-  }
-  
+  gateResid <- NULL
+  gate <- fhGate(fh)
   ## remove the top bin - this contains clipped values representing all
   ## out-of-range data, not true values
   chanTrim <- chanDat[chanDat < max(chanDat)]
-
+  gate <- gate[chanDat < max(chanDat)]
+  
+  if(sum(fhGate(fh)) != 0){
+    gateResid <- chanTrim[!gate]
+    chanTrim <- chanTrim[gate]
+  }
+  
   metaData <- pData(parameters(fhRaw(fh)))
   maxBins <- metaData[which(metaData$name == fhChannel(fh)), "range"]
   
@@ -764,10 +768,17 @@ setBins <- function(fh, bins = 256){
   DBvals <- getDoubletVals(intensity)
   TRvals <- getTripletVals(intensity, DBvals)
   QDvals <- getQuadrupletVals(intensity, DBvals, TRvals)
+
+  if(!is.null(gateResid)){
+    gateResid <- hist(gateResid, breaks = histBins$breaks,
+                      plot = FALSE)$counts
+  } else {
+    gateResid <- numeric(length(intensity))
+  }
   fhHistData(fh) <- data.frame(xx = xx, intensity = intensity,
                             SCvals = SCvals, MCvals = MCvals,
                             DBvals = DBvals, TRvals = TRvals,
-                            QDvals = QDvals)
+                            QDvals = QDvals, gateResid = gateResid)
   fh <- resetFlowHist(fh)
   fh
 }
