@@ -1,5 +1,6 @@
 library(devtools)
 library(flowPloidyData)
+library(flowCore)
 load_all()
 
 batch1 <-batchFlowHist(files = flowPloidyFiles, channel = "FL3.INT.LIN")
@@ -8,19 +9,31 @@ batch1b <- browseFlowHist(batch1)
 fh1 <-FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN",
                analyze = TRUE)
 
+paul <- FlowHist(file = "~/research/flow/paul/Lob.leaf.Jul2414.L02.002",
+                channel = "FL2.A", analyze = TRUE)
+
+
 viewFlowChannels(file = "/home/tws/research/flow/gating examples/Vac.ON.DL.02.022")
 
 gateFlowHist(fh1)
 
-vac2 <- FlowHist(file =
-                   "/home/tws/research/flow/gating examples/Vac.ON.DL.14.026",
-                 channel = "FL2.A")
-vac2 <- setBins(vac2, 256)
-dat <- exprs(fhRaw(vac2))
+vac2 <-
+  FlowHist(
+    file = "~/research/flow/gating examples/Vac.ON.DL.14.026",
+    channel = "FL2.A")
 
-plot(dat[, "FL2.A"], dat[ , "SSC.H"] /dat[ , "FL2.A"], pch = 16,
-     ylim = c(0, 1.5),
-     col = "#11111150", cex = 0.75, main = fhFile(vac2)) 
+dat <- exprs(fhRaw(vac2))
+thresh <- 0.05
+test <- dat[ , "FL3.H"]/ dat[, "FL2.A"] < thresh
+
+vac2g <- setGate(vac2, test)
+## vac2g <- cleanPeaks(findPeaks(vac2g))
+vac2g <- pickPeaks(vac2g)
+vac2g <- addComponents(vac2g)
+vac2g <- setLimits(vac2g)
+vac2g <- makeModel(vac2g)
+vac2g <- getInit(vac2g)
+vac2g <- fhAnalyze(vac2g)
 
 
 par(mfrow=c(2,2))
@@ -28,12 +41,40 @@ plot(vac2, sub = "ungated")
 plot(dat[, "FL2.A"], dat[ , "FL3.H"]/ dat[, "FL2.A"], pch = 16,
      ylim = c(0, 0.08),
      col = "#11111130", cex = 0.5, main = fhFile(vac2))
-thresh <- 0.05
 abline(h = thresh, col = 2)
-test <- dat[ , "FL3.H"]/ dat[, "FL2.A"] < thresh
-vac2g <- setGate(vac2, test)
-plotFH(vac2g, sub= "gated")
+plot(vac2g, sub = "gated")
 plotResid(vac2g)
+
+
+## SSC plots
+thresh <- 1
+test <- dat[ , "SSC.H"]/ dat[, "FL2.A"] < thresh
+
+vac2g <- setGate(vac2, test)
+## vac2g <- cleanPeaks(findPeaks(vac2g))
+vac2g <- pickPeaks(vac2g)
+vac2g <- addComponents(vac2g)
+vac2g <- setLimits(vac2g)
+vac2g <- makeModel(vac2g)
+vac2g <- getInit(vac2g)
+vac2g <- fhAnalyze(vac2g)
+
+
+par(mfrow=c(2,2))
+plot(vac2, sub = "ungated")
+plot(dat[, "FL2.A"], dat[ , "SSC.H"]/ dat[, "FL2.A"], pch = 16,
+     ylim = c(0, 3),
+     col = "#11111130", cex = 0.5, main = fhFile(vac2))
+abline(h = thresh, col = 2)
+plot(vac2g, sub = "gated")
+plotResid(vac2g)
+
+
+
+vac2g <- fhAnalyze(vac2g)
+
+vac2gd <- dropComponents(vac2g, c("SC", "MC"))
+vac2gd <- fhAnalyze(vac2gd)
 
 vac2g <- findPeaks(vac2g)
 vac2g <- cleanPeaks(vac2g, window = 20)

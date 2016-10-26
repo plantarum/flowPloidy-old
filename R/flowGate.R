@@ -7,7 +7,9 @@ plotGate <- function(fh, x, y, ...){
   if(! y %in% chans)
       stop("Selected flow channel: ", y, " does not exist!")
 
-  plot(exprs(fhRaw(fh))[, c(x, y)], pch = 16, col = "#05050510")
+  dat <- exprs(fhRaw(fh))[, c(x, y)]
+  dat[,y] <- dat[,y] / dat[,x]
+  plot(dat, pch = 16, col = "#05050510")
 }
 
 plotResid <- function(fh, ...){
@@ -24,20 +26,38 @@ setGate <- function(fh, gate){
   fh
 }
 
+isGated <- function(fh){
+  ## returns TRUE if the FlowHist data is gated
+  sum(fhGate(fh)) != 0
+}
+
 gateFlowHist <- function(fh){
-  x <- "SS.INT.LIN"
-  y <- "FS.TOF.LIN"
+  raw <- exprs(fhRaw(fh))
+  chan1 <- viewFlowChannels(fh)[1]
+  chan2 <- viewFlowChannels(fh)[2]
   
+  initGateData <- data.frame(x = raw[, chan1],
+                             y = raw[, chan2] / raw[, chan1]) 
+
   ui <- fluidPage(
     fluidRow(
       column(width = 2,
              selectInput('xcol', 'X Variable', viewFlowChannels(fh),
-                         selected = viewFlowChannels(fh)[1]),
+                         selected = chan1),
              selectInput('ycol', 'Y Variable', viewFlowChannels(fh),
-                         selected = viewFlowChannels(fh)[2])),
+                         selected = chan2),
+             sliderInput("yrange", "yrange", min = 0,
+                         max = max(initGateData$y),
+                         value = c(0, max(initGateData$y)),
+                         step = NULL, round = FALSE,
+                         ticks = TRUE, animate = FALSE,
+                         width = NULL, sep = ",", pre = NULL, post = NULL,
+                         dragRange = FALSE)
+             ),
+      
       column(width = 4,
              plotOutput("gatePlot", height = 300,
-                                        # Equivalent to: click = clickOpts(id = "plot_click")
+                        clickOpts(id = "plot_click"),
                         click = "gatePlot_click",
                         brush = brushOpts(
                           id = "gatePlot_brush"
@@ -59,10 +79,16 @@ gateFlowHist <- function(fh){
 
   server <- function(input, output) {
     ##browser()                           
+    gateData <- reactive({
+      chan1 <- viewFlowChannels(fh)[input$xcol]
+      chan2 <- viewFlowChannels(fh)[input$ycol]
+      
+      data.frame(x = raw[, chan1],
+                 y = raw[, chan2] / raw[, chan1])
+    })
+
     output$gatePlot <- renderPlot({
-      message(length(fhGate(fh)))
-      message(sum(fhGate(fh)))
-      plotGate(fh, input$xcol, input$ycol)
+      plotGate(gateData(), ylim = input$yrange)
     })
 
     output$gateResiduals <- renderPlot({
@@ -78,8 +104,8 @@ gateFlowHist <- function(fh){
     })
     
     output$click_info <- renderPrint({
-      nearPoints(data.frame(exprs(fhRaw(fh))), xvar = input$xcol, yvar =
-      input$ycol, input$gatePlot_click, addDist = TRUE) 
+      nearPoints(data.frame(exprs(fhRaw(fh))), xvar = input$xcol,
+                 yvar = input$ycol, input$gatePlot_click, addDist = TRUE)
     })
 
     fhHistPlot <- reactive({

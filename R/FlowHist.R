@@ -167,6 +167,7 @@ setMethod(
     .Object@debris <- debris
     .Object@opts <- opts
     .Object <- addComponents(.Object)
+    .Object <- setLimits(.Object)
     .Object <- makeModel(.Object)
     .Object <- getInit(.Object)
     callNextMethod(.Object, ...)
@@ -336,10 +337,7 @@ fhRaw <- function(fh){
 resetFlowHist <- function(fh, from = "peaks"){
   ## Clear analysis slots
   ## Default is to clear everything from peaks onwards
-  removeFrom <- c("peaks", "comps")
-  ## Dependencies
-  ## - changing peaks changes everything
-  ## - changing comps changes model, init, nls
+  removeFrom <- c("gate", "peaks", "comps", "limits")
 
   ## coded to allow for further refinement, if/when additions to the
   ## FlowHist class makes it sensible to change the granularity of slot
@@ -349,11 +347,17 @@ resetFlowHist <- function(fh, from = "peaks"){
 
   rmF <- function(x)
     removeNum <= which(removeFrom == x)
-  
+
+  if(rmF("gate")){
+    fhGate(fh) <- logical()
+    fh <- setBins(fh)                   # recreate histData
+  }
   if(rmF("peaks"))
     fhPeaks(fh) <- matrix()
   if(rmF("comps")){
     fhComps(fh) <- list()
+  }
+  if(rmF("limits")){    
     fhLimits(fh) <- list()
     fhModel(fh) <- function(){}
     fhInit(fh) <- list()
@@ -915,7 +919,7 @@ findPeaks <- function(fh, window = 20, smooth = 20){
 #' debris field is large.
 #' }
 #' 
-cleanPeaks <- function(fh, window){
+cleanPeaks <- function(fh, window = 20){
   ## Remove ties and multiple peaks for histogram analysis
 
   ## Screen out any ties - if two peaks have the same height, and are
@@ -1031,6 +1035,7 @@ pickInit <- function(fh){
 
   fh <- pickPeaks(fh)
   fh <- addComponents(fh)
+  fh <- setLimits(fh)
   fh <- makeModel(fh)
   fh <- getInit(fh)
   fh
@@ -1101,6 +1106,7 @@ updateFlowHist <- function(fh, linearity = NULL, debris = NULL,
   
   fh <- resetFlowHist(fh, from = "comps")
   fh <- addComponents(fh)
+  fh <- setLimits(fh)
   fh <- makeModel(fh)
   fh <- getInit(fh)
   if(analyze)

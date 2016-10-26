@@ -272,6 +272,7 @@ selectPeaks <- function(fh, peakA, peakB){
   fhPeaks(fh) <- newPeaks
   
   fh <- addComponents(fh)
+  fh <- setLimits(fh)
   fh <- makeModel(fh)
   fh <- getInit(fh)
 

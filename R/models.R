@@ -536,17 +536,38 @@ fhComponents$brB <-
 ## Model Building Functions ##
 ##############################
 addComponents <- function(fh){
+  fh <- resetFlowHist(fh, "comps")
   for(i in fhComponents)
     if(mcIncludeTest(i)(fh)){
       newComp <- i
       mcSpecialParams(newComp) <- mcSpecialParamSetter(newComp)(fh)
       fhComps(fh)[[mcName(i)]] <- newComp
-      lims <- mcParamLimits(i)
-      newLims <- fhLimits(fh)
-      for(j in names(lims))
-        newLims[[j]] <- lims[[j]]
-      fhLimits(fh) <- newLims
+      ## lims <- mcParamLimits(i)
+      ## newLims <- fhLimits(fh)
+      ## for(j in names(lims))
+      ##   newLims[[j]] <- lims[[j]]
+      ## fhLimits(fh) <- newLims
     }
+  fh
+}
+
+dropComponents <- function(fh, components){
+  fh <- resetFlowHist(fh, "limits")  
+  fhComps(fh) <- fhComps(fh)[! names(fhComps(fh)) %in% components]
+  fh <- setLimits(fh)
+  fh <- makeModel(fh)
+  fh <- getInit(fh)
+  fh
+}
+
+setLimits <- function(fh){
+  fhLimits(fh) <- list()
+  for(i in fhComps(fh)){
+    lims <- mcParamLimits(i)
+    for(j in names(lims)){
+      fhLimits(fh)[[j]] <- lims[[j]]
+    }
+  }
   fh
 }
 
