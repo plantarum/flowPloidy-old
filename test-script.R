@@ -22,6 +22,8 @@ vac2 <-
     file = "~/research/flow/gating examples/Vac.ON.DL.14.026",
     channel = "FL2.A")
 
+gateFlowHist(vac2)
+
 dat <- exprs(fhRaw(vac2))
 thresh <- 0.05
 test <- dat[ , "FL3.H"]/ dat[, "FL2.A"] < thresh
