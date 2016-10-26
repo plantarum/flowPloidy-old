@@ -7,9 +7,9 @@
 plotFH(fh, ...)
 }
 \arguments{
-\item{fh}{a \code{FlowHist} object}
+\item{fh}{a \code{\link{FlowHist}} object}
 
-\item{...}{additional parameters passed to \code{plot}}
+\item{...}{additional parameters passed to \code{\link{plot}}}
 }
 \value{
 Not applicable, used for plotting

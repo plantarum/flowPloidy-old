@@ -7,7 +7,7 @@
 \method{plot}{FlowHist}(x, init = FALSE, nls = TRUE, comps = TRUE, ...)
 }
 \arguments{
-\item{x}{a \code{FlowHist} object}
+\item{x}{a \code{\link{FlowHist}} object}
 
 \item{init}{boolean; if TRUE, plot the regression model using the
 initial parameter estimates over the raw data.}
