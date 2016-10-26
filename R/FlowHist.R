@@ -750,7 +750,7 @@ fhStart <- function(intensity){
   ## is the same general principle applied in ModFit. I implement this idea
   ## by picking the highest point in the first 20 non-zero channels in the
   ## histogram.
-  startMax <- max(intensity[which(intensity != 0)][1:20])
+  startMax <- max(intensity[which(intensity != 0)][1:10])
   startBin <- which(intensity == startMax)[1]
   startBin
 }
