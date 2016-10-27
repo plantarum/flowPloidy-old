@@ -33,8 +33,9 @@ isGated <- function(fh){
 
 gateFlowHist <- function(fh){
   raw <- exprs(fhRaw(fh))
-  chan1 <- viewFlowChannels(fh)[1]
-  chan2 <- viewFlowChannels(fh)[2]
+  chan1 <- fhChannel(fh)
+  chan2 <- viewFlowChannels(fh)[2]      # why 2? sometimes, by chance, the
+                                        # second column is the SS value.
   
   initGateData <- data.frame(x = raw[, chan1],
                              y = raw[, chan2] / raw[, chan1]) 
@@ -43,31 +44,35 @@ gateFlowHist <- function(fh){
     fluidRow(
       column(2,
              selectInput('xcol', 'X Variable', viewFlowChannels(fh),
-                         selected = chan1),
+                         selected = chan1)),
+      column(2,
              selectInput('ycol', 'Y Variable', viewFlowChannels(fh),
-                         selected = chan2),
-             sliderInput("yrange", "yrange", min = 0,
-                         max = max(initGateData$y),
-                         value = c(0, max(initGateData$y)),
-                         dragRange = FALSE))
-             ),
-      
+                         selected = chan2)),
+      column(2,
+             sliderInput("yrange", "Zoom", min = 0, ticks = FALSE,
+                         step = max(4,
+    ceiling(log(max(initGateData$y))))/20, 
+                         max = max(4, ceiling(log(max(initGateData$y)))),
+                         value = 0,
+                         dragRange = FALSE))),
+       #      ),
+    fluidRow(
       column(4,
-             plotOutput("gatePlot", height = 300,
+             plotOutput("gatePlot", #height = 300,
                         click = "gatePlot_click",
                         brush = brushOpts(
-                          id = "gatePlot_brush"
+                          id = "gatePlot_brush",
+                          resetOnNew = TRUE
                         )
                         )
              ),
       column(4,
-             plotOutput("gatedData", height = 300)
+             plotOutput("gatedData") #, height = 300)
              ),
     ## fluidRow(
-    fluidRow(
-      column(6,
-             plotOutput("gateResiduals"))
-    )
+      column(4,
+             plotOutput("gateResiduals"))) #, height = 300)))
+
   )
 
   server <- function(input, output, session) {
@@ -75,8 +80,10 @@ gateFlowHist <- function(fh){
         dat <- gateData()
         # Control the value, min, max, and step.
         # Step size is 2 when input value is even; 1 when value is odd.
-        updateSliderInput(session, "yrange", value = c(0, max(dat$y)),
-                          min = 0, max = max(dat$y))
+        updateSliderInput(session, "yrange", 
+                          step = max(4, ceiling(log(max(dat[,2]))))/20,
+                          max = max(4, ceiling(log(max(dat[,2])))),
+                          value = 0, min = 0)
     })
 
     ##browser()                           
@@ -84,36 +91,30 @@ gateFlowHist <- function(fh){
       chan1 <- input$xcol
       chan2 <- input$ycol
       
-      data.frame(x = raw[, chan1],
-                 y = raw[, chan2] / raw[, chan1])
+      df <- data.frame(x = raw[, chan1],
+                       y = raw[, chan2] / raw[, chan1])
+      names(df) <- c(chan1, paste(chan1, chan2, sep = "/"))
+      df
     })
 
     output$gatePlot <- renderPlot({
-      plot(gateData(), ylim = input$yrange, pch = 16, col = "#05050510")
+      dat <- gateData()
+      plot(dat, ylim = c(0, exp(log(max(dat[, 2])) - input$yrange)),
+           pch = 16, col = "#05050510") 
     })
 
     output$gateResiduals <- renderPlot({
-      message("Residual plot: ", length(fhGate(fh)))
-      message(sum(fhGate(fh)))
-      tmp <- input$xcol                 # dummy to trigger redraw
-      tmp <- input$gatePlot_brush
-      plotResid(fh)
+      plotResid(fhHistPlot())
     })
 
     output$gatedData <- renderPlot({
       plot(fhHistPlot(), nls = FALSE, init = FALSE, comps = FALSE)
     })
     
-    output$click_info <- renderPrint({
-      nearPoints(data.frame(exprs(fhRaw(fh))), xvar = input$xcol,
-                 yvar = input$ycol, input$gatePlot_click, addDist = TRUE)
-    })
-
     fhHistPlot <- reactive({
-      bp <- brushedPoints(gateData(),
-                          xvar = "x", yvar = "y",
-                          input$gatePlot_brush,
-                          allRows = TRUE)$selected_
+      dat <- gateData()
+      bp <- brushedPoints(dat, xvar = names(dat)[1], yvar = names(dat)[2],
+                          input$gatePlot_brush, allRows = TRUE)$selected_
       fh <<- setGate(fh, bp)
       fh
     })
