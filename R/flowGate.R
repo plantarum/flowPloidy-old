@@ -12,9 +12,10 @@ plotGate <- function(fh, x, y, ...){
   plot(dat, pch = 16, col = "#05050510")
 }
 
-plotResid <- function(fh, ...){
-  plot(fhHistData(fh)$gateResid, type = 'n', main = fhFile(fh),
-       sub = "Gate Resdiduals", xlab = fhChannel(fh), ...)
+plotResid <- function(fh, main = fhFile(fh), ...){
+  plot(fhHistData(fh)$gateResid, type = 'n', main = main,
+       sub = "Gate Resdiduals", xlab = fhChannel(fh), ylab = "Intensity",
+       ...) 
   polygon(x = c(fhHistData(fh)$xx, max(fhHistData(fh)$xx) + 1),
           y = c(fhHistData(fh)$gateResid, 0),
           col = "lightgray", border = NA)
@@ -104,7 +105,7 @@ gateFlowHist <- function(fh){
     })
 
     output$gateResiduals <- renderPlot({
-      plotResid(fhHistPlot())
+      plotResid(fhHistPlot(), main = "Gate Residuals")
     })
 
     output$gatedData <- renderPlot({

@@ -517,7 +517,7 @@ setMethod(
 #' fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
 #' plotFH(fh1)
 #' @export
-plotFH <- function(fh, ...){
+plotFH <- function(fh, main = fhFile(fh), ...){
   ## plots the raw data for a FlowHist object
   plot(fhHistData(fh)$intensity, type = 'n', main = fhFile(fh),
        ylab = "Intensity", xlab = fhChannel(fh), ...)
@@ -541,8 +541,9 @@ plotFH <- function(fh, ...){
 #' @return Not applicable
 #' @author Tyler Smith
 #' @export
-plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
-  plotFH(x, ...)
+plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE,
+                          main = fhFile(x), ...){
+  plotFH(x, main = main, ...)
 
   if(init){
     yy <- with(fhHistData(x),
