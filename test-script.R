@@ -6,6 +6,16 @@ load_all()
 paul <- FlowHist(file = "~/research/flow/paul/Lob.leaf.Jul2414.L02.002",
                 channel = "FL2.A", analyze = TRUE)
 
+dort <- batchFlowHist(list.files("~/research/flow/paul/dort-set",
+                                 full.names=TRUE),
+                      channel = "FL2.A")
+dortB <- browseFlowHist(dort)
+
+az <- batchFlowHist(list.files("~/research/flow/paul/az-set",
+                                 full.names=TRUE),
+                      channel = "FL2.A")
+azB <- browseFlowHist(az)
+
 batch1 <-batchFlowHist(files = flowPloidyFiles, channel = "FL3.INT.LIN")
 batch1b <- browseFlowHist(batch1)
 
