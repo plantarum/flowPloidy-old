@@ -41,6 +41,7 @@ fhDoNLS <- function(fh){
   args <- as.character(names(formals(fhModel(fh))))
   args <- args[!args %in% c("", names(getSpecialParams(fh)))]
   pLims <- fhLimits(fh)
+  pLims <- pLims[! names(pLims) %in% names(getSpecialParams(fh))]
   lLims <- sapply(pLims, function(x) x[1])
   uLims <- sapply(pLims, function(x) x[2])
   args <- paste(args, collapse = ", ")
