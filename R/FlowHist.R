@@ -83,6 +83,8 @@ setOldClass("nls")
 #' @param pick boolean; if TRUE, the user will be prompted to select peaks
 #'   to use for starting values. Otherwise (the default), starting values
 #'   will be detected automatically.
+#' @param samples integer; the number of samples in the data. Default is 2
+#' (unknown and standard), but can be set to 3 if two standards are  used.
 #' @param verbose boolean; if TRUE, \code{\link{histBatch}} will list files
 #'   as it processes them. 
 #' 
@@ -107,7 +109,9 @@ setOldClass("nls")
 #' @slot CV a list of the coefficients of variation for each peak in the
 #'   fitted model.
 #' @slot RCS numeric, the residual chi-square for the fitted model.
-#'
+#' @slot samples numeric, the number of samples included in the data. The
+#'   default is 2 (i.e., unknown and standard), but if two standards are
+#'   used it should be set to 3.
 #' @return \code{\link{FlowHist}} returns a \code{\link{FlowHist}} object.
 #' @author Tyler Smith
 setClass(
@@ -115,6 +119,7 @@ setClass(
   representation = representation(
     raw = "flowFrame", ## raw data, object defined in flowCore
     channel = "character", ## data channel to use for histogram
+    samples = "integer", ## (maximum) number of sample peaks to fit
     bins = "integer", ## the number of bins to use
     linearity = "character", ## "fixed" or "variable", to determine whether
     ## or not linearity is fixed at 2, or allowed to vary as a model
@@ -143,9 +148,10 @@ setMethod(
   definition = function(.Object, file, channel, bins = 256,
                         window = 20, smooth = 20, pick = FALSE,
                         linearity = "variable", debris = "SC",
-                        opts = list(), ... ){
+                        samples = 2, opts = list(), ... ){
     .Object@raw <- read.FCS(file, dataset = 1, alter.names = TRUE)
     .Object@channel <- channel
+    .Object@samples <- as.integer(samples)
     .Object <- setBins(.Object, bins)
     if(pick){
       .Object <- pickPeaks(.Object)
@@ -173,6 +179,15 @@ fhLimits <- function(fh){
 
 `fhLimits<-` <- function(fh, value){
   fh@limits <- value
+  fh
+}
+
+fhSamples <- function(fh){
+  fh@samples
+}
+
+`fhSamples<-` <- function(fh, value){
+  fh@samples <- value
   fh
 }
 
@@ -356,11 +371,11 @@ resetFlowHist <- function(fh, from = "peaks"){
 #' @export
 FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
                      pick = FALSE, linearity = "variable", debris = "SC",
-                     opts = list(), analyze = TRUE){
+                     opts = list(), samples = 2, analyze = TRUE){
   fh <-  new("FlowHist", file = file, channel = channel,
              bins = as.integer(bins), window = window, smooth = smooth,
              pick = pick, linearity = linearity, debris = debris,
-             opts = opts)
+             opts = opts, samples = samples)
   if(analyze)
     fh <- fhAnalyze(fh)
   return(fh)
@@ -399,13 +414,14 @@ viewFlowChannels <- function(file){
 #' @export
 batchFlowHist <- function(files, channel, bins = 256, verbose = TRUE,
                       window = 20, smooth = 20, linearity = "variable",
-                      debris = "SC"){ 
+                      debris = "SC", samples = 2){ 
   res <- list()
   for(i in seq_along(files)){
     if(verbose) message("processing ", files[i])
     tmpRes <- FlowHist(file = files[i], channel = channel, bins = bins,
                        window = window, smooth = smooth, pick = FALSE,
-                       linearity = linearity, debris = debris)
+                       linearity = linearity, debris = debris,
+                       samples = samples)
     res[[fhFile(tmpRes)]] <- tmpRes
   }              
   return(res)
@@ -418,6 +434,7 @@ setMethod(
     cat("FlowHist object '")
     cat(fhFile(object)); cat("'\n")
     cat("channel: "); cat(fhChannel(object)); cat("\n")
+    cat(fhSamples(object)); cat(" samples"); cat("\n")
     cat("bins: "); cat(fhBins(object)); cat("\n")
     cat("linearity: "); cat(fhLinearity(object)); cat("\n")
     cat("debris: "); cat(fhDebris(object)); cat("\n")

@@ -226,10 +226,13 @@ erf <- function(x) {
 #' in the model fitting doesn't make an appreciable difference in my tests
 #' so far, so I've left it simple.
 #' 
-#' @param a1,a2,b1,b2 area parameters
-#' @param Ma,Mb curve mean parameter
-#' @param Sa,Sb curve standard deviation parameter
+#' @param a1,a2,b1,b2,c1,c2 area parameters
+#' @param Ma,Mb,Mc curve mean parameter
+#' @param Sa,Sb,Sc curve standard deviation parameter
 #' @param xx vector of histogram intensities
+#' @param d numeric, the ratio of G2/G1 peak means. When linearity is
+#'   fixed, this is set to 2. Otherwise, it is fit as a model parameter
+#'   bounded between 1.9 and 2.1.
 #' @return NA
 #' @author Tyler Smith
 #' @name gauss
@@ -382,9 +385,11 @@ fhComponents$brB <-
 
 fhComponents$fC1 <-
   ModelComponent(
-    name = "fC1", color = "yellow",
+    name = "fC1", color = "darkgreen",
     desc = "Gaussian curve for G1 peak of sample C",
-    includeTest = function(fh) {FALSE},
+    includeTest = function(fh) {
+      nrow(fhPeaks(fh)) > 2 && fhSamples(fh) > 2
+      },
     func = function(c1, Mc, Sc, xx){
       (c1 / (sqrt(2 * pi) * Sc) * exp(-((xx - Mc)^2)/(2 * Sc^2)))
     },
@@ -399,11 +404,11 @@ fhComponents$fC1 <-
 
 fhComponents$fC2 <-
   ModelComponent(
-    name = "fC2", color = "yellow",
+    name = "fC2", color = "darkgreen",
     desc = "Gaussian curve for G2 peak of sample C",
     includeTest = function(fh){
-      FALSE
-      ##(fhPeaks(fh)[3, "mean"] * 2) <= nrow(fhHistData(fh))
+      nrow(fhPeaks(fh)) > 2 && fhSamples(fh) > 2 &&
+        (fhPeaks(fh)[3, "mean"] * 2) <= nrow(fhHistData(fh))
     },
     func = function(c2, Mc, Sc, d, xx){
       (c2 / (sqrt(2 * pi) * Sc * 2) *
