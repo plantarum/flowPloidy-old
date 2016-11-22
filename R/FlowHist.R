@@ -682,45 +682,50 @@ tabulateFlowHist <- function(fh, file = NULL){
 }
 
 exFlowHist <- function(fh){
+  df <- data.frame(file = fhFile(fh), channel = fhChannel(fh),
+                   components = paste(names(fhComps(fh)), collapse = ";"),
+                   totalEvents = sum(fhHistData(fh)$intensity))
+  
   if(length(fhNLS(fh)) > 0){
+    df$countsA = fhCounts(fh)$firstPeak$value
+    df$countsB = ifelse(is.null(fhCounts(fh)$secondPeak$value), NA,
+                        fhCounts(fh)$secondPeak$value)
+    df$countsC = ifelse(is.null(fhCounts(fh)$thirdPeak$value), NA,
+                        fhCounts(fh)$thirdPeak$value)
+    df$sizeA = coef(fhNLS(fh))["Ma"]
+    df$sizeB = coef(fhNLS(fh))["Mb"]
+    df$sizeC = coef(fhNLS(fh))["Mc"]
+    df$cvA = fhCV(fh)$CVa
+    df$cvB = ifelse(is.null(fhCV(fh)$CVb), NA, fhCV(fh)$CVb)
+    df$cvC = ifelse(is.null(fhCV(fh)$CVc), NA, fhCV(fh)$CVc)
+    df$AB = unlist(ifelse(is.null(fhCV(fh)$AB[1]), NA,
+                          fhCV(fh)$AB[1]))
+    df$ABse = unlist(ifelse(is.null(fhCV(fh)$AB[2]), NA,
+                            fhCV(fh)$AB[2]))
+
+    df$AC = unlist(ifelse(is.null(fhCV(fh)$AC[1]), NA,
+                          fhCV(fh)$AC[1]))
+    df$ACse = unlist(ifelse(is.null(fhCV(fh)$AC[2]), NA,
+                            fhCV(fh)$AC[2]))
+
+    df$BC = unlist(ifelse(is.null(fhCV(fh)$BC[1]), NA,
+                                     fhCV(fh)$BC[1]))
+    df$BCse = unlist(ifelse(is.null(fhCV(fh)$BC[2]), NA,
+                            fhCV(fh)$BC[2]))
+
+    df$rcs = fhRCS(fh)
+
     if(fhLinearity(fh) == "variable")
-      linearity = coef(fhNLS(fh))["d"]
+      df$linearity = coef(fhNLS(fh))["d"]
     else
-      linearity = NA
-             
-    data.frame(file = fhFile(fh), channel = fhChannel(fh),
-             components = paste(names(fhComps(fh)), collapse = ";"),
-             totalEvents = sum(fhHistData(fh)$intensity),
-             countsA = fhCounts(fh)$firstPeak$value,
-             countsB = ifelse(is.null(fhCounts(fh)$secondPeak$value), NA,
-                              fhCounts(fh)$secondPeak$value),
-             sizeA = coef(fhNLS(fh))["Ma"],
-             sizeB = coef(fhNLS(fh))["Mb"],
-             cvA = fhCV(fh)$CVa,
-             cvB = ifelse(is.null(fhCV(fh)$CVb), NA, fhCV(fh)$CVb),
-             ratioAB = unlist(ifelse(is.null(fhCV(fh)$CI[1]), NA,
-                                     fhCV(fh)$CI[1])),
-             ratioSE = unlist(ifelse(is.null(fhCV(fh)$CI[2]), NA,
-                                     fhCV(fh)$CI[2])),
-             rcs = fhRCS(fh),
-             linearity = linearity,
-             row.names = NULL)
+      df$linearity = NA
+    row.names(df) = NULL
   } else {
-    data.frame(file = fhFile(fh), channel = fhChannel(fh),
-               components = paste(names(fhComps(fh)), collapse = ";"),
-               totalEvents = sum(fhHistData(fh)$intensity),
-               countsA = NA,
-               countsB = NA,
-               sizeA = NA,
-               sizeB = NA,
-               cvA = NA,
-               cvB = NA,
-               ratioAB = NA,
-               ratioSE = NA,
-               rcs = NA,
-               linearity = NA,
-               row.names = NULL)
+    df[, c("countsA", "countsB", "countsC", "sizeA", "sizeB", "sizeC",
+           "cvA", "cvB", "cvC", "AB", "ABse", "AC", "ACse", "BC", "BCse",
+           "rcs", "linearity", "row.names")] <- NA 
   }
+  df
 }
 
 #################################################
