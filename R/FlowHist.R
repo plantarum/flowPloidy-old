@@ -557,6 +557,16 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
            y = grconvertY(0.7, from = "npc", to = "user"))
       abline(v = 2 * fhInit(x)$Mb, col = "orange", lwd = 0.5)
     }
+    if(! is.null(fhInit(x)$Mc)){
+      abline(v = fhInit(x)$Mc, col = "darkgreen", lwd = 2)
+      points(x = fhInit(x)$Mc,
+             y = fhHistData(x)$intensity[round(fhInit(x)$Mc, 0)],
+             cex = 2, pch = 16, col = "darkgreen")
+      text(paste("Samp. C: ", round(fhInit(x)$Mc, 0)), cex = 1,
+           x = fhInit(x)$Mc, col = "darkgreen", pos = 2,
+           y = grconvertY(0.5, from = "npc", to = "user"))
+      abline(v = 2 * fhInit(x)$Mc, col = "darkgreen", lwd = 0.5)
+    }
   }
 
   if(nls & (length(fhNLS(x)) > 0)){
@@ -564,33 +574,49 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
     lines(x = fhHistData(x)$xx[-(1:(fhStart(fhHistData(x)$intensity) -
                                     1))], 
           y = predict(fhNLS(x)), col = 2)
+    yPos <- grconvertY(0.95, from = "npc", to = "user") # starting pos
+    lHt <- par("cxy")[2]                # line height
     text(paste("RCS: ", round(dat$rcs, 3)), cex = 1, pos = 2,
          x = grconvertX(0.975, from = "npc", to = "user"),
-         y = grconvertY(0.95, from = "npc", to = "user"))
+         y = yPos)
+    yPos <- yPos - lHt
     text(paste("A: ", round(dat$sizeA, 1), "/",
                round(dat$countsA, 1), "/",
                round(dat$cvA, 3)),
          cex = 1, pos = 2, col = "blue",
          x = grconvertX(0.975, from = "npc", to = "user"),
-         y = grconvertY(0.95, from = "npc", to = "user") - par("cxy")[2])
-    text(paste("B: ", round(dat$sizeB, 1), "/",
-               round(dat$countsB, 1), "/",
-               round(dat$cvB, 3)),
-         cex = 1, pos = 2, col = "orange",
-         x = grconvertX(0.975, from = "npc", to = "user"),
-         y = grconvertY(0.95, from = "npc", to = "user") -
-           par("cxy")[2] * 2)
-    text(paste("A/B:  ",
-               round(dat$ratioAB, 3)), cex = 1, pos = 2,
-         x = grconvertX(0.975, from = "npc", to = "user"),
-         y = grconvertY(0.95, from = "npc", to = "user") -
-           par("cxy")[2] * 3)
-    text(paste("Linearity: ",
-               round(dat$linearity, 3)), cex = 1,
+         y = yPos)
+    yPos <- yPos - lHt
+
+    if(!is.na(dat$sizeB)){
+      text(paste("B: ", round(dat$sizeB, 1), "/",
+                 round(dat$countsB, 1), "/",
+                 round(dat$cvB, 3)),
+           cex = 1, pos = 2, col = "orange",
+           x = grconvertX(0.975, from = "npc", to = "user"),
+           y = yPos)
+      yPos <- yPos - lHt
+    }
+
+    if(!is.na(dat$sizeC)){
+      text(paste("C: ", round(dat$sizeC, 1), "/",
+                 round(dat$countsC, 1), "/",
+                 round(dat$cvC, 3)),
+           cex = 1, pos = 2, col = "darkgreen",
+           x = grconvertX(0.975, from = "npc", to = "user"),
+           y = yPos)
+      yPos <- yPos - lHt
+    }
+
+    if(is.na(dat$linearity))
+      linval <- "fixed"
+    else
+      linval <- round(dat$linearity, 3)
+    
+    text(paste("Linearity: ", linval), cex = 1,
          pos = 2, 
          x = grconvertX(0.975, from = "npc", to = "user"),
-         y = grconvertY(0.95, from = "npc", to = "user") -
-           par("cxy")[2] * 4) 
+         y = yPos) 
 
   }
 
