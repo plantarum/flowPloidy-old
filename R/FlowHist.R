@@ -539,33 +539,36 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE, ...){
     lines(x = fhHistData(x)$xx,
           y = yy, 
           col = "grey", lwd = 1, lty = 5)
-    abline(v = fhInit(x)$Ma, col = "blue", lwd = 2)
     points(x = fhInit(x)$Ma,
            y  = fhHistData(x)$intensity[round(fhInit(x)$Ma, 0)],
-           cex = 2, pch = 16, col = "blue")
-    text(paste("Samp. A: ", round(fhInit(x)$Ma, 0)), cex = 1,
+           cex = 1.5, pch = 16, col = "blue")
+    text("A", cex = 1,
          x = fhInit(x)$Ma, col = "blue", pos = 2,
-         y = grconvertY(0.9, from = "npc", to = "user"))
-    abline(v = 2 * fhInit(x)$Ma, col = "blue", lwd = 0.5)
+         y = fhHistData(x)$intensity[round(fhInit(x)$Ma, 0)])
+    points(x = 2 * fhInit(x)$Ma,
+           y = fhHistData(x)$intensity[round(2 * fhInit(x)$Ma, 0)],
+           col = "blue", cex = 1.5)
     if(! is.null(fhInit(x)$Mb)){
-      abline(v = fhInit(x)$Mb, col = "orange", lwd = 2)
       points(x = fhInit(x)$Mb,
              y = fhHistData(x)$intensity[round(fhInit(x)$Mb, 0)],
-             cex = 2, pch = 16, col = "orange")
-      text(paste("Samp. B: ", round(fhInit(x)$Mb, 0)), cex = 1,
+             cex = 1.5, pch = 16, col = "orange")
+      text("B", cex = 1,
            x = fhInit(x)$Mb, col = "orange", pos = 2,
-           y = grconvertY(0.7, from = "npc", to = "user"))
-      abline(v = 2 * fhInit(x)$Mb, col = "orange", lwd = 0.5)
+           y = fhHistData(x)$intensity[round(fhInit(x)$Mb, 0)])
+      points(x = 2 * fhInit(x)$Mb,
+             y = fhHistData(x)$intensity[round(2 * fhInit(x)$Mb, 0)],
+             col = "orange", cex = 1.5)
     }
     if(! is.null(fhInit(x)$Mc)){
-      abline(v = fhInit(x)$Mc, col = "darkgreen", lwd = 2)
       points(x = fhInit(x)$Mc,
              y = fhHistData(x)$intensity[round(fhInit(x)$Mc, 0)],
-             cex = 2, pch = 16, col = "darkgreen")
-      text(paste("Samp. C: ", round(fhInit(x)$Mc, 0)), cex = 1,
+             cex = 1.5, pch = 16, col = "darkgreen")
+      text("C", cex = 1,
            x = fhInit(x)$Mc, col = "darkgreen", pos = 2,
-           y = grconvertY(0.5, from = "npc", to = "user"))
-      abline(v = 2 * fhInit(x)$Mc, col = "darkgreen", lwd = 0.5)
+           y = fhHistData(x)$intensity[round(fhInit(x)$Mc, 0)])
+      points(x = 2 * fhInit(x)$Mc,
+             y = fhHistData(x)$intensity[round(2 * fhInit(x)$Mc, 0)],
+             col = "green", cex = 1.5)
     }
   }
 
@@ -897,20 +900,7 @@ findPeaks <- function(fh, window = 20, smooth = 20){
                 i <- i - 1
               }
           }}
-    ## while(i < length(dat) && dat[i] < max(dat[c(i - 1, i + 1)], TRUE)){
-    ##   if(dat[i + 1] > dat[i -1]){
-    ##     isMax[i] <- FALSE
-    ##     isMax[i + 1] <- TRUE
-    ##     i <- i + 1
-    ##   } else {
-    ##     if(i == 1)
-    ##       break
-    ##     else {
-    ##       isMax[i] <- FALSE
-    ##       isMax[i - 1] <- TRUE
-    ##       i <- i - 1
-    ##     }
-    ##   }}}
+
   maxVals <- dat[isMax]                 # use the raw data for heights 
   res <- cbind(mean = (1:length(dat))[isMax], height = maxVals)
   fhPeaks(fh) <- res
