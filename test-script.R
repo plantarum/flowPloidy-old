@@ -8,7 +8,7 @@ paul <- FlowHist(file = "~/research/flow/paul/Lob.leaf.Jul2414.L02.002",
 
 dort <- batchFlowHist(list.files("~/research/flow/paul/dort-set",
                                  full.names=TRUE),
-                      channel = "FL2.A")
+                      channel = "FL2.A", samples = 3)
 dortB <- browseFlowHist(dort)
 
 az <- batchFlowHist(list.files("~/research/flow/paul/az-set",
