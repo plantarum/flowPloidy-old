@@ -1,3 +1,18 @@
+Changes in version 1.1.2 (2016-11-22)
+-------------------------------------
+
+User Visible Changes
+
+    * Added support for processing files with two standards present. A new
+      argument is available for functions that load FCS files
+      (batchFlowHist, FlowHist etc.): `samples`. By default this is set to
+      2, to account for a single unknown and an co-chopped standard. If you
+      are using two co-chopped standards (or really anytime you have three
+      distinct samples chopped together), set samples = 3. This can also be
+      changed interactively in the browseFlowHist GUI.
+
+    * The layout of the browseFlowHist GUI has been re-arranged somewhat to
+      accomodate the new features mentioned above.
 
 Changes in version 1.1.1 (2016-10-26)
 -------------------------------------
