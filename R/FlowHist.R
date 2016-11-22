@@ -1000,7 +1000,7 @@ cleanPeaks <- function(fh, window = 20){
 
   rownames(out) <- NULL
 
-  out <- out[1:min(2, nrow(out)), , drop = FALSE]
+  ## out <- out[1:min(2, nrow(out)), , drop = FALSE]
   if(nrow(out) > 1){
     out <- out[order(out[, "mean"]), ]
   }
@@ -1094,7 +1094,8 @@ pickPeaks <- function(fh){
 #' @param debris character, either "SC", the default, or "MC", to set the
 #'   debris model component to the Single-Cut or Multi-Cut models.
 #' @param analyze boolean, if TRUE the updated model will be analyzed
-#'   immediately 
+#'   immediately
+#' @param samples integer, the number of samples in the data
 #' @return a \code{\link{FlowHist}} object with the modified values of linearity
 #'   and/or debris, and, if \code{analyze} was TRUE, a new NLS fitting
 #' @author Tyler Smith
