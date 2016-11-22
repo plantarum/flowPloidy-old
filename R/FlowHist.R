@@ -1108,10 +1108,11 @@ pickPeaks <- function(fh){
 #' plot(fh1)
 #' @export
 updateFlowHist <- function(fh, linearity = NULL, debris = NULL,
-                           analyze = TRUE){
+                           samples = NULL, analyze = TRUE){
   ## keep the existing peaks, as they may have already been tweaked by the
   ## user
   message("updating FlowHist")
+
   if(!is.null(linearity))
     if(linearity %in% c("fixed", "variable"))
       fhLinearity(fh) <- linearity
@@ -1122,8 +1123,14 @@ updateFlowHist <- function(fh, linearity = NULL, debris = NULL,
       fhDebris(fh) <- debris
     else
       stop("Invalid debris value")
+  if(!is.null(samples))
+    if(samples > 0 && samples < 4)
+      fhSamples(fh) <- as.integer(samples)
+    else
+      stop("Invalid sample number: must be between 1 and 3")
   
   fh <- resetFlowHist(fh, from = "comps")
+  
   fh <- addComponents(fh)
   fh <- makeModel(fh)
   fh <- getInit(fh)
