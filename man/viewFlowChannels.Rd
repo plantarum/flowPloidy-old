@@ -17,7 +17,7 @@ Displays the column names present in an FCS file
 }
 \details{
 A convenience function for viewing column names in an FCS, in order to
-  select one for the \code{channel} argument in \code{FlowHist}.
+  select one for the \code{channel} argument in \code{\link{FlowHist}}.
 }
 \examples{
 library(flowPloidyData) 
@@ -27,6 +27,6 @@ viewFlowChannels(flowPloidyFiles[1])
 Tyler Smith
 }
 \seealso{
-\code{FlowHist}
+\code{\link{FlowHist}}
 }
 
