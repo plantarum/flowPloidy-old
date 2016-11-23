@@ -1,4 +1,4 @@
-## Functions for creating and viewing FlowHist objects.
+# Functions for creating and viewing FlowHist objects.
 
 #' @importFrom flowCore read.FCS exprs pData parameters
 NULL
@@ -225,6 +225,16 @@ fhModel <- function(fh){
 `fhModel<-` <- function(fh, value){
   fh@model <- value
   fh
+}
+
+fhSpecialParams <- function(fh){
+  names(getSpecialParams(fh))
+}
+
+fhArgs <- function(fh){
+  res <- names(formals(fhModel(fh)))
+  res <- res[!res %in% fhSpecialParams(fh)]
+  res
 }
 
 fhNLS <- function(fh){

@@ -38,10 +38,9 @@ fhAnalyze <- function(fh){
 fhDoNLS <- function(fh){
   model <- fhModel(fh)
   form1 <- paste("intensity ~ model(")
-  args <- as.character(names(formals(fhModel(fh))))
-  args <- args[!args %in% c("", names(getSpecialParams(fh)))]
+  args <- fhArgs(fh)
   pLims <- fhLimits(fh)
-  pLims <- pLims[! names(pLims) %in% names(getSpecialParams(fh))]
+  pLims <- pLims[! names(pLims) %in% fhSpecialParams(fh)]
   lLims <- sapply(pLims, function(x) x[1])
   uLims <- sapply(pLims, function(x) x[2])
   args <- paste(args, collapse = ", ")
