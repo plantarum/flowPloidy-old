@@ -8,10 +8,10 @@
 \usage{
 FlowHist(file, channel, bins = 256, window = 20, smooth = 20,
   pick = FALSE, linearity = "variable", debris = "SC", opts = list(),
-  analyze = TRUE, gate = logical())
+  samples = 2, gate = logical(), analyze = TRUE)
 
 batchFlowHist(files, channel, bins = 256, verbose = TRUE, window = 20,
-  smooth = 20, linearity = "variable", debris = "SC")
+  smooth = 20, linearity = "variable", debris = "SC", samples = 2)
 }
 \arguments{
 \item{file}{character, the name of the file to load}
@@ -40,6 +40,9 @@ debris model component to the Single-Cut or Multi-Cut models.}
 
 \item{opts}{list, currently not used, but maybe in future as a way to
 test additional model options}
+
+\item{samples}{integer; the number of samples in the data. Default is 2
+(unknown and standard), but can be set to 3 if two standards are  used.}
 
 \item{analyze}{boolean, if TRUE the  model will be analyzed
 immediately}
@@ -134,6 +137,10 @@ model.}
 fitted model.}
 
 \item{\code{RCS}}{numeric, the residual chi-square for the fitted model.}
+
+\item{\code{samples}}{numeric, the number of samples included in the data. The
+default is 2 (i.e., unknown and standard), but if two standards are
+used it should be set to 3.}
 }}
 \examples{
 library(flowPloidyData) 

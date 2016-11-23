@@ -2,7 +2,7 @@
 #'   actionButton plotOutput reactive eventReactive shinyApp titlePanel
 #'   sidebarLayout sidebarPanel htmlOutput fluidRow tags mainPanel
 #'   renderPrint renderTable renderPlot renderText column observe runApp
-#'   stopApp wellPanel updateRadioButtons
+#'   stopApp wellPanel updateRadioButtons HTML numericInput
 NULL
 
 #' @importFrom utils str
@@ -38,56 +38,54 @@ browseFlowHist <- function(flowList, debug = FALSE){
   
   initialDebris <- fhDebris(.fhList[[1]])
 
+  initialSamples <- fhSamples(.fhList[[1]])
+  
   if(debug) message("init Debris: ", initialDebris)
   
   ui <- fluidPage(
-    ## sidebarLayout(
-    fluidRow(
-      column(2,
-             fluidRow(
-               wellPanel(
-                 htmlOutput("flowNumber", align = "center"),
-                 tags$br(),
-                 fluidRow(
-                   column(6, actionButton("prev", label = "Prev")),
-                   column(6, actionButton("nxt", label = "Next")))))
-             ),
-      ## tags$hr(),
-      column(10,
-             fluidRow(
-               column(3, 
-                      wellPanel(radioButtons(inputId = "peakPicker",
-                                             label = "Move peak:", 
-                                             choices = list("A" = "A",
-                                                            "B" = "B"), 
-                                             selected = "A", inline =
-                                                               TRUE))), 
-               column(4,
-                      wellPanel(radioButtons(inputId = "linearity",
-                                             label = "Linearity",
-                                             choices =
-                                               list("Fixed" = "ON",
-                                                    "Variable" = "OFF"), 
-                                             inline = TRUE,
-                                             selected =
-                                               initialLinearity))),
-               column(3,
-                      wellPanel(radioButtons(inputId = "debris",
-                                             label = "Debris Model",
-                                             choices =
-                                               list("MC" = "MC",
-                                                    "SC" = "SC"),  
-                                             inline = TRUE,
-                                             selected =
-                                               initialDebris))),
-               column(2,
-                      tags$br(),
-                      actionButton("exit", label = "Return to R")
-                      )))),
-        ## tags$hr(),
-    fluidRow(
-      plotOutput("init", click = "pointPicker"))
-  )
+    tags$head(
+           tags$style(HTML("
+      .col-sm-3 {
+          max-width: 300px;
+      }
+    "))
+  ),
+    sidebarLayout(
+      sidebarPanel(width = 3,
+        tags$br(),
+        fluidRow(
+          column(5, htmlOutput("flowNumber", align = "center")),
+          column(3, actionButton("prev", label = "Prev")),
+          column(4, actionButton("nxt", label = "Next"))),
+        tags$hr(),
+        fluidRow(
+          column(4, 
+                 numericInput('sampSelect', 'Samples',
+                              initialSamples, min = 2, max = 3)),
+          column(8,
+                 radioButtons(inputId = "peakPicker",
+                              label = "Move peak:", 
+                              choices = list("A" = "A",
+                                             "B" = "B",
+                                             "C" = "C"), 
+                              selected = "A", inline = TRUE))),
+        tags$hr(),
+        radioButtons(inputId = "linearity",
+                     label = "Linearity",
+                     choices = list("Fixed" = "ON",
+                                    "Variable" = "OFF"), 
+                     inline = TRUE, selected = initialLinearity),
+        tags$hr(),
+        radioButtons(inputId = "debris",
+                     label = "Debris Model",
+                     choices = list("MC" = "MC", "SC" = "SC"),  
+                     inline = TRUE, selected = initialDebris),
+        tags$br(),
+        actionButton("exit", label = "Return to R")
+        ),
+      mainPanel(
+        plotOutput("init", click = "pointPicker"))
+    ))
 
   server <- function(input, output, session){
     nxtVal <- 0
@@ -110,13 +108,24 @@ browseFlowHist <- function(flowList, debug = FALSE){
         if(debug) message(prefix, "peak Picker")
         if(input$peakPicker == "A"){
           .fhList[[fhCurrent()]] <<-
-            selectPeaks(.fhList[[fhCurrent()]], xPt[1,1],
-                        fhInit(.fhList[[fhCurrent()]])$Mb) 
+            selectPeaks(.fhList[[fhCurrent()]],
+                        xPt[1,1],
+                        fhInit(.fhList[[fhCurrent()]])$Mb,
+                        fhInit(.fhList[[fhCurrent()]])$Mc) 
           .fhList[[fhCurrent()]] <<- fhAnalyze(.fhList[[fhCurrent()]])
-        } else {
+        } else if(input$peakPicker == "B"){
           .fhList[[fhCurrent()]] <<-
             selectPeaks(.fhList[[fhCurrent()]],
-                        fhInit(.fhList[[fhCurrent()]])$Ma, xPt[1,1])
+                        fhInit(.fhList[[fhCurrent()]])$Ma,
+                        xPt[1,1],
+                        fhInit(.fhList[[fhCurrent()]])$Mc)
+          .fhList[[fhCurrent()]] <<- fhAnalyze(.fhList[[fhCurrent()]])
+        } else if(input$peakPicker == "C"){
+          .fhList[[fhCurrent()]] <<-
+            selectPeaks(.fhList[[fhCurrent()]],
+                        fhInit(.fhList[[fhCurrent()]])$Ma,
+                        fhInit(.fhList[[fhCurrent()]])$Mb,
+                        xPt[1,1])
           .fhList[[fhCurrent()]] <<- fhAnalyze(.fhList[[fhCurrent()]])
         }
       }
@@ -156,10 +165,28 @@ browseFlowHist <- function(flowList, debug = FALSE){
             updateFlowHist(.fhList[[fhCurrent()]], 
                            debris = "MC", analyze = TRUE)
         }
+
       if(debug){
         prefix <<- substring(prefix, 2)
         message(prefix, "returning from fhInitPlot")
       }
+
+      if(input$sampSelect == 2 &&
+         fhSamples(.fhList[[fhCurrent()]]) != 2)
+      {
+        if(debug) message(prefix, "switching to 2 samples")
+        .fhList[[fhCurrent()]] <<-
+          updateFlowHist(.fhList[[fhCurrent()]],
+                         samples = 2, analyze = TRUE)
+      }
+      else 
+        if(input$sampSelect == 3 &&
+           fhSamples(.fhList[[fhCurrent()]]) != 3) { 
+          if(debug) message(prefix, "switching to 3 samples")
+          .fhList[[fhCurrent()]] <<-
+            updateFlowHist(.fhList[[fhCurrent()]], 
+                           samples = 3, analyze = TRUE)
+        }
       
       .fhList[[fhCurrent()]]
     })
@@ -173,19 +200,6 @@ browseFlowHist <- function(flowList, debug = FALSE){
         nxtVal <<- input$nxt
         if(.fhI < length(.fhList))
           .fhI <<- .fhI + 1
-
-        if(debug) message(prefix, "updating linval forward")
-        if(fhLinearity(.fhList[[.fhI]]) == "fixed"){
-          if(debug) message(prefix, "turning button ON")
-          linVal <- "ON"
-        } else {
-          if(debug) message(prefix, "turning button OFF")
-          linVal <- "OFF"
-        }
-        
-        updateRadioButtons(session, "linearity",
-                           selected = linVal)
-
       }
 
       if(input$prev > prevVal){
@@ -195,30 +209,25 @@ browseFlowHist <- function(flowList, debug = FALSE){
         prevVal <<- input$prev
         if(.fhI > 1)
           .fhI <<- .fhI - 1
-
-        if(debug) message(prefix, "updating linval backwards")
-        if(fhLinearity(.fhList[[.fhI]]) == "fixed"){
-          if(debug) message(prefix, "turning button ON")
-          linVal <- "ON"
-        } else {
-          if(debug) message(prefix, "turning button OFF")
-          linVal <- "OFF"
-        }
-        updateRadioButtons(session, "linearity",
-                           selected = linVal)
       }
-
-      if(fhDebris(.fhList[[.fhI]]) == "SC" ){
-        if(debug) message(prefix, "Switching to SC")
-        debVal <- "SC"
+      
+      if(fhLinearity(.fhList[[.fhI]]) == "fixed"){
+        if(debug) message(prefix, "turning button ON")
+        linVal <- "ON"
       } else {
-        if(debug) message(prefix, "Switching to MC")
-        debVal <- "MC"
+        if(debug) message(prefix, "turning button OFF")
+        linVal <- "OFF"
       }
       
+      updateRadioButtons(session, "linearity",
+                         selected = linVal)
+
       updateRadioButtons(session, "debris",
-                         selected = debVal)
-      
+                         selected = fhDebris(.fhList[[.fhI]]))
+
+      updateNumericInput(session, "sampSelect",
+                         value = fhSamples(.fhList[[.fhI]])) 
+
       if(debug){
               prefix <<- substring(prefix, 2)
               message(prefix, "returning from fhCurrent")
@@ -255,14 +264,18 @@ browseFlowHist <- function(flowList, debug = FALSE){
   return(.fhList)
 }
 
-selectPeaks <- function(fh, peakA, peakB){
+selectPeaks <- function(fh, peakA, peakB, peakC){
   pA <- fhHistData(fh)[round(peakA, 0), c("xx", "intensity")]
   if(is.numeric(peakB))                 
     pB <- fhHistData(fh)[round(peakB, 0), c("xx", "intensity")]
+  if(is.numeric(peakC))                 
+    pC <- fhHistData(fh)[round(peakC, 0), c("xx", "intensity")]
   
   fh <- resetFlowHist(fh)
 
-  if(is.numeric(peakB))
+  if(is.numeric(peakC))
+    newPeaks <- as.matrix(rbind(pA, pB, pC))
+  else if(is.numeric(peakB))
     newPeaks <- as.matrix(rbind(pA, pB))
   else
     newPeaks <- as.matrix(rbind(pA))

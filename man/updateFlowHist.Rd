@@ -4,7 +4,8 @@
 \alias{updateFlowHist}
 \title{updateFlowHist}
 \usage{
-updateFlowHist(fh, linearity = NULL, debris = NULL, analyze = TRUE)
+updateFlowHist(fh, linearity = NULL, debris = NULL, samples = NULL,
+  analyze = TRUE)
 }
 \arguments{
 \item{fh}{a \code{\link{FlowHist}} object}
@@ -15,6 +16,8 @@ as a model parameter.}
 
 \item{debris}{character, either "SC", the default, or "MC", to set the
 debris model component to the Single-Cut or Multi-Cut models.}
+
+\item{samples}{integer, the number of samples in the data}
 
 \item{analyze}{boolean, if TRUE the updated model will be analyzed
 immediately}
