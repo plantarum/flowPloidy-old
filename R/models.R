@@ -648,6 +648,8 @@ fhComponents$AG <-
 ## Model Building Functions ##
 ##############################
 addComponents <- function(fh){
+  ## make sure old components are flushed!
+  fh <- resetFlowHist(fh, from = "comps")
   for(i in fhComponents)
     if(mcIncludeTest(i)(fh)){
       newComp <- i
