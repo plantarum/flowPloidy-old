@@ -41,6 +41,15 @@ browseFlowHist <- function(flowList, debug = FALSE){
   initialSamples <- fhSamples(.fhList[[1]])
   
   if(debug) message("init Debris: ", initialDebris)
+
+  raw <- exprs(fhRaw(.fhList[[.fhI]]))
+  chan1 <- fhChannel(.fhList[[.fhI]])
+  chan2 <- viewFlowChannels(.fhList[[.fhI]])[2]      # why 2? sometimes, by
+                                        # chance, the 
+                                        # second column is the SS value.
+  
+  initGateData <- data.frame(x = raw[, chan1],
+                             y = raw[, chan2] / raw[, chan1]) 
   
   ui <- fluidPage(
     tags$head(
@@ -48,55 +57,85 @@ browseFlowHist <- function(flowList, debug = FALSE){
       .col-sm-3 {
           max-width: 300px;
       }
-    "))
-  ),
-    sidebarLayout(
-      sidebarPanel(width = 3,
-        tags$br(),
-        fluidRow(
-          column(5, htmlOutput("flowNumber", align = "center")),
-          column(3, actionButton("prev", label = "Prev")),
-          column(4, actionButton("nxt", label = "Next"))),
-        tags$hr(),
-        fluidRow(
-          column(4, 
-                 numericInput('sampSelect', 'Samples',
-                              initialSamples, min = 2, max = 3)),
-          column(8,
-                 radioButtons(inputId = "peakPicker",
-                              label = "Move peak:", 
-                              choices = list("A" = "A",
-                                             "B" = "B",
-                                             "C" = "C"), 
-                              selected = "A", inline = TRUE))),
-        tags$hr(),
-        radioButtons(inputId = "linearity",
-                     label = "Linearity",
-                     choices = list("Fixed" = "ON",
-                                    "Variable" = "OFF"), 
-                     inline = TRUE, selected = initialLinearity),
-        tags$hr(),
-        radioButtons(inputId = "debris",
-                     label = "Debris Model",
-                     choices = list("MC" = "MC", "SC" = "SC"),  
-                     inline = TRUE, selected = initialDebris),
-        tags$br(),
-        actionButton("exit", label = "Return to R")
-        ),
-      mainPanel(
-        plotOutput("init", click = "pointPicker"))
-    ))
+    "))),
+    fluidRow(
+      column(width = 3,
+             wellPanel(
+               fluidRow(
+                 column(5, htmlOutput("flowNumber", align = "center")),
+                 column(3, actionButton("prev", label = "Prev")),
+                 column(4, actionButton("nxt", label = "Next"))),
+               tags$hr(),
+               fluidRow(
+                 column(4, 
+                        numericInput('sampSelect', 'Samples',
+                                     initialSamples, min = 2, max = 3)),
+                 column(8,
+                        radioButtons(inputId = "peakPicker",
+                                     label = "Move peak:", 
+                                     choices = list("A" = "A",
+                                                    "B" = "B",
+                                                    "C" = "C"), 
+                                     selected = "A", inline = TRUE))),
+               tags$hr(),
+               radioButtons(inputId = "linearity",
+                            label = "Linearity",
+                            choices = list("Fixed" = "ON",
+                                           "Variable" = "OFF"), 
+                            inline = TRUE, selected = initialLinearity),
+               tags$hr(),
+               radioButtons(inputId = "debris",
+                            label = "Debris Model",
+                            choices = list("MC" = "MC", "SC" = "SC"),  
+                            inline = TRUE, selected = initialDebris),
+               tags$br(),
+               actionButton("exit", label = "Return to R")
+             )),
+      column(width = 9,
+             plotOutput("init", click = "pointPicker"))
+    ),
+    fluidRow(
+      column(width = 3,
+             wellPanel(
+               selectInput('xcol', 'X Variable',
+                           viewFlowChannels(.fhList[[.fhI]]), 
+                         selected = chan1),
+               selectInput('ycol', 'Y Variable',
+                           viewFlowChannels(.fhList[[.fhI]]), 
+                         selected = chan2),
+               sliderInput("yrange", "Zoom", min = 0, ticks = FALSE,
+                           step =
+                             max(4, ceiling(log(max(initGateData$y))))/20, 
+                           max = max(4, ceiling(log(max(initGateData$y)))),
+                           value = 0, dragRange = FALSE))),
+      column(3,
+             plotOutput("gatePlot",
+                        click = "gatePlot_click",
+                        brush = brushOpts(
+                          id = "gatePlot_brush",
+                          resetOnNew = TRUE
+                        )
+                        )
+             ),
+      column(3,
+             plotOutput("gatedData")
+             ),
+      column(3,
+             plotOutput("gateResiduals")))
 
+  )
+    
   server <- function(input, output, session){
     nxtVal <- 0
     prevVal <- 0
     prefix <- ""
     
-    fhInitPlot <- reactive({
+    fhPlot <- reactive({
       if(debug){
-        message(prefix, "fhInitPlot ",
+        message(prefix, "fhPlot ",
                         environmentName(environment())) 
         prefix <<- paste(prefix, " ", sep = "")}
+
       tmp <- .fhList[[fhCurrent()]]
       if(debug) message(prefix, "fh@linearity = ", fhLinearity(tmp))
       if(debug) message(prefix, "button value = ", input$linearity)
@@ -168,7 +207,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
 
       if(debug){
         prefix <<- substring(prefix, 2)
-        message(prefix, "returning from fhInitPlot")
+        message(prefix, "returning from fhPlot")
       }
 
       if(input$sampSelect == 2 &&
@@ -187,6 +226,13 @@ browseFlowHist <- function(flowList, debug = FALSE){
             updateFlowHist(.fhList[[fhCurrent()]], 
                            samples = 3, analyze = TRUE)
         }
+
+      dat <- gateData()
+      bp <- brushedPoints(dat, xvar = names(dat)[1], yvar = names(dat)[2],
+                          input$gatePlot_brush, allRows = TRUE)$selected_
+      if(sum(bp) > 0){
+        .fhList[[fhCurrent()]] <<- setGate(.fhList[[fhCurrent()]], bp)
+      }
       
       .fhList[[fhCurrent()]]
     })
@@ -218,7 +264,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
         if(debug) message(prefix, "turning button OFF")
         linVal <- "OFF"
       }
-      
+
       updateRadioButtons(session, "linearity",
                          selected = linVal)
 
@@ -247,7 +293,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
         message(prefix, "renderPlot")
         prefix <<- paste(prefix, " ", sep = "")
       }
-      plot(fhInitPlot(), init = TRUE, nls = TRUE, comps = TRUE)
+      plot(fhPlot(), init = TRUE, nls = TRUE, comps = TRUE)
       if(debug){
         prefix <<- substring(prefix, 2)
         message(prefix, "returning from renderPlot")
@@ -257,6 +303,49 @@ browseFlowHist <- function(flowList, debug = FALSE){
     output$flowNumber <- renderText({
       if(debug) message(prefix, "flowNumber")
       paste("File", tags$b(fhCurrent()), "of", length(.fhList))
+    })
+
+    observe({
+      dat <- gateData()
+      updateSliderInput(session, "yrange", 
+                        step = max(4, ceiling(log(max(dat[,2]))))/20,
+                        max = max(4, ceiling(log(max(dat[,2])))),
+                        value = 0, min = 0)
+    })
+
+    ##browser()                           
+    gateData <- reactive({
+      chan1 <- input$xcol
+      chan2 <- input$ycol
+
+      raw <<- exprs(fhRaw(.fhList[[fhCurrent()]]))
+      
+      df <- data.frame(x = raw[, chan1],
+                       y = raw[, chan2] / raw[, chan1])
+      names(df) <- c(chan1, paste(chan1, chan2, sep = "/"))
+      df
+    })
+
+    output$gatePlot <- renderPlot({
+      dat <- gateData()
+      plot(dat, ylim = c(0, exp(log(max(dat[, 2])) - input$yrange)),
+           pch = 16, col = "#05050510") 
+    })
+
+    output$gateResiduals <- renderPlot({
+      plotResid(fhHistPlot(), main = "Gate Residuals")
+    })
+
+    output$gatedData <- renderPlot({
+      plot(fhHistPlot(), nls = FALSE, init = FALSE, comps = FALSE)
+    })
+    
+    fhHistPlot <- reactive({
+      dat <- gateData()
+      bp <- brushedPoints(dat, xvar = names(dat)[1], yvar = names(dat)[2],
+                          input$gatePlot_brush, allRows = TRUE)$selected_
+      .fhList[[fhCurrent()]] <<- setGate(.fhList[[fhCurrent()]], bp)
+      .fhList[[fhCurrent()]]
     })
 
   }
