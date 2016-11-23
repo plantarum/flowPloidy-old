@@ -14,6 +14,11 @@ User Visible Changes
     * The layout of the browseFlowHist GUI has been re-arranged somewhat to
       accomodate the new features mentioned above.
 
+    * The linearity flag is over-ridden when no G2 peaks are present.
+      Without a G2 peak, linearity can't be properly fit. This leads to
+      linear gradients, because the linearity parameter is used in the
+      S-phase components.
+
 Changes in version 1.1.1 (2016-10-26)
 -------------------------------------
 
