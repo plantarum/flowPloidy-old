@@ -736,7 +736,7 @@ exFlowHist <- function(fh){
   } else {
     df[, c("countsA", "countsB", "countsC", "sizeA", "sizeB", "sizeC",
            "cvA", "cvB", "cvC", "AB", "ABse", "AC", "ACse", "BC", "BCse",
-           "rcs", "linearity", "row.names")] <- NA 
+           "rcs", "linearity")] <- NA 
   }
   df
 }
