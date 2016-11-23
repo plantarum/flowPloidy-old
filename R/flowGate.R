@@ -21,9 +21,18 @@ plotResid <- function(fh, main = fhFile(fh), ...){
           col = "lightgray", border = NA)
 }
 
-setGate <- function(fh, gate){
+setGate <- function(fh, gate, refresh = TRUE){
   fhGate(fh) <- gate
   fh <- setBins(fh, fhBins(fh))
+  if(refresh){
+    fh <- findPeaks(fh)
+    fh <- cleanPeaks(fh)
+    fh <- addComponents(fh)
+    fh <- setLimits(fh)
+    fh <- makeModel(fh)
+    fh <- getInit(fh)
+    fh <- fhAnalyze(fh)
+  }
   fh
 }
 
