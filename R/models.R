@@ -661,6 +661,11 @@ addComponents <- function(fh){
         newLims[[j]] <- lims[[j]]
       fhLimits(fh) <- newLims
     }
+  if(fhLinearity(fh) == "variable")
+    if(sum(c("fA2", "fB2", "fC2") %in% names(fhComps(fh))) == 0){
+      message("No G2 peaks, using fixed linearity")
+      fh <- updateFlowHist(fh, linearity = "fixed")
+    }
   fh
 }
 
