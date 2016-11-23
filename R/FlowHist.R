@@ -475,8 +475,8 @@ setMethod(
     if(length(object@CV) > 0){
     cvs <- c(fhCV(object)$CVa, fhCV(object)$CVb)
     if(!is.null(fhCV(object)$CVb)){
-      cat(paste("\nRatio Peak A / Peak B: ", round(fhCV(object)$CI[1], 3),
-                ", SE: ", round(fhCV(object)$CI[2], 5), sep = ""))
+      cat(paste("\nRatio Peak A / Peak B: ", round(fhCV(object)$AB[1], 3),
+                ", SE: ", round(fhCV(object)$AB[2], 5), sep = ""))
     }
   }
 
