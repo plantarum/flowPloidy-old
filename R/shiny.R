@@ -13,7 +13,8 @@ NULL
 #'
 #' Visually assess histogram fits
 #' @title browseFlowHist
-#' @param flowList a list of \code{\link{FlowHist}} objects
+#' @param flowList either a \code{\link{FlowHist}} object, or a list of
+#'   \code{\link{FlowHist}} objects 
 #' @param debug boolean, turns on debugging messages
 #' @return Returns the list of \code{\link{FlowHist}} objects, updated by any
 #'   changes made in the GUI.
@@ -26,6 +27,11 @@ NULL
 #' }
 #' @export
 browseFlowHist <- function(flowList, debug = FALSE){
+  if(class(flowList) == "FlowHist"){
+    flowList <- list(flowList)
+    names(flowList) <- fhFile(flowList[[1]])
+  }
+  
   .fhI <- 1
   .fhList <- flowList
 
