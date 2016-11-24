@@ -23,8 +23,10 @@
   - [X] update vignettes and examples to use flowPloidyData package to
     access sample files
 
-* Features [6/8]
-  - [ ] Gating
+* Features [7/8]
+  - [ ] Need to provide an interface for visualizing an existing gate in
+    the browseFlowHist UI.
+  - [X] Gating
   - [ ] save and restore parameter estimates from nls
   - [X] S-phase
     After considering broadened trapezoids and broadened rectangles, and
@@ -50,3 +52,4 @@
   - [X] export results as a table for saving to disk
   - [X] batch processing
   - [X] switch to nlsLM for regressions
+    
