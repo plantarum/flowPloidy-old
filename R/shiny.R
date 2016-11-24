@@ -2,7 +2,8 @@
 #'   actionButton plotOutput reactive eventReactive shinyApp titlePanel
 #'   sidebarLayout sidebarPanel htmlOutput fluidRow tags mainPanel
 #'   renderPrint renderTable renderPlot renderText column observe runApp
-#'   stopApp wellPanel updateRadioButtons HTML numericInput
+#'   stopApp wellPanel updateRadioButtons HTML numericInput sliderInput
+#'   brushOpts 
 NULL
 
 #' @importFrom utils str
