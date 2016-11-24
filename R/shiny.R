@@ -114,7 +114,8 @@ browseFlowHist <- function(flowList, debug = FALSE){
                            step =
                              max(4, ceiling(log(max(initGateData$y))))/20, 
                            max = max(4, ceiling(log(max(initGateData$y)))),
-                           value = 0, dragRange = FALSE))),
+                           value = 0, dragRange = FALSE),
+               actionButton("setGate", label = "Set Gate"))),
       column(3,
              plotOutput("gatePlot",
                         click = "gatePlot_click",
@@ -135,6 +136,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
   server <- function(input, output, session){
     nxtVal <- 0
     prevVal <- 0
+    setGateVal <- 0
     prefix <- ""
     
     fhPlot <- reactive({
@@ -143,6 +145,19 @@ browseFlowHist <- function(flowList, debug = FALSE){
                         environmentName(environment())) 
         prefix <<- paste(prefix, " ", sep = "")}
 
+      if(input$setGate > setGateVal){
+        if(debug) message(prefix, "moving forwards to ", .fhI + 1)
+        setGateVal <<- input$setGate
+        dat <- gateData()
+        bp <- brushedPoints(dat, xvar = names(dat)[1],
+                            yvar = names(dat)[2], input$gatePlot_brush,
+                            allRows = TRUE)$selected_
+        if(sum(bp) == 0) bp <- logical()
+        
+        .fhList[[fhCurrent()]] <<- setGate(.fhList[[fhCurrent()]], bp) 
+      }
+
+      
       tmp <- .fhList[[fhCurrent()]]
       if(debug) message(prefix, "fh@linearity = ", fhLinearity(tmp))
       if(debug) message(prefix, "button value = ", input$linearity)
@@ -234,17 +249,17 @@ browseFlowHist <- function(flowList, debug = FALSE){
                            samples = 3, analyze = TRUE)
         }
 
-      dat <- gateData()
-      bp <- brushedPoints(dat, xvar = names(dat)[1], yvar = names(dat)[2],
-                          input$gatePlot_brush, allRows = TRUE)$selected_
-      if(sum(bp) > 0){
-        .fhList[[fhCurrent()]] <<- setGate(.fhList[[fhCurrent()]], bp)
-      }
       
       .fhList[[fhCurrent()]]
     })
 
     fhCurrent <- reactive({
+      ## fhCurrent returns the index of the currently active FlowHist
+      ## object in fhList.
+
+      ## When moving to a new FlowHist object, fhCurrent checks that the
+      ## settings for linearity, debris model and sample number are updated
+      ## according to the values in the new FlowHist object.
       if(debug) {
         message(prefix, "fhCurrent, starting at ", .fhI)
         prefix <<- paste(prefix, " ", sep = "")}
@@ -315,8 +330,8 @@ browseFlowHist <- function(flowList, debug = FALSE){
     observe({
       dat <- gateData()
       updateSliderInput(session, "yrange", 
-                        step = max(4, ceiling(log(max(dat[,2]))))/20,
-                        max = max(4, ceiling(log(max(dat[,2])))),
+                        step = max(6, ceiling(log(max(dat[,2]))))/20,
+                        max = max(6, ceiling(log(max(dat[,2])))),
                         value = 0, min = 0)
     })
 
@@ -334,7 +349,16 @@ browseFlowHist <- function(flowList, debug = FALSE){
     })
 
     output$gatePlot <- renderPlot({
+      forceChange <- input$setGate
       dat <- gateData()
+      if(isGated(.fhList[[fhCurrent()]])){
+      plot(dat, ylim = c(0, exp(log(max(dat[, 2])) - input$yrange)),
+           type = 'n')
+      points(dat[!fhGate(.fhList[[fhCurrent()]]), ], pch = 16,
+             col = "#05050510")
+      points(dat[fhGate(.fhList[[fhCurrent()]]), ], pch = 16,
+             col = "#80000010") 
+      } else
       plot(dat, ylim = c(0, exp(log(max(dat[, 2])) - input$yrange)),
            pch = 16, col = "#05050510") 
     })
@@ -348,11 +372,11 @@ browseFlowHist <- function(flowList, debug = FALSE){
     })
     
     fhHistPlot <- reactive({
+      ## returns the gated data, but doesn't set it permanently!
       dat <- gateData()
       bp <- brushedPoints(dat, xvar = names(dat)[1], yvar = names(dat)[2],
                           input$gatePlot_brush, allRows = TRUE)$selected_
-      .fhList[[fhCurrent()]] <<- setGate(.fhList[[fhCurrent()]], bp)
-      .fhList[[fhCurrent()]]
+      setGate(.fhList[[fhCurrent()]], bp, refresh = FALSE)
     })
 
   }
