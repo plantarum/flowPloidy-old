@@ -348,9 +348,15 @@ browseFlowHist <- function(flowList, debug = FALSE){
       df
     })
 
+    ################
+    ## Gate Plots ##
+    ################
+
+    gateMar <- c(5, 4, 1, 0)
     output$gatePlot <- renderPlot({
       forceChange <- input$setGate
       dat <- gateData()
+      op = par(mar = gateMar)
       if(isGated(.fhList[[fhCurrent()]])){
       plot(dat, ylim = c(0, exp(log(max(dat[, 2])) - input$yrange)),
            type = 'n')
@@ -359,16 +365,23 @@ browseFlowHist <- function(flowList, debug = FALSE){
       points(dat[fhGate(.fhList[[fhCurrent()]]), ], pch = 16,
              col = "#80000010") 
       } else
-      plot(dat, ylim = c(0, exp(log(max(dat[, 2])) - input$yrange)),
-           pch = 16, col = "#05050510") 
+        plot(dat, ylim = c(0, exp(log(max(dat[, 2])) - input$yrange)),
+             pch = 16, col = "#05050510")
+
+      par(op)
     })
 
     output$gateResiduals <- renderPlot({
+      op = par(mar = gateMar)
       plotResid(fhHistPlot(), main = "Gate Residuals")
+      par(op)
     })
 
     output$gatedData <- renderPlot({
-      plot(fhHistPlot(), nls = FALSE, init = FALSE, comps = FALSE)
+      op = par(mar = gateMar)
+      plot(fhHistPlot(), nls = FALSE, init = FALSE, comps = FALSE,
+           main = "")
+      par(op)
     })
     
     fhHistPlot <- reactive({

@@ -548,7 +548,7 @@ setMethod(
 #' @export
 plotFH <- function(fh, main = fhFile(fh), ...){
   ## plots the raw data for a FlowHist object
-  plot(fhHistData(fh)$intensity, type = 'n', main = fhFile(fh),
+  plot(fhHistData(fh)$intensity, type = 'n', main = main,
        ylab = "Intensity", xlab = fhChannel(fh), ...)
   polygon(x = c(fhHistData(fh)$xx, max(fhHistData(fh)$xx) + 1),
           y = c(fhHistData(fh)$intensity, 0),
