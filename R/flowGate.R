@@ -12,9 +12,9 @@ plotGate <- function(fh, x, y, ...){
   plot(dat, pch = 16, col = "#05050510")
 }
 
-plotResid <- function(fh, main = fhFile(fh), ...){
+plotResid <- function(fh, main = fhFile(fh), sub = "Gate Residuals", ...){
   plot(fhHistData(fh)$gateResid, type = 'n', main = main,
-       sub = "Gate Resdiduals", xlab = fhChannel(fh), ylab = "Intensity",
+       sub = sub, xlab = fhChannel(fh), ylab = "Intensity",
        ...) 
   polygon(x = c(fhHistData(fh)$xx, max(fhHistData(fh)$xx) + 1),
           y = c(fhHistData(fh)$gateResid, 0),

@@ -57,17 +57,28 @@ browseFlowHist <- function(flowList, debug = FALSE){
   ui <- fluidPage(
     tags$head(
            tags$style(HTML("
-      .col-sm-3 {
+      .sidepanel {
           max-width: 300px;
+      }
+      #gatePlot, #gatedData, #gateResiduals {
+          max-height: 300px;
       }
     "))),
     fluidRow(
       column(width = 3,
+             tags$div(class = "sidepanel", 
              wellPanel(
                fluidRow(
-                 column(5, htmlOutput("flowNumber", align = "center")),
-                 column(3, actionButton("prev", label = "Prev")),
-                 column(4, actionButton("nxt", label = "Next"))),
+                 column(4,
+                        actionButton("exit", label = "Exit")),
+                 column(8, 
+                        fluidRow(
+                          column(12, htmlOutput("flowNumber",
+                                                align = "center"))),
+                        fluidRow(
+                          column(5, actionButton("prev", label = "Prev")),
+                          column(7, actionButton("nxt",
+                                                 label = "Next"))))),
                tags$hr(),
                fluidRow(
                  column(4, 
@@ -90,28 +101,30 @@ browseFlowHist <- function(flowList, debug = FALSE){
                radioButtons(inputId = "debris",
                             label = "Debris Model",
                             choices = list("MC" = "MC", "SC" = "SC"),  
-                            inline = TRUE, selected = initialDebris),
-               tags$br(),
-               actionButton("exit", label = "Return to R")
-             )),
+                            inline = TRUE, selected = initialDebris)
+             ))),
       column(width = 9,
              plotOutput("fhHistogram", click = "pointPicker"))
     ),
     fluidRow(
       column(width = 3,
+             tags$div(class = "sidepanel",
              wellPanel(
-               selectInput('xcol', 'X Variable',
-                           viewFlowChannels(.fhList[[.fhI]]), 
-                         selected = chan1),
-               selectInput('ycol', 'Y Variable',
-                           viewFlowChannels(.fhList[[.fhI]]), 
-                         selected = chan2),
+               fluidRow(
+                 column(6,
+                        selectInput('xcol', 'X Variable',
+                                    viewFlowChannels(.fhList[[.fhI]]), 
+                                    selected = chan1)),
+                 column(6,
+                        selectInput('ycol', 'Y Variable',
+                                    viewFlowChannels(.fhList[[.fhI]]), 
+                                    selected = chan2))),
                sliderInput("yrange", "Zoom", min = 0, ticks = FALSE,
                            step =
                              max(4, ceiling(log(max(initGateData$y))))/20, 
                            max = max(4, ceiling(log(max(initGateData$y)))),
                            value = 0, dragRange = FALSE),
-               actionButton("setGate", label = "Set Gate"))),
+               actionButton("setGate", label = "Set Gate")))),
       column(width = 3,
              plotOutput("gatePlot",
                         click = "gatePlot_click",
@@ -291,7 +304,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
 
     output$gateResiduals <- renderPlot({
       op = par(mar = gateMar)
-      plotResid(fhHistPlot(), main = "Gate Residuals")
+      plotResid(fhHistPlot(), main = "Gate Residuals", sub = "")
       par(op)
     })
 

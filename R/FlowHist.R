@@ -627,7 +627,7 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE,
     yPos <- yPos - lHt
     text(paste("A: ", round(dat$sizeA, 1), "/",
                round(dat$countsA, 1), "/",
-               round(dat$cvA, 3)),
+               round(100 * dat$cvA, 1)),
          cex = 1, pos = 2, col = "blue",
          x = grconvertX(0.975, from = "npc", to = "user"),
          y = yPos)
@@ -636,7 +636,7 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE,
     if(!is.na(dat$sizeB)){
       text(paste("B: ", round(dat$sizeB, 1), "/",
                  round(dat$countsB, 1), "/",
-                 round(dat$cvB, 3)),
+                 round(100 * dat$cvB, 1)),
            cex = 1, pos = 2, col = "orange",
            x = grconvertX(0.975, from = "npc", to = "user"),
            y = yPos)
@@ -646,7 +646,7 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE,
     if(!is.na(dat$sizeC)){
       text(paste("C: ", round(dat$sizeC, 1), "/",
                  round(dat$countsC, 1), "/",
-                 round(dat$cvC, 3)),
+                 round(100 * dat$cvC, 1)),
            cex = 1, pos = 2, col = "darkgreen",
            x = grconvertX(0.975, from = "npc", to = "user"),
            y = yPos)
