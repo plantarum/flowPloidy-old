@@ -1,20 +1,17 @@
 library(devtools)
 library(flowPloidyData)
-library(flowCore)
 load_all()
 
 batch1 <- batchFlowHist(flowPloidyFiles, channel="FL3.INT.LIN")
 b1b <- browseFlowHist(batch1)
 
 
-gateFlowHist(fh1)
-
 vac2 <-
   FlowHist(
     file = "~/research/flow/gating examples/Vac.ON.DL.14.026",
     channel = "FL2.A")
 
-gateFlowHist(vac2)
+browseFlowHist(vac2)
 
 dat <- exprs(fhRaw(vac2))
 thresh <- 0.05

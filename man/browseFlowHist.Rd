@@ -7,7 +7,8 @@
 browseFlowHist(flowList, debug = FALSE)
 }
 \arguments{
-\item{flowList}{a list of \code{\link{FlowHist}} objects}
+\item{flowList}{either a \code{\link{FlowHist}} object, or a list of
+\code{\link{FlowHist}} objects}
 
 \item{debug}{boolean, turns on debugging messages}
 }

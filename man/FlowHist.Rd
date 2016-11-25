@@ -44,12 +44,12 @@ test additional model options}
 \item{samples}{integer; the number of samples in the data. Default is 2
 (unknown and standard), but can be set to 3 if two standards are  used.}
 
-\item{analyze}{boolean, if TRUE the  model will be analyzed
-immediately}
-
 \item{gate}{logical, a vector of events to exclude from analysis. In
 normal usage this will be set interactively, not as a function
 argument.}
+
+\item{analyze}{boolean, if TRUE the  model will be analyzed
+immediately}
 
 \item{files}{character, a vector of file names to load}
 
