@@ -3,7 +3,7 @@
 #'   sidebarLayout sidebarPanel htmlOutput fluidRow tags mainPanel
 #'   renderPrint renderTable renderPlot renderText column observe runApp
 #'   stopApp wellPanel updateRadioButtons HTML numericInput sliderInput
-#'   brushOpts 
+#'   brushOpts eventReactive
 NULL
 
 #' @importFrom utils str
@@ -36,10 +36,6 @@ browseFlowHist <- function(flowList, debug = FALSE){
   .fhList <- flowList
 
   initialLinearity <- fhLinearity(.fhList[[1]])
-  if(initialLinearity == "fixed")
-    initialLinearity <- "ON"
-  else
-    initialLinearity <- "OFF"
 
   if(debug) message("init Linearity: ", initialLinearity)
   
@@ -87,8 +83,8 @@ browseFlowHist <- function(flowList, debug = FALSE){
                tags$hr(),
                radioButtons(inputId = "linearity",
                             label = "Linearity",
-                            choices = list("Fixed" = "ON",
-                                           "Variable" = "OFF"), 
+                            choices = list("Fixed" = "fixed",
+                                           "Variable" = "variable"), 
                             inline = TRUE, selected = initialLinearity),
                tags$hr(),
                radioButtons(inputId = "debris",
@@ -134,8 +130,8 @@ browseFlowHist <- function(flowList, debug = FALSE){
   )
     
   server <- function(input, output, session){
-    nxtVal <- 0
-    prevVal <- 0
+    rv <- reactiveValues(fhI = 1)
+
     setGateVal <- 0
     prefix <- ""
     
@@ -146,7 +142,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
         prefix <<- paste(prefix, " ", sep = "")}
 
       if(input$setGate > setGateVal){
-        if(debug) message(prefix, "moving forwards to ", .fhI + 1)
+        if(debug) message(prefix, "Setting gate")
         setGateVal <<- input$setGate
         dat <- gateData()
         bp <- brushedPoints(dat, xvar = names(dat)[1],
@@ -191,8 +187,8 @@ browseFlowHist <- function(flowList, debug = FALSE){
         }
       }
 
-      if(debug) message(prefix, "checking linearity for element ", .fhI)
-      if(input$linearity == "ON" &&
+      if(debug) message(prefix, "checking linearity for element ", rv$fhI)
+      if(input$linearity == "fixed" &&
          fhLinearity(.fhList[[fhCurrent()]]) != "fixed")
       {
         if(debug) message(prefix, "fixing linearity")
@@ -201,7 +197,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
                          linearity = "fixed", analyze = TRUE)
       }
       else 
-        if(input$linearity == "OFF" &&
+        if(input$linearity == "variable" &&
            fhLinearity(.fhList[[fhCurrent()]]) != "variable") { 
           if(debug) message(prefix, "modeling linearity")
           .fhList[[fhCurrent()]] <<-
@@ -253,56 +249,39 @@ browseFlowHist <- function(flowList, debug = FALSE){
       .fhList[[fhCurrent()]]
     })
 
-    fhCurrent <- reactive({
-      ## fhCurrent returns the index of the currently active FlowHist
-      ## object in fhList.
 
-      ## When moving to a new FlowHist object, fhCurrent checks that the
-      ## settings for linearity, debris model and sample number are updated
-      ## according to the values in the new FlowHist object.
-      if(debug) {
-        message(prefix, "fhCurrent, starting at ", .fhI)
-        prefix <<- paste(prefix, " ", sep = "")}
-      if(input$nxt > nxtVal){
-        if(debug) message(prefix, "moving forwards to ", .fhI + 1)
-        nxtVal <<- input$nxt
-        if(.fhI < length(.fhList))
-          .fhI <<- .fhI + 1
-      }
+    ## eventReactive would require an invalid reactive value in the
+    ## expression to trigger the calculation; observeEvent will simply do
+    ## the calculation:
+    fhNext <- observeEvent(input$nxt, {
+      if(rv$fhI < length(.fhList))
+        rv$fhI <- rv$fhI + 1
+    })
 
-      if(input$prev > prevVal){
-        if(debug){
-          message(prefix, "moving backwards to ", .fhI - 1)
-        }
-        prevVal <<- input$prev
-        if(.fhI > 1)
-          .fhI <<- .fhI - 1
-      }
+    fhPrev <- observeEvent(input$prev, {
+      if(rv$fhI > 1)
+        rv$fhI <- rv$fhI - 1
+    })
+
+    fhCurrent <- eventReactive(rv$fhI, {
+      ## When navigating to a new FlowHist object via Prev/Next, update the
+      ## radio buttons before passing the new object index on to plotting
+      ## and analysis. The reaction chain is:
+
+      ## fhNext/fhPrev --> rv$fhI --> fhCurrent --> fhPlot
       
-      if(fhLinearity(.fhList[[.fhI]]) == "fixed"){
-        if(debug) message(prefix, "turning button ON")
-        linVal <- "ON"
-      } else {
-        if(debug) message(prefix, "turning button OFF")
-        linVal <- "OFF"
-      }
-
       updateRadioButtons(session, "linearity",
-                         selected = linVal)
+                         selected = fhLinearity(.fhList[[rv$fhI]]))
 
       updateRadioButtons(session, "debris",
-                         selected = fhDebris(.fhList[[.fhI]]))
+                         selected = fhDebris(.fhList[[rv$fhI]]))
 
       updateNumericInput(session, "sampSelect",
-                         value = fhSamples(.fhList[[.fhI]])) 
+                         value = fhSamples(.fhList[[rv$fhI]]))
 
-      if(debug){
-              prefix <<- substring(prefix, 2)
-              message(prefix, "returning from fhCurrent")
-      }
-      .fhI
-    })
-    
+      rv$fhI
+    })      
+      
     observe({
       if(input$exit > 0){
         stopApp()
