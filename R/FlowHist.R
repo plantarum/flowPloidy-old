@@ -550,7 +550,7 @@ plotFH <- function(fh, main = fhFile(fh), ...){
   ## plots the raw data for a FlowHist object
   plot(fhHistData(fh)$intensity, type = 'n', main = main,
        ylab = "Intensity", xlab = fhChannel(fh), ...)
-  polygon(x = c(fhHistData(fh)$xx, max(fhHistData(fh)$xx) + 1),
+  polygon(x = c(fhHistData(fh)$xx, 0),
           y = c(fhHistData(fh)$intensity, 0),
           col = "lightgray", border = NA)
 }
@@ -807,11 +807,17 @@ setBins <- function(fh, bins = 256){
 
   ## Extract the data channel
   chanDat <- exprs(fhRaw(fh))[, fhChannel(fh)]
+  if(sum(is.na(chanDat) > 0))
+    stop("Error: Flow Data contains missing values!")
   gateResid <- NULL
   gate <- fhGate(fh)
   ## remove the top bin - this contains clipped values representing all
   ## out-of-range data, not true values
   chanTrim <- chanDat[chanDat < max(chanDat)]
+  ## remove values < 0
+  ## negative values are artifacts produced by compensation in the
+  ## instrument
+  chanTrim <- chanTrim[chanTrim > 0]
   gate <- gate[chanDat < max(chanDat)]
   
   if(sum(fhGate(fh)) != 0){
@@ -825,7 +831,8 @@ setBins <- function(fh, bins = 256){
   ## aggregate bins: combine maxBins into bins via hist
   binAg <- floor(maxBins / bins)
 
-  histBins <- hist(chanTrim, breaks = seq(from = 0, to = 1024, by = binAg),
+  histBins <- hist(chanTrim, breaks = seq(from = 0, to = maxBins,
+                                          by = binAg),
                    plot = FALSE)
 
   intensity <- histBins$counts
