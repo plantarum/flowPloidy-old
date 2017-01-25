@@ -2,6 +2,20 @@ library(devtools)
 library(flowPloidyData)
 load_all()
 
+viewFlowChannels("~/research/flow/160930_HCT116_Ca-new.fcs")
+viewFlowChannels("~/research/flow/160930_HCT116_Ca.fcs")
+old <- flowCore::read.FCS("~/research/flow/160930_HCT116_Ca.fcs",
+                          dataset = 1, alter.names = TRUE)
+
+new <- flowCore::read.FCS("~/research/flow/160930_HCT116_Ca-new.fcs",
+                          dataset = 1, alter.names = TRUE)
+
+hct <- FlowHist("~/research/flow/160930_HCT116_Ca-new.fcs",
+                channel = "Propidium.Iodide.A")
+
+hct <- FlowHist("~/research/flow/160930_HCT116_Ca-new.fcs",
+                channel = "Propidium.Iodide.A", bins = 512)
+
 batch1 <- batchFlowHist(flowPloidyFiles, channel="FL3.INT.LIN")
 b1b <- browseFlowHist(batch1)
 
