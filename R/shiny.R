@@ -83,7 +83,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
                fluidRow(
                  column(4, 
                         numericInput('sampSelect', 'Samples',
-                                     initialSamples, min = 2, max = 3)),
+                                     initialSamples, min = 1, max = 3)),
                  column(8,
                         radioButtons(inputId = "peakPicker",
                                      label = "Move peak:", 

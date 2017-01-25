@@ -124,7 +124,7 @@ fhDoCV <- function(fh){
     CVb <- coef(fhNLS(fh))["Sb"]/coef(fhNLS(fh))["Mb"]
     AB <- deltaMethod(fhNLS(fh), "Ma/Mb")
   } else {
-    CVb <- CI <- NULL
+    CVb <- CI <- AB <- NULL
   }
 
   if("fC1" %in% names(fhComps(fh))){
