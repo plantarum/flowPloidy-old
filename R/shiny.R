@@ -53,6 +53,9 @@ browseFlowHist <- function(flowList, debug = FALSE){
   
   initGateData <- data.frame(x = raw[, chan1],
                              y = raw[, chan2] / raw[, chan1]) 
+
+  maxY <- max(initGateData$y[!is.infinite(initGateData$y)],
+              na.rm = TRUE)
   
   ui <- fluidPage(
     tags$head(
@@ -121,8 +124,8 @@ browseFlowHist <- function(flowList, debug = FALSE){
                                     selected = chan2))),
                sliderInput("yrange", "Zoom", min = 0, ticks = FALSE,
                            step =
-                             max(4, ceiling(log(max(initGateData$y))))/20, 
-                           max = max(4, ceiling(log(max(initGateData$y)))),
+                             max(4, ceiling(log(maxY)))/20, 
+                           max = max(4, ceiling(log(maxY))),
                            value = 0, dragRange = FALSE),
                actionButton("setGate", label = "Set Gate")))),
       column(width = 3,
@@ -260,9 +263,10 @@ browseFlowHist <- function(flowList, debug = FALSE){
 
     observe({
       dat <- gateData()
+      maxY <- max(dat[,2][!is.infinite(dat[,2])])
       updateSliderInput(session, "yrange", 
-                        step = max(6, ceiling(log(max(dat[,2]))))/20,
-                        max = max(6, ceiling(log(max(dat[,2])))),
+                        step = max(6, ceiling(log(maxY)))/20,
+                        max = max(6, ceiling(log(maxY))),
                         value = 0, min = 0)
     })
 
@@ -288,16 +292,18 @@ browseFlowHist <- function(flowList, debug = FALSE){
       forceChange <- input$setGate
       dat <- gateData()
       op = par(mar = gateMar)
-      if(isGated(.fhList[[fhCurrent()]])){
-      plot(dat, ylim = c(0, exp(log(max(dat[, 2])) - input$yrange)),
+      ## need to account for infinite values when setting plot ranges.
+      ## Infinite values generated when the dat[, 1] contains 0 values. 
+      maxY <- max(dat[! is.infinite(dat[,2]), 2])
+      plot(dat, ylim = c(0, exp(log(maxY) - input$yrange)),
            type = 'n')
-      points(dat[!fhGate(.fhList[[fhCurrent()]]), ], pch = 16,
-             col = "#05050510")
-      points(dat[fhGate(.fhList[[fhCurrent()]]), ], pch = 16,
-             col = "#80000010") 
+      if(isGated(.fhList[[fhCurrent()]])){
+        points(dat[!fhGate(.fhList[[fhCurrent()]]), ], pch = 16,
+               col = "#05050510")
+        points(dat[fhGate(.fhList[[fhCurrent()]]), ], pch = 16,
+               col = "#80000010") 
       } else
-        plot(dat, ylim = c(0, exp(log(max(dat[, 2])) - input$yrange)),
-             pch = 16, col = "#05050510")
+        points(dat, pch = 16, col = "#05050510")
 
       par(op)
     })

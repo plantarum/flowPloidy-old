@@ -16,7 +16,7 @@ plotResid <- function(fh, main = fhFile(fh), sub = "Gate Residuals", ...){
   plot(fhHistData(fh)$gateResid, type = 'n', main = main,
        sub = sub, xlab = fhChannel(fh), ylab = "Intensity",
        ...) 
-  polygon(x = c(fhHistData(fh)$xx, max(fhHistData(fh)$xx) + 1),
+  polygon(x = c(fhHistData(fh)$xx, 0), ## max(fhHistData(fh)$xx) + 1),
           y = c(fhHistData(fh)$gateResid, 0),
           col = "lightgray", border = NA)
 }
