@@ -621,6 +621,12 @@ plot.FlowHist <- function(x, init = FALSE, nls = TRUE, comps = TRUE,
           y = predict(fhNLS(x)), col = 2)
     yPos <- grconvertY(0.95, from = "npc", to = "user") # starting pos
     lHt <- par("cxy")[2]                # line height
+    if(isGated(x)){
+      text("-- GATED --", cex = 1, pos = 2, col = 2,
+           x = grconvertX(0.975, from = "npc", to = "user"),
+           y = yPos)
+      yPos <- yPos - lHt
+    }
     text(paste("RCS: ", round(dat$rcs, 3)), cex = 1, pos = 2,
          x = grconvertX(0.975, from = "npc", to = "user"),
          y = yPos)
