@@ -73,23 +73,23 @@ setOldClass("nls")
 #' @param linearity character, either "variable", the default, or "fixed".
 #'   If "fixed", linearity is fixed at 2; if "variable", linearity is fit
 #'   as a model parameter.
-#' @param debris character, either "SC", the default, or "MC", to set the
-#'   debris model component to the Single-Cut or Multi-Cut models.
-#' @param analyze boolean, if TRUE the  model will be analyzed
-#'   immediately
+#' @param debris character, either "SC", the default, "MC", or "none", to
+#'   set the debris model component to the Single-Cut or Multi-Cut models,
+#'   or to not include a debris component (such as for gated data).
+#' @param analyze boolean, if TRUE the model will be analyzed immediately
 #' @param opts list, currently not used, but maybe in future as a way to
 #'   test additional model options
 #' @param window the width of the moving window used to identify local
 #'   maxima for peak detection via \code{\link{caTools::runmax}}
-#' @param smooth the width of the moving window used to reduce noise in
-#'   the histogram via \code{\link{caTools::runmean}}
+#' @param smooth the width of the moving window used to reduce noise in the
+#'   histogram via \code{\link{caTools::runmean}}
 #' @param pick boolean; if TRUE, the user will be prompted to select peaks
 #'   to use for starting values. Otherwise (the default), starting values
 #'   will be detected automatically.
 #' @param samples integer; the number of samples in the data. Default is 2
-#' (unknown and standard), but can be set to 3 if two standards are  used.
+#'   (unknown and standard), but can be set to 3 if two standards are used.
 #' @param verbose boolean; if TRUE, \code{\link{histBatch}} will list files
-#'   as it processes them. 
+#'   as it processes them.
 #' 
 #' @slot raw a flowFrame object containing the raw data from the FCS file
 #' @slot channel character, the name of the data column to use
@@ -1173,7 +1173,7 @@ updateFlowHist <- function(fh, linearity = NULL, debris = NULL,
     else
       stop("Invalid linearity value")
   if(!is.null(debris))
-    if(debris %in% c("SC", "MC"))
+    if(debris %in% c("SC", "MC", "none"))
       fhDebris(fh) <- debris
     else
       stop("Invalid debris value")

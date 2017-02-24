@@ -103,7 +103,8 @@ browseFlowHist <- function(flowList, debug = FALSE){
                tags$hr(),
                radioButtons(inputId = "debris",
                             label = "Debris Model",
-                            choices = list("MC" = "MC", "SC" = "SC"),  
+                            choices = list("MC" = "MC", "SC" = "SC",
+                                           "none" = "none"),  
                             inline = TRUE, selected = initialDebris)
              ))),
       column(width = 9,
