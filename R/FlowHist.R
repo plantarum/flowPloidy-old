@@ -395,7 +395,6 @@ resetFlowHist <- function(fh, from = "peaks"){
   fh
 }
 
-
 #' @rdname FlowHist
 #' @examples
 #' library(flowPloidyData) 
@@ -442,7 +441,6 @@ viewFlowChannels <- function(file){
   names(res) <- NULL
   res
 }
-
 
 #' @rdname FlowHist
 #' @examples
@@ -657,12 +655,14 @@ setBins <- function(fh, bins = 256){
   ## remove the top bin - this contains clipped values representing all
   ## out-of-range data, not true values
   chanTrim <- chanDat[chanDat < max(chanDat)]
+  gate <- gate[chanDat < max(chanDat)]
   ## remove values < 0
   ## negative values are artifacts produced by compensation in the
   ## instrument
-  chanTrim <- chanTrim[chanTrim > 0]
-  gate <- gate[chanDat < max(chanDat)]
-  
+  posVals <- chanTrim > 0
+  chanTrim <- chanTrim[posVals]
+  gate <- gate[posVals]
+
   if(sum(fhGate(fh)) != 0){
     gateResid <- chanTrim[!gate]
     chanTrim <- chanTrim[gate]
@@ -679,6 +679,10 @@ setBins <- function(fh, bins = 256){
                    plot = FALSE)
 
   intensity <- histBins$counts
+  ## remove the first 5 bins, eliminating noisy artifacts produced by
+  ## instrument compensation. This is below the level of actual data, so
+  ## shouldn't cause any problems with analysis.
+  intensity[1:5] <- 0
   xx <- 1:length(intensity)
   startBin <- fhStart(intensity)
   SCvals <- getSingleCutVals(intensity, xx, startBin)
