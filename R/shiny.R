@@ -28,6 +28,9 @@ NULL
 #' @export
 browseFlowHist <- function(flowList, debug = FALSE){
   if(class(flowList) == "FlowHist"){
+    ## if flowList is a single FlowHist object, wrap it in a list so we can
+    ## use the same code for processing single and multiple FlowHist
+    ## objects. Convert back to a single object on return.
     flowList <- list(flowList)
     names(flowList) <- fhFile(flowList[[1]])
   }
@@ -332,7 +335,14 @@ browseFlowHist <- function(flowList, debug = FALSE){
 
   }
   runApp(shinyApp(ui = ui, server = server))
-  return(.fhList)
+  if(length(.fhList) == 1){
+    ## if we started with one flowHist object, return one flowHist object
+    return(.fhList[[1]])
+  } else {
+    ## we started with a list of flowHist objects, return a list of
+    ## modified objects:
+    return(.fhList)
+  }
 }
 
 selectPeaks <- function(fh, peakA, peakB, peakC){
