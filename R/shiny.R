@@ -59,6 +59,9 @@ browseFlowHist <- function(flowList, debug = FALSE){
 
   maxY <- max(initGateData$y[!is.infinite(initGateData$y)],
               na.rm = TRUE)
+
+  if(is.nan(maxY))
+    maxY <- 6
   
   ui <- fluidPage(
     tags$head(
@@ -95,12 +98,6 @@ browseFlowHist <- function(flowList, debug = FALSE){
                                     label = "Peak",
                                     selected = "A",
                                     choices = list("A", "B", "C")))),
-                        ## radioButtons(inputId = "peakPicker",
-                        ##              label = "Move peak:", 
-                        ##              choices = list("A" = "A",
-                        ##                             "B" = "B",
-                        ##                             "C" = "C"), 
-                        ##              selected = "A", inline = TRUE))),
                tags$hr(),
                radioButtons(inputId = "linearity",
                             label = "Linearity",
@@ -132,9 +129,11 @@ browseFlowHist <- function(flowList, debug = FALSE){
                                     selected = chan2))),
                sliderInput("yrange", "Zoom", min = 0, ticks = FALSE,
                            step =
-                             max(4, ceiling(log(maxY)))/20, 
-                           max = max(4, ceiling(log(maxY))),
+                             max(6, ceiling(log(maxY)))/20, 
+                           max = max(6, ceiling(log(maxY)), na.rm = TRUE),
                            value = 0, dragRange = FALSE),
+               selectInput('yType', 'Y axis', c("Y/X", "Y"),
+                           selected = "Y/X"),
                actionButton("setGate", label = "Set Gate")))),
       column(width = 3,
              plotOutput("gatePlot",
@@ -271,10 +270,11 @@ browseFlowHist <- function(flowList, debug = FALSE){
 
     observe({
       dat <- gateData()
-      maxY <- max(dat[,2][!is.infinite(dat[,2])])
+      maxY <- max(dat[,2][!is.nan(dat[,2])], na.rm = TRUE)
       updateSliderInput(session, "yrange", 
-                        step = max(6, ceiling(log(maxY)))/20,
-                        max = max(6, ceiling(log(maxY))),
+                        step = max(6, ceiling(log(maxY)),
+                                   na.rm = TRUE )/20,
+                        max = max(6, ceiling(log(maxY)), na.rm = TRUE),
                         value = 0, min = 0)
     })
 
@@ -284,10 +284,16 @@ browseFlowHist <- function(flowList, debug = FALSE){
       chan2 <- input$ycol
 
       raw <<- exprs(fhRaw(.fhList[[fhCurrent()]]))
-      
+      if(input$yType == "Y/X"){
+        yvals <- raw[, chan2] / raw[, chan1]
+        yName <- paste(chan2, chan1, sep = "/")
+      } else if(input$yType == "Y"){
+        yvals <- raw[, chan2]
+        yName <- chan2
+      }
       df <- data.frame(x = raw[, chan1],
-                       y = raw[, chan2] / raw[, chan1])
-      names(df) <- c(chan1, paste(chan1, chan2, sep = "/"))
+                       y = yvals)
+      names(df) <- c(chan1, yName)
       df
     })
 
@@ -302,7 +308,7 @@ browseFlowHist <- function(flowList, debug = FALSE){
       op = par(mar = gateMar)
       ## need to account for infinite values when setting plot ranges.
       ## Infinite values generated when the dat[, 1] contains 0 values. 
-      maxY <- max(dat[! is.infinite(dat[,2]), 2])
+      maxY <- max(dat[!is.nan(dat[,2]), 2])
       plot(dat, ylim = c(0, exp(log(maxY) - input$yrange)),
            type = 'n')
       if(isGated(.fhList[[fhCurrent()]])){
