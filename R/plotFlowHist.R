@@ -19,7 +19,7 @@
 plotFH <- function(fh, main = fhFile(fh), ...){
   ## plots the raw data for a FlowHist object
   plot(fhHistData(fh)$intensity, type = 'n', main = main,
-       ylab = "Intensity", xlab = fhChannel(fh), ...)
+       ylab = "Nuclei", xlab = "Fluorescence", ...)
   polygon(x = c(fhHistData(fh)$xx, 0),
           y = c(fhHistData(fh)$intensity, 0),
           col = "lightgray", border = NA)
