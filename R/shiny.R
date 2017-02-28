@@ -72,6 +72,12 @@ browseFlowHist <- function(flowList, debug = FALSE){
       #gatePlot, #gatedData, #gateResiduals {
           max-height: 300px;
       }
+      #exit {
+          margin-top: 1.4em;
+      }
+      #setGate {
+          margin-top: 1.8em;
+      }
     "))),
     fluidRow(
       column(width = 3,
@@ -132,9 +138,13 @@ browseFlowHist <- function(flowList, debug = FALSE){
                              max(6, ceiling(log(maxY)))/20, 
                            max = max(6, ceiling(log(maxY)), na.rm = TRUE),
                            value = 0, dragRange = FALSE),
-               selectInput('yType', 'Y axis', c("Y/X", "Y"),
-                           selected = "Y/X"),
-               actionButton("setGate", label = "Set Gate")))),
+               fluidRow(
+                 column(6, 
+                        selectInput('yType', 'Y axis', c("Y/X", "Y"),
+                                    selected = "Y/X")),
+                 column(6,
+                        actionButton("setGate", label = "Set Gate"))
+               )))),
       column(width = 3,
              plotOutput("gatePlot",
                         click = "gatePlot_click",
