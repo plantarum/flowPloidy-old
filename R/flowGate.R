@@ -23,10 +23,17 @@ plotResid <- function(fh, main = fhFile(fh), sub = "Gate Residuals", ...){
 
 setGate <- function(fh, gate, refresh = TRUE){
   fhGate(fh) <- gate
+  ## We save and restore the peaks here. In most cases, you need to
+  ## relocate peaks after setBins, since you're changing the underlying
+  ## data the peaks are located in. When setting a gate, however, the peak
+  ## position is often/usually going to remain in the same place, the gate
+  ## only removes marginal noisy areas (debris). setBins could be modified
+  ## to leave the peaks unaltered, but that might lead to abuse in
+  ## situations where we want to enforce re-finding peaks.
+  peaks <- fhPeaks(fh)
   fh <- setBins(fh, fhBins(fh))
+  fhPeaks(fh) <- peaks
   if(refresh){
-    fh <- findPeaks(fh)
-    fh <- cleanPeaks(fh)
     fh <- addComponents(fh)
     fh <- setLimits(fh)
     fh <- makeModel(fh)
