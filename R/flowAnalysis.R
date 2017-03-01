@@ -24,9 +24,9 @@ NULL
 #' @export
 fhAnalyze <- function(fh){
   message("analyzing ", fhFile(fh))
-  tryVal <- try(fh <- fhDoNLS(fh))
+  tryVal <- try(fh <- fhDoNLS(fh), silent = TRUE)
   if(inherits(tryVal, "try-error")){
-    message("\n*** Analysis Failed: ", fhFile(fh), " ***\n")
+    message("    *** Model Fit Needs Attention: ", fhFile(fh), " ***")
   } else {
     fh <- fhDoCounts(fh)
     fh <- fhDoCV(fh)
