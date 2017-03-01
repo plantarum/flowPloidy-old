@@ -24,6 +24,80 @@ NULL
 
 setOldClass("nls")
 
+setClass(
+  Class = "FlowStandards",
+  representation = representation(
+    sizes = "numeric",
+    selected = "numeric",
+    peak = "character"
+  )
+)
+
+stdSizes <- function(std){
+  std@sizes
+}
+
+stdSelected <- function(std){
+  std@selected
+}
+
+`stdSelected<-` <- function(std, value){
+  if(value %in% stdSizes(std))
+    std@selected <- value
+  else
+    stop("selected standard size not in list of standard sizes!")
+  std
+}
+
+stdPeak <- function(std){
+  std@peak
+}
+
+`stdPeak<-` <- function(std, value){
+  std@peak <- value
+  std
+}
+
+setMethod(
+  f = "show",
+  signature = "FlowStandards",
+  def = function(object){
+    sizes <- stdSizes(object)
+    sizes <- sizes[!is.na(sizes)]
+    selected <- stdSelected(object)
+    peak <- stdPeak(object)
+    if(length(sizes) == 1){
+      cat("standard: ", sizes, "pg")
+    } else {
+      cat(length(sizes), "standards: ")
+      cat(sizes, "\n");
+      if(is.numeric(selected))
+        cat("set to: ", selected, "\n")
+      else
+        cat("not set\n")
+    }
+    if(is.character(peak))
+      cat("standard peak: ", peak, "\n")
+    else
+      cat("standard peak not identified\n")
+  }
+)
+
+FlowStandards <- function(sizes, selected = 0, peak = "X"){
+  if((selected != 0) && ! selected %in% sizes)
+    stop("Selected standard size must be in the sizes vector!")
+
+  if(! 0 %in% sizes)
+    sizes <- c(0, sizes)
+  
+  if(length(sizes[sizes != 0]) == 1)
+    selected <- sizes[sizes != 0]
+  
+  new("FlowStandards", sizes = sizes, selected = as.numeric(selected),
+      peak = peak)
+}
+
+
 #' FlowHist
 #'
 #' Creates a \code{\link{FlowHist}} object from an FCS file, setting up the
@@ -143,7 +217,8 @@ setClass(
     nls = "nls", ## nls output
     counts = "list", ## cell counts in each peak
     CV = "list", ## CVs
-    RCS = "numeric" ## residual chi-square
+    RCS = "numeric", ## residual chi-square
+    standards = "FlowStandards" ## a FlowStandards object
   ),
   prototype = prototype(
     ## TODO complete this?
@@ -156,12 +231,14 @@ setMethod(
   definition = function(.Object, file, channel, bins = 256,
                         window = 20, smooth = 20, pick = FALSE,
                         linearity = "variable", debris = "SC",
-                        gate = logical(), samples = 2, opts = list(),
+                        gate = logical(), samples = 2, standards = 0,
+                        opts = list(),
                         ...){ 
     .Object@raw <- read.FCS(file, dataset = 1, alter.names = TRUE)
     .Object@channel <- channel
     .Object@gate <- gate
     .Object@samples <- as.integer(samples)
+    .Object@standards <- FlowStandards(sizes = standards)
     .Object <- setBins(.Object, bins)
     if(pick){
       .Object <- pickPeaks(.Object)
@@ -360,6 +437,38 @@ fhRaw <- function(fh){
   fh
 }
 
+fhStandards <- function(fh){
+  fh@standards
+}
+
+`fhStandards<-` <- function(fh, value){
+  fh@standards <- value
+  fh
+}
+
+fhStdPeak <- function(fh){
+  stdPeak(fhStandards(fh))
+}
+
+`fhStdPeak<-` <- function(fh, value){
+  stdPeak(fhStandards(fh)) <- value
+  fh
+}
+
+fhStdSelected <- function(fh){
+  stdSelected(fhStandards(fh))
+}
+
+`fhStdSelected<-` <- function(fh, value){
+  stdSelected(fhStandards(fh)) <- value
+  fh
+}
+
+fhStdSizes <- function(fh){
+  stdSizes(fhStandards(fh))
+}
+
+
 resetFlowHist <- function(fh, from = "peaks"){
   ## Clear analysis slots
   ## Default is to clear everything from peaks onwards
@@ -404,11 +513,12 @@ resetFlowHist <- function(fh, from = "peaks"){
 FlowHist <- function(file, channel, bins = 256, window = 20, smooth = 20,
                      pick = FALSE, linearity = "variable", debris = "SC",
                      opts = list(), samples = 2, gate = logical(),
-                     analyze = TRUE){
+                     analyze = TRUE, standards = 0){
   fh <-  new("FlowHist", file = file, channel = channel,
              bins = as.integer(bins), window = window, smooth = smooth,
              pick = pick, linearity = linearity, debris = debris,
-             opts = opts, samples = samples, gate = gate)
+             opts = opts, samples = samples, gate = gate,
+             standards = standards )
   if(analyze)
     fh <- fhAnalyze(fh)
   return(fh)
@@ -453,14 +563,14 @@ viewFlowChannels <- function(file){
 #' @export
 batchFlowHist <- function(files, channel, bins = 256, verbose = TRUE,
                       window = 20, smooth = 20, linearity = "variable",
-                      debris = "SC", samples = 2){ 
+                      debris = "SC", samples = 2, ...){ 
   res <- list()
   for(i in seq_along(files)){
     if(verbose) message("processing ", files[i])
     tmpRes <- FlowHist(file = files[i], channel = channel, bins = bins,
                        window = window, smooth = smooth, pick = FALSE,
                        linearity = linearity, debris = debris,
-                       samples = samples)
+                       samples = samples, ...)
     res[[fhFile(tmpRes)]] <- tmpRes
   }              
   return(res)
@@ -571,6 +681,15 @@ exFlowHist <- function(fh){
   df <- data.frame(file = fhFile(fh), channel = fhChannel(fh),
                    components = paste(names(fhComps(fh)), collapse = ";"),
                    totalEvents = sum(fhHistData(fh)$intensity))
+  if(fhStdSelected(fh) != 0)
+    df$standard <- fhStdSelected(fh)
+  else
+    df$standard <- NA
+  
+  if(fhStdPeak(fh) == "X")
+    df$stdpeak <- NA
+  else
+    df$stdpeak <- fhStdPeak(fh)
   
   if(length(fhNLS(fh)) > 0){
     df$countsA = fhCounts(fh)$firstPeak$value
@@ -605,11 +724,20 @@ exFlowHist <- function(fh){
       df$linearity = coef(fhNLS(fh))["d"]
     else
       df$linearity = NA
+
+    if(! anyNA(c(df[, c("stdpeak", "standard")])))
+      if(df$stdpeak == "A"){
+        df$pg <- df$sizeB/df$sizeA
+      } else if(df$stdpeak == "B"){
+        df$pg <- df$sizeA/df$sizeB
+      } else {
+        df$pg <- NA
+      }
     row.names(df) = NULL
   } else {
     df[, c("countsA", "countsB", "countsC", "sizeA", "sizeB", "sizeC",
            "cvA", "cvB", "cvC", "AB", "ABse", "AC", "ACse", "BC", "BCse",
-           "rcs", "linearity")] <- NA 
+           "rcs", "linearity", "pg")] <- NA 
   }
   df
 }

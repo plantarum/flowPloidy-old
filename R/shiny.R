@@ -41,6 +41,12 @@ browseFlowHist <- function(flowList, debug = FALSE){
   initialLinearity <- fhLinearity(.fhList[[1]])
 
   if(debug) message("init Linearity: ", initialLinearity)
+
+  initialStdSelected <- fhStdSelected(.fhList[[1]])
+  message("initialStdSelected: ", initialStdSelected)
+  standardList <- fhStdSizes(.fhList[[1]])
+  message("standardList: ", standardList)
+  initialStdPeak <- fhStdPeak(.fhList[[1]])
   
   initialDebris <- fhDebris(.fhList[[1]])
 
@@ -104,6 +110,18 @@ browseFlowHist <- function(flowList, debug = FALSE){
                                     label = "Peak",
                                     selected = "A",
                                     choices = list("A", "B", "C")))),
+               fluidRow(
+                 column(6, 
+                        selectInput(inputId = 'standardSelect',
+                                    label = 'Standard Value',
+                                    choices = standardList,
+                                    selected = initialStdSelected)),
+                 column(6,
+                        selectInput(inputId = "standardPeak",
+                                    label = "Standard Peak",
+                                    selected = initialStdPeak,
+                                    choices = list("X", "A",
+                                                   "B", "C")))) ,
                tags$hr(),
                radioButtons(inputId = "linearity",
                             label = "Linearity",
@@ -190,9 +208,13 @@ browseFlowHist <- function(flowList, debug = FALSE){
 
       updateRadioButtons(session, "debris",
                          selected = fhDebris(.fhList[[rv$fhI]]))
-
       updateNumericInput(session, "sampSelect",
                          value = fhSamples(.fhList[[rv$fhI]]))
+
+      updateSelectInput(session, "standardSelect",
+                         selected = fhStdSelected(.fhList[[rv$fhI]]))
+      updateSelectInput(session, "standardPeak",
+                         selected = fhStdPeak(.fhList[[rv$fhI]]))
       rv$FH <- .fhList[[rv$fhI]]
       rv$fhI
     })      
@@ -262,7 +284,20 @@ browseFlowHist <- function(flowList, debug = FALSE){
                          samples = input$sampSelect, analyze = TRUE)
       rv$FH <- .fhList[[fhCurrent()]]
     })
-    
+
+    fhUpdateStdPeak <- observeEvent(input$standardPeak, {
+      if(fhStdPeak(.fhList[[fhCurrent()]]) != input$standardPeak)
+        fhStdPeak(.fhList[[fhCurrent()]]) <<- input$standardPeak
+    })
+
+    fhUpdateStdSelected <- observeEvent(input$standardSelect, {
+      ## don't update the fh object if the input is the same as the actual
+      ## value (may come up when switching to a new object)
+      if(fhStdSelected(.fhList[[fhCurrent()]]) != input$standardSelect)
+        fhStdSelected(.fhList[[fhCurrent()]]) <<-
+          as.numeric(input$standardSelect) 
+    })
+
     observe({
       if(input$exit > 0){
         stopApp()
