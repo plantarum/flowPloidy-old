@@ -122,18 +122,21 @@ browseFlowHist <- function(flowList, debug = FALSE){
                                     selected = initialStdPeak,
                                     choices = list("X", "A",
                                                    "B", "C")))) ,
-               tags$hr(),
-               radioButtons(inputId = "linearity",
-                            label = "Linearity",
-                            choices = list("Fixed" = "fixed",
-                                           "Variable" = "variable"), 
-                            inline = TRUE, selected = initialLinearity),
-               tags$hr(),
-               radioButtons(inputId = "debris",
-                            label = "Debris Model",
-                            choices = list("MC" = "MC", "SC" = "SC",
-                                           "none" = "none"),  
-                            inline = TRUE, selected = initialDebris)
+               fluidRow(
+                 column(6,
+                        selectInput(inputId = "linearity",
+                                    label = "Linearity",
+                                    selected = initialLinearity,
+                                    choices = list("Fixed" = "fixed",
+                                                   "Variable" =
+                                                     "variable"))),  
+                 column(6, 
+                        selectInput(inputId = "debris",
+                                    label = "Debris Model",
+                                    choices = list("MC" = "MC",
+                                                   "SC" = "SC", 
+                                                   "none" = "none"),  
+                                    selected = initialDebris)))
              ))),
       column(width = 9,
              plotOutput("fhHistogram", click = "pointPicker"))
@@ -203,10 +206,9 @@ browseFlowHist <- function(flowList, debug = FALSE){
 
       ## fhNext/fhPrev --> rv$fhI --> fhCurrent --> rv$FH
       
-      updateRadioButtons(session, "linearity",
+      updateSelectInput(session, "linearity",
                          selected = fhLinearity(.fhList[[rv$fhI]]))
-
-      updateRadioButtons(session, "debris",
+      updateSelectInput(session, "debris",
                          selected = fhDebris(.fhList[[rv$fhI]]))
       updateNumericInput(session, "sampSelect",
                          value = fhSamples(.fhList[[rv$fhI]]))
