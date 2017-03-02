@@ -267,24 +267,30 @@ browseFlowHist <- function(flowList, debug = FALSE){
     ## Not sure why the following toggle events don't respond as
     ## eventReactives?
     fhToggleLinearity <- observeEvent(input$linearity, {
-      .fhList[[fhCurrent()]] <<-
-        updateFlowHist(.fhList[[fhCurrent()]],
-                       linearity = input$linearity, analyze = TRUE)
-      rv$FH <- .fhList[[fhCurrent()]]
+      if(fhLinearity(.fhList[[fhCurrent()]]) != input$linearity){
+        .fhList[[fhCurrent()]] <<-
+          updateFlowHist(.fhList[[fhCurrent()]],
+                         linearity = input$linearity, analyze = TRUE)
+        rv$FH <- .fhList[[fhCurrent()]]
+      }
     })
     
     fhToggleDebris <- observeEvent(input$debris, {
-      .fhList[[fhCurrent()]] <<-
-        updateFlowHist(.fhList[[fhCurrent()]],
-                       debris = input$debris, analyze = TRUE)
-      rv$FH <- .fhList[[fhCurrent()]]
+      if(fhDebris(.fhList[[fhCurrent()]]) != input$debris){
+        .fhList[[fhCurrent()]] <<-
+          updateFlowHist(.fhList[[fhCurrent()]],
+                         debris = input$debris, analyze = TRUE)
+        rv$FH <- .fhList[[fhCurrent()]]
+      }
     })
 
     fhToggleSamples <- observeEvent(input$sampSelect, {
-      .fhList[[fhCurrent()]] <<-
-        updateFlowHist(.fhList[[fhCurrent()]],
+      if(fhSamples(.fhList[[fhCurrent()]]) != input$sampSelect){
+        .fhList[[fhCurrent()]] <<-
+          updateFlowHist(.fhList[[fhCurrent()]],
                          samples = input$sampSelect, analyze = TRUE)
-      rv$FH <- .fhList[[fhCurrent()]]
+        rv$FH <- .fhList[[fhCurrent()]]
+      }
     })
 
     fhUpdateStdPeak <- observeEvent(input$standardPeak, {
