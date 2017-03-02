@@ -725,14 +725,14 @@ exFlowHist <- function(fh){
     else
       df$linearity = NA
 
-    if(! anyNA(c(df[, c("stdpeak", "standard")])))
+    if(! anyNA(c(df[, c("stdpeak", "standard")]))){
       if(df$stdpeak == "A"){
         df$pg <- df$sizeB/df$sizeA
       } else if(df$stdpeak == "B"){
         df$pg <- df$sizeA/df$sizeB
-      } else {
-        df$pg <- NA
-      }
+      }} else {
+         df$pg <- NA
+       }
     row.names(df) = NULL
   } else {
     df[, c("countsA", "countsB", "countsC", "sizeA", "sizeB", "sizeC",
