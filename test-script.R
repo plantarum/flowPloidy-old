@@ -2,11 +2,29 @@ library(devtools)
 library(flowPloidyData)
 load_all()
 
+
+etienne <- batchFlowHist(list.files("/home/tws/research/flow/etienne/",
+                                    full.names = TRUE),
+                         channel = "FL3.INT.LIN") 
+
+etBr <- browseFlowHist(etienne)
+
+e1 <- FlowHist("Calli+laxa-moved gate 2017-02-07 553.LMD",
+               channel = "FL3.INT.LIN")
+
+e1 <- FlowHist("Calliciprus+laxa 2017-02-07 550.LMD",
+               channel = "FL3.INT.LIN")
+
+e1 <- FlowHist("call1.LMD", channel = "FL3.INT.LIN")
+
+
 viewFlowChannels("~/research/flow/160930_HCT116_Ca-new.fcs")
 viewFlowChannels("~/research/flow/160930_HCT116_Ca.fcs")
 
 hct <- FlowHist("~/research/flow/160930_HCT116_Ca-new.fcs",
-                channel = "Propidium.Iodide.A", samples = 1)
+                channel = "Propidium.Iodide.A")
+
+hctB <- browseFlowHist(hct)
 
 hctNoDebris <- dropComponents(hct, c("SC", "AG"))
 hctNoDebris <- fhAnalyze(hctNoDebris)
@@ -20,7 +38,21 @@ plot(hct, ylim = c(0, 800))
 hct <- FlowHist("~/research/flow/160930_HCT116_Ca-new.fcs",
                 channel = "Propidium.Iodide.A", bins = 512)
 
-batch1 <- batchFlowHist(flowPloidyFiles, channel="FL3.INT.LIN")
+batch1 <- batchFlowHist(flowPloidyFiles, channel="FL3.INT.LIN",
+                        standards = 2.5)
+b1 <- batch1[[1]]
+
+b1Br <- browseFlowHist(batch1)
+
+99/1440.2/2.2
+136.1/2827.1/2
+
+121.6/1886.8/3.5
+166.1/1894.1/4.2
+
+77.2/591.2/4.2
+171.5/1021.6/2.5
+
 b1 <- batch1[[1]]
 
 do.call(integrate, c(substitute(fhModel(b1)), as.list(coef(fhNLS(b1))),
