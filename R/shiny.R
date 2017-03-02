@@ -323,7 +323,8 @@ browseFlowHist <- function(flowList, debug = FALSE){
 
     observe({
       dat <- gateData()
-      maxY <- max(dat[,2][!is.nan(dat[,2])], na.rm = TRUE)
+      maxY <- max(dat[,2][!is.nan(dat[,2]) & is.finite(dat[,2])],
+                  na.rm = TRUE)
       updateSliderInput(session, "yrange", 
                         step = max(6, ceiling(log(maxY)),
                                    na.rm = TRUE )/20,
@@ -361,7 +362,8 @@ browseFlowHist <- function(flowList, debug = FALSE){
       op = par(mar = gateMar)
       ## need to account for infinite values when setting plot ranges.
       ## Infinite values generated when the dat[, 1] contains 0 values. 
-      maxY <- max(dat[!is.nan(dat[,2]), 2])
+      maxY <- max(dat[!is.nan(dat[,2]) & is.finite(dat[,2]), 2],
+                  na.rm = TRUE)
       plot(dat, ylim = c(0, exp(log(maxY) - input$yrange)),
            type = 'n')
       if(isGated(.fhList[[fhCurrent()]])){
