@@ -1,7 +1,7 @@
 ---
 title: "flowPloidy: Flow Cytometry Histograms"
 author: "Tyler Smith"
-date: "`r Sys.Date()`"
+date: "2017-03-15"
 output: 
     rmarkdown::html_vignette:
         fig_width: 6
@@ -43,7 +43,7 @@ Applying this concept is complicated by several factors:
   drift over the course of a run
       
 We can illustrate these challenges by comparing an ideal FCM DNA histogram
-with actual experimental data. 
+with simulated experimental data. 
 
 ```{r ideal histogram, echo = FALSE}
 plot(x = 1, type = 'n', xlim = c(0, 256), ylim = c(0, 500),
@@ -147,7 +147,7 @@ There are two main problems with this approach. First, the placement of the
 box around a peak is subjective. One of the most important quality-checks
 for ploidy analysis is the coefficient of variation (CV) for a peak. We can
 easily lower the CV just by drawing a narrower box around our data.
-Consequently, our confidence in our results is undermined by not having a
+Consequently, our confidence in our results is undermined by not having an
 objective and repeatable method for setting the limits around a peak.
 
 The second problem is that we are not accounting for the different types of
@@ -251,9 +251,9 @@ To simplify the presentation of histograms in the previous sections, I
 omitted the internal standards used in FCM analysis. This is a critical
 component of ploidy analysis, because the fluorescence values for a given
 quantity of DNA are not fixed. The measured values vary based on the tissue
-preparation, cytometer. Even for the same tissue prep run on the same
-flow cytometer, the fluorescence values can vary over the course of a
-single day.
+preparation and the flow cytometer. Even for the same tissue prep run on
+the same flow cytometer, the fluorescence values can vary over the course
+of a single day.
 
 If we were to re-run the sample that yielded a mean value of 80 in our
 example, we might get a different result. Which means we can't interpret
