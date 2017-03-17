@@ -10,7 +10,8 @@ output:
         fig_width: 6
         fig_height: 4
         fig_caption: false
-        pandoc_args: ["--variable=fontfamily:tgschola"]
+        keep_tex: true
+        template: fpPandoc.latex
 vignette: >
   %\VignetteIndexEntry{flowPloidy: Getting Started}
   %\VignetteEngine{knitr::rmarkdown}
