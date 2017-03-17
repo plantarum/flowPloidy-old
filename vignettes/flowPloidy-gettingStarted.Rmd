@@ -23,7 +23,7 @@ bibliography: flowPloidy.bibtex
 
 This document provides a walk-through of the normal workflow for analyzing
 flow cytometry (FCM) histograms with `flowPloidy`. See the vignette
-"flowPloidy: Flow Cytometry Histograms" for an general overview of FCM
+"flowPloidy: Flow Cytometry Histograms" for a general overview of FCM
 histograms.
 
 # Installation
@@ -94,7 +94,9 @@ However, sometimes R gets confused and will complain about missing
 packages, even though we've asked it to automatically install everything
 that `flowPloidy` needs (i.e., `dependencies = TRUE`). If you see messages
 in the terminal indicating a package name that isn't found, try installing
-that package directly and then re-run the `install_github` line above.
+that package directly and then re-run the `install_github` line above. You
+may need to repeat this process several times to get all the dependencies
+installed.
 
 
 # Importing Data
@@ -111,7 +113,7 @@ library(flowPloidyData)
 After loading this package, you'll have access to the variable
 `flowPloidyFiles`. This is a vector containing the full paths to the sample
 data files on your system. Whenever we use it in the examples below, you
-can substitute a list containing the paths to your FCM data files.
+can substitute a vector containing the paths to your FCM data files.
 Subsetting this variable (i.e., `flowPloidyFiles[1]`) produces a single
 file name.
 
@@ -119,9 +121,9 @@ file name.
 
 **NOTE**
 
-To generate a list of your own files, use the R function `list.files`. For
-example, if all your files are the directory `~/flow/data/`, you can create
-a vector containing your files with:
+To generate a list of your own files, use the R function `list.files()`.
+For example, if all your files are the directory `~/flow/data/`, you can
+create a vector containing your files with:
 
 ```{r list.files1, eval = FALSE}
 my.files <- list.files("~/flow/data", full.names = TRUE)
@@ -149,11 +151,11 @@ viewFlowChannels(flowPloidyFiles[1])
 ## or viewFlowcChannels("my-flow-file.LMD")
 ```
 
-For our flow cytometer, the primary data channel is called "FL3.INT.LIN".
+For our flow cytometer, the primary data channel is called "`FL3.INT.LIN`".
 Knowing this, we can now import all the files in a directory with the
-function `batchFlowHist`:
+function `batchFlowHist()`:
 
-```{r batchFlowHist, message = 1:10}
+```{r batchFlowHist, message = 1:10, collapse = TRUE, cache = TRUE}
 batch1 <- batchFlowHist(flowPloidyFiles, channel = "FL3.INT.LIN")
 ```
 
@@ -165,7 +167,7 @@ the problems in the next step.
 
 # Reviewing and Correcting Histogram Analyses
 
-The function `browseFlowHist` provides an interactive way to view and
+The function `browseFlowHist()` provides an interactive way to view and
 correct our analyses. 
 
 ***
@@ -175,8 +177,8 @@ correct our analyses.
 To save your corrections, you need to store the output of this function in
 a variable. For example `myresults <- browseFlowHist(batch1)` will store
 the updated results in the variable `myresults`. It's often easiest to
-update the analyses 'in place', assigning the output of `browseFlowHist` to
-the variable you pass to is as an argument, as in the following example.
+update the analyses 'in place', assigning the output of `browseFlowHist()`
+to the variable you pass to is as an argument, as in the following example.
 
 ***
 
@@ -188,8 +190,8 @@ batch1 <- browseFlowHist(batch1)
 
 ## Histogram presentation
 
-Calling `browseFlowHist` opens a window in your internet browser that will
-display your histograms. The first one looks like this:
+Calling `browseFlowHist()` opens a window in your internet browser that
+will display your histograms. The first one looks like this:
 
 ![](gs_browse1.png)
 
@@ -307,7 +309,7 @@ parameters before determining which combination is best. Sometimes, the
 algorithm gets stuck on incorrect parameters. Luckily, this is usually
 easily detected by humans.
 
-An example is file 11, "734.LMD" in our sample data:
+An example is file 11, "`734.LMD`" in our sample data:
 
 ![](gs_browse11.png)
 
@@ -353,7 +355,7 @@ key to cancel the browser loop.
 
 Assuming we've made all of our edits and exited cleanly from the browser
 window, the updated histogram data is now stored in our variable. We can
-retrieve a summary table with the function `tabulateFlowHist`:
+retrieve a summary table with the function `tabulateFlowHist()`:
 
 ```{r tabulateFlowHist}
 tabulateFlowHist(batch1)[1:4, ]
@@ -404,7 +406,7 @@ results <- tabulateFlowHist(batch1, file = "FCMresults.csv")
 At this point, you have your raw FCM data files, as produced by your flow
 cytometer, and you have the results of your histogram analyses. You don't
 have a permanent record of the actual model fits. If you want that, you'll
-need to save the object returned from `browseFlowHist`. 
+need to save the object returned from `browseFlowHist()`. 
 
 ```{r saving FlowHist objects, eval = FALSE}
 save(batch1, file = "my-FCM-analyses.Rdata")
@@ -420,15 +422,15 @@ histogram from the raw data files.
 Up to this point, we've largely ignored size standards. There are two and a
 half different ways to incorporate size standards into your `flowPloidy`
 analysis. You could ignore them entirely. If you do, the data returned by
-`tabulateFlowHist` will include only the relative G1 peak positions for
+`tabulateFlowHist()` will include only the relative G1 peak positions for
 your samples, from which you can determine which one is the standard, based
 on the expected ratios for your study. This is a bit tedious.
 
 A better option is telling `flowPloidy` the size of your standard when you
 load your files. You do this by providing the appropriate value of the
-standard as the `standards` argument to `batchFlowHist`. For example, if we
-used _Raphananus satuvus_ Saxa, (genome size 1.11pg) as our standard, we'd
-call `batchFlowHist` as:
+standard as the `standards` argument to `batchFlowHist()`. For example, if
+we used _Raphananus satuvus_ Saxa, (genome size 1.11pg) as our standard,
+we'd call `batchFlowHist()` as:
 
 ```{r setting standards, eval = FALSE}
 batch1 <- batchFlowHist(flowPloidyFiles, channel = "FL3.INT.LIN",
@@ -440,23 +442,24 @@ samples in the batch that use a different standard, or that you wish to
 exclude from automatic generation of the pg value for any reason, you can
 manually set the standard size to `0` to indicate this. You will still need
 to identify which peak is the standard. Once you've done that, the pg value
-will be calculated for you when you run `tabulateFlowHist`.
+will be calculated for you when you run `tabulateFlowHist()`.
 
 If you have used more than one standard for different samples in batch, you
-can pass a vector of all the possible standard values to `batchFlowHist`.
+can pass a vector of all the possible standard values to `batchFlowHist()`.
 For example, if some of your samples used _Raphananus satuvus_ Saxa, and
-others used _Pisum sativum_ Ctirad (9.09pg), we'd call `batchFlowHist` as:
+others used _Pisum sativum_ Ctirad (9.09pg), we'd call `batchFlowHist()`
+as:
 
 ```{r multiple standards, eval = FALSE}
 batch1 <- batchFlowHist(flowPloidyFiles, channel = "FL3.INT.LIN",
                         standards = c(1.11, 9.09))
 ```
 
-Called like this, when you use `browseFlowHist` the `Standard Value`
+Called like this, when you use `browseFlowHist()` the `Standard Value`
 dropdown list will have three options: 0 (for samples that you don't wish
 to have the pg value calculated), 1.11, and 9.09. Once again, any samples
 for which you have set the Standard Value and identified the Standard Peak
-will have the pg values calculated when you call `tabulateFlowHist`.
+will have the pg values calculated when you call `tabulateFlowHist()`.
 
 # Gating
 
@@ -480,7 +483,7 @@ viewFlowChannels(fpVac)
 ```
 
 This data came from a different flow cytometer, so here we'll use the
-"FL2.A" channel:
+"`FL2.A`" channel:
 
 ```{r read vac}
 vac <- batchFlowHist(fpVac, channel = "FL2.A")
@@ -510,8 +513,8 @@ data are available. The zoom slider allows you to zoom in on the lower
 portion of the plot.
 
 The `Y axis` dropdown allows you to toggle between two plotting
-relationships. `Y/X` plots your chosen channel on the X axis, and the ratio
-of the Y and X channels on the Y axis. This is often useful in
+relationships. `Y/X` plots your chosen X channel on the X axis, and the
+ratio of the Y and X channels on the Y axis. This is often useful in
 'straightening out' the plot, making it easier to see the boundaries
 between cell populations. If you prefer, you can set the `Y axis` drop down
 to `Y` instead, which will give you the usual Y ~ X plot.
