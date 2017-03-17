@@ -614,7 +614,59 @@ generate with CellQuest on the same sample?**
 Vac.ON.DL.14.026
 
 # Nitty Gritty
+We have now run through the complete FCM workflow in `flowPloidy`. For more
+details, see the help files provided with the package (i.e., `?FlowHist`,
+`?browseFlowHist` etc.). The remainder of this vignette will discuss some
+of the finer details of the model-fitting procedure.
+
 ## Residual Chi-Square
+@bagwell_1993 recommended the Residual Chi-Square as a measure of
+goodness-of-fit for FCM histogram models. The RCS is calculated as
+$\frac{\chi{}^2}{n - m}$ where $\chi{}^2$ is the familiar Chi-Square
+statistic ($\sum \frac{(\text{observed} -
+\text{expected})^2}{\text{observed}}$), $n$ is the number of data points,
+and $m$ is the number of model parameters. Values above 4.0 indicate a poor
+fit, while values less than 0.7 indicate over-fitting.
+
+This corrects a problem with the regular $\chi^2$, which is dependent on
+the number of data points. In the process of generating a histogram, the
+data channel is partitioned in to bins. A 256-bin histogram will produce a
+lower $\chi^2$ value than a 1024-bin histogram for the same data.
+Similarly, increasing the number of model parameters will lower the
+$\chi^2$, which could encourage over-fitting. Correcting the $\chi^2$ by a
+factor of $n-m$ addresses both of these issues.
+
+That said, the RCS is not without drawbacks of its own. @rabinovitch_1994
+note that the $\chi^2$ value is "affected by a large number of variables,
+not all related to goodness of fit; [including] ... the end points of the
+analysis region used within the histogram". This has been our experience
+with `flowPloidy`. FCM histograms are typically quite noisy in the first
+few (lowest) bins, and often have a long tail of low values at the upper
+end. These regions of the histogram have little, if any, influence on the
+parameter estimates of interest to us (i.e., peak means, CVs, and cell
+counts). However, they can have a large influence on the RCS. Making small
+changes in the start and end of the analysis region, or the way the upper
+bins are modeled (particularly with the aggregate or S-phase model
+components) can have a dramatic influence on the RCS value.
+
+In practice, the RCS is most useful as an indicator of potential problems
+with the model fit, as illustrated in the example above. However, it is
+most appropriately used as a general guideline, not an absolute criterion
+of quality.
+
 ## Linearity
+Linearity measures the relationship between G1 and G2 peaks of the same
+sample. Theoretically, it *should* be 2. However, it frequently differs,
+presumably do to conditions particular to the operation of a particular
+flow cytometer at a given time. By default, `flowPloidy` will fit linearity
+as a model parameter, bounded between 1.9 and 2.1. However, in rare cases
+switching to a fixed value of 2 may help address models that get stuck in a
+local minimum. Toggling this option for a single file can be done in the
+`browseFlowHist()` interface, or it can be set for a batch of files during
+initial processing by passing the `linearity = "fixed"` argument to the 
+`batchFlowHist()` and `FlowHist()` functions.
+
 ## Debris Models
 ## GUI options
+
+## Working from the Console
