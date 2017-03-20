@@ -19,6 +19,9 @@ raw data (i.e., using the final parameter values)}
 \item{comps}{boolean; if TRUE, plot the individual model components
 over the raw data.}
 
+\item{main}{character; the plot title. Defaults to the filename of the
+\code{\link{FlowHist}} object.}
+
 \item{...}{additional arguments passed on to plot()}
 }
 \value{

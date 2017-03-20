@@ -9,6 +9,9 @@ plotFH(fh, main = fhFile(fh), ...)
 \arguments{
 \item{fh}{a \code{\link{FlowHist}} object}
 
+\item{main}{character; the plot title. Defaults to the filename of the
+\code{\link{FlowHist}} object.}
+
 \item{...}{additional parameters passed to \code{\link{plot}}}
 }
 \value{

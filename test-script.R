@@ -5,7 +5,7 @@ load_all()
 
 etienne <- batchFlowHist(list.files("/home/tws/research/flow/etienne/",
                                     full.names = TRUE),
-                         channel = "FL3.INT.LIN") 
+                         channel = "FL3.INT.LIN", standards = 2.5) 
 
 etBr <- browseFlowHist(etienne)
 
@@ -43,15 +43,6 @@ batch1 <- batchFlowHist(flowPloidyFiles, channel="FL3.INT.LIN",
 b1 <- batch1[[1]]
 
 b1Br <- browseFlowHist(batch1)
-
-99/1440.2/2.2
-136.1/2827.1/2
-
-121.6/1886.8/3.5
-166.1/1894.1/4.2
-
-77.2/591.2/4.2
-171.5/1021.6/2.5
 
 b1 <- batch1[[1]]
 

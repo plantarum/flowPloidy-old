@@ -8,6 +8,8 @@
 #' create their own plotting routines.
 #' 
 #' @param fh a \code{\link{FlowHist}} object
+#' @param main character; the plot title. Defaults to the filename of the
+#'   \code{\link{FlowHist}} object.
 #' @param ... additional parameters passed to \code{\link{plot}}
 #' @return Not applicable, used for plotting
 #' @author Tyler Smith
@@ -36,6 +38,8 @@ plotFH <- function(fh, main = fhFile(fh), ...){
 #'   raw data (i.e., using the final parameter values)
 #' @param comps boolean; if TRUE, plot the individual model components
 #'   over the raw data.
+#' @param main character; the plot title. Defaults to the filename of the
+#'   \code{\link{FlowHist}} object.
 #' @param ... additional arguments passed on to plot()
 #' @return Not applicable
 #' @author Tyler Smith

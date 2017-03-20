@@ -1,9 +1,10 @@
-#' @importFrom shiny fluidPage nearPoints reactive radioButtons
-#'   actionButton plotOutput reactive eventReactive shinyApp titlePanel
-#'   sidebarLayout sidebarPanel htmlOutput fluidRow tags mainPanel
-#'   renderPrint renderTable renderPlot renderText column observe runApp
-#'   stopApp wellPanel updateRadioButtons HTML numericInput sliderInput
-#'   brushOpts eventReactive
+#' @importFrom shiny actionButton brushOpts brushedPoints column
+#'   eventReactive eventReactive fluidPage fluidRow HTML htmlOutput
+#'   mainPanel nearPoints numericInput observe observeEvent plotOutput
+#'   radioButtons reactive reactiveValues renderPlot renderPrint
+#'   renderTable renderText runApp selectInput shinyApp sidebarLayout
+#'   sidebarPanel sliderInput stopApp tags titlePanel updateNumericInput
+#'   updateRadioButtons updateSelectInput updateSliderInput wellPanel
 NULL
 
 #' @importFrom utils str
@@ -222,7 +223,6 @@ browseFlowHist <- function(flowList, debug = FALSE){
     })      
 
     fhSetGate <- observeEvent(input$setGate, { 
-      if(debug) message(prefix, "Setting gate")
       dat <- gateData()
       bp <- brushedPoints(dat, xvar = names(dat)[1],
                           yvar = names(dat)[2], input$gatePlot_brush,

@@ -154,16 +154,20 @@ FlowStandards <- function(sizes, selected = 0, peak = "X"){
 #' @param opts list, currently not used, but maybe in future as a way to
 #'   test additional model options
 #' @param window the width of the moving window used to identify local
-#'   maxima for peak detection via \code{\link{caTools::runmax}}
+#'   maxima for peak detection via \code{\link{runmax}}
 #' @param smooth the width of the moving window used to reduce noise in the
-#'   histogram via \code{\link{caTools::runmean}}
+#'   histogram via \code{\link{runmean}}
 #' @param pick boolean; if TRUE, the user will be prompted to select peaks
 #'   to use for starting values. Otherwise (the default), starting values
 #'   will be detected automatically.
 #' @param samples integer; the number of samples in the data. Default is 2
 #'   (unknown and standard), but can be set to 3 if two standards are used.
-#' @param verbose boolean; if TRUE, \code{\link{histBatch}} will list files
-#'   as it processes them.
+#' @param standards numeric; the size of the internal standard in pg. When
+#'   loading a data set where different samples have different standards, a
+#'   vector of all the standard sizes. If set to 0, calculation of pg for
+#'   the unknown sample will not be done.
+#' @param verbose boolean; if TRUE, \code{\link{batchFlowHist}} will list
+#'   files as it processes them.
 #' 
 #' @slot raw a flowFrame object containing the raw data from the FCS file
 #' @slot channel character, the name of the data column to use
@@ -179,7 +183,7 @@ FlowStandards <- function(sizes, selected = 0, peak = "X"){
 #'   position.
 #' @slot peaks matrix, containing the coordinates used for peaks when
 #'   calculcating initial parameter values.
-#' @slot comps a list of \code{\link{modelComponent}} objects included for
+#' @slot comps a list of \code{ModelComponent} objects included for
 #'   these data.
 #' @slot model the function (built from \code{comps}) to fit to these data.
 #' @slot init a list of initial parameter estimates to use in fitting the
@@ -557,6 +561,7 @@ viewFlowChannels <- function(file){
 #' library(flowPloidyData) 
 #' batch1 <- batchFlowHist(flowPloidyFiles, channel = "FL3.INT.LIN")
 #' batch1
+#' @param ... Additional arguments passed to \code{\link{FlowHist}}
 #' @return
 #' \code{\link{batchFlowHist}} returns a list of \code{\link{FlowHist}}
 #'   objects. 
@@ -877,9 +882,9 @@ NULL
 #' 
 #' @param fh a \code{\link{FlowHist}} object
 #' @param window an integer, the width of the moving window to use in
-#'   identifying local maxima via \code{\link{caTools::runmax}}
+#'   identifying local maxima via \code{\link{runmax}}
 #' @param smooth an integer, the width of the moving window to use in
-#'   removing noise via \code{\link{caTools::runmean}}
+#'   removing noise via \code{\link{runmean}}
 #' 
 #' @return Returns a matrix with two columns:
 #' \describe{
@@ -1092,6 +1097,7 @@ pickInit <- function(fh){
   fh
 }
 
+#' @rdname pickInit
 pickPeaks <- function(fh){
   ## Does the work of actually plotting and selecting peaks for
   ##   \code{\link{pickInit}}
@@ -1130,8 +1136,9 @@ pickPeaks <- function(fh){
 #' @param analyze boolean, if TRUE the updated model will be analyzed
 #'   immediately
 #' @param samples integer, the number of samples in the data
-#' @return a \code{\link{FlowHist}} object with the modified values of linearity
-#'   and/or debris, and, if \code{analyze} was TRUE, a new NLS fitting
+#' @return a \code{\link{FlowHist}} object with the modified values of
+#'   linearity and/or debris, and, if \code{analyze} was TRUE, a new NLS
+#'   fitting
 #' @author Tyler Smith
 #' @examples
 #' ## defaults to 256 bins:

@@ -13,10 +13,10 @@ cleanPeaks(fh, window = 20)
 \item{fh}{a \code{\link{FlowHist}} object}
 
 \item{window}{an integer, the width of the moving window to use in
-identifying local maxima via \code{\link{caTools::runmax}}}
+identifying local maxima via \code{\link{runmax}}}
 
 \item{smooth}{an integer, the width of the moving window to use in
-removing noise via \code{\link{caTools::runmean}}}
+removing noise via \code{\link{runmean}}}
 }
 \value{
 Returns a matrix with two columns:

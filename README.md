@@ -13,7 +13,8 @@ is ongoing.
 
 `flowPloidy` is available in [Bioconductor](https://bioconductor.org).
 
-To install it, you need to install the `bioconductor` R package (more details on the [Bioconductor site ](http://bioconductor.org/install/)):
+To install it, you need to install the `bioconductor` R package (more
+details on the [Bioconductor site ](http://bioconductor.org/install/)):
 
 ```{r}
 ## try http:// if https:// URLs are not supported

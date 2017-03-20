@@ -98,9 +98,16 @@ that package directly and then re-run the `install_github` line above. You
 may need to repeat this process several times to get all the dependencies
 installed.
 
+# Loading the Package and Importing Data
+You only need to install the package once (other than updating the package
+to get new versions as they are released). Once that's done, you can load
+it from your R session:
 
-# Importing Data
-Once you have the package installed, you're ready to process your files.
+```{r flowPloidy}
+library(flowPloidy)
+```
+
+Once you have the package loaded, you're ready to process your files.
 You can load single files, but we usually process a directory-full of FCM
 files at once. For the purposes of this tutorial, we'll use the sample
 files provided in the `flowPloidyData` package, which we installed in the
@@ -162,8 +169,8 @@ batch1 <- batchFlowHist(flowPloidyFiles, channel = "FL3.INT.LIN")
 [ ... output truncated to save space ...]
 
 The output indicates that there were problems with some of the histograms
-(i.e., `*** Model Fit Needs Attention ***`). This is expected, and we'll correct
-the problems in the next step.
+(i.e., `*** Model Fit Needs Attention ***`). This is expected, and we'll
+correct the problems in the next step.
 
 # Reviewing and Correcting Histogram Analyses
 
@@ -228,7 +235,7 @@ regarding the model fit:
 * **Linearity:** The linearity parameter, discussed further below.
 
 For this example, the default settings have worked perfectly. The model fit
-is acceptable (RCS 2.208), and the CVs for the peaks is well below the
+is acceptable (RCS 2.208), and the CVs for the peaks are well below the
 usual 5% threshold for acceptable.
 
 One thing we don't see is an indication of which peak is the standard, and
@@ -617,6 +624,10 @@ generate with CellQuest on the same sample?**
 Vac.ON.DL.14.026
 
 # Nitty Gritty
+
+**This should probably be moved to a separate 'reference manual', as it has
+no particular narrative flow.**
+
 We have now run through the complete FCM workflow in `flowPloidy`. For more
 details, see the help files provided with the package (i.e., `?FlowHist`,
 `?browseFlowHist` etc.). The remainder of this vignette will discuss some

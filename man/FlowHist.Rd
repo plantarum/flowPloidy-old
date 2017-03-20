@@ -23,10 +23,10 @@ batchFlowHist(files, channel, bins = 256, verbose = TRUE, window = 20,
 a histogram}
 
 \item{window}{the width of the moving window used to identify local
-maxima for peak detection via \code{\link{caTools::runmax}}}
+maxima for peak detection via \code{\link{runmax}}}
 
 \item{smooth}{the width of the moving window used to reduce noise in the
-histogram via \code{\link{caTools::runmean}}}
+histogram via \code{\link{runmean}}}
 
 \item{pick}{boolean; if TRUE, the user will be prompted to select peaks
 to use for starting values. Otherwise (the default), starting values
@@ -52,10 +52,17 @@ argument.}
 
 \item{analyze}{boolean, if TRUE the model will be analyzed immediately}
 
+\item{standards}{numeric; the size of the internal standard in pg. When
+loading a data set where different samples have different standards, a
+vector of all the standard sizes. If set to 0, calculation of pg for
+the unknown sample will not be done.}
+
 \item{files}{character, a vector of file names to load}
 
-\item{verbose}{boolean; if TRUE, \code{\link{histBatch}} will list files
-as it processes them.}
+\item{verbose}{boolean; if TRUE, \code{\link{batchFlowHist}} will list
+files as it processes them.}
+
+\item{...}{Additional arguments passed to \code{\link{FlowHist}}}
 }
 \value{
 \code{\link{FlowHist}} returns a \code{\link{FlowHist}} object.
@@ -122,7 +129,7 @@ position.}
 \item{\code{peaks}}{matrix, containing the coordinates used for peaks when
 calculcating initial parameter values.}
 
-\item{\code{comps}}{a list of \code{\link{modelComponent}} objects included for
+\item{\code{comps}}{a list of \code{ModelComponent} objects included for
 these data.}
 
 \item{\code{model}}{the function (built from \code{comps}) to fit to these data.}

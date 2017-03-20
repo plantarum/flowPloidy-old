@@ -2,9 +2,12 @@
 % Please edit documentation in R/FlowHist.R
 \name{pickInit}
 \alias{pickInit}
+\alias{pickPeaks}
 \title{Interactively select model starting values}
 \usage{
 pickInit(fh)
+
+pickPeaks(fh)
 }
 \arguments{
 \item{fh}{A \code{\link{FlowHist}} object}
