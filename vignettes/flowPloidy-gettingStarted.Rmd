@@ -267,8 +267,11 @@ analysis works as expected:
 
 ![](gs_browse2c.png)
 
-Note that some of the internal model-fitting routines require that the A
-peak is less than the B peak.
+Note that the A peak must have a lower mean (i.e., be further left on the
+histogram) than the B peak. If you try to put the A peak above the B peak,
+`flowPloidy` will swap them around for you, to make the lower peak A and
+the upper peak B. This is necessary for some of the internal model-fitting
+code to work properly.
 
 ## Changing Model Components: Debris Model
 

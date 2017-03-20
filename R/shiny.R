@@ -427,7 +427,8 @@ selectPeaks <- function(fh, peakA, peakB, peakC){
     newPeaks <- as.matrix(rbind(pA))
   
   colnames(newPeaks) <- c("mean", "height")
-
+  newPeaks <- newPeaks[order(newPeaks[, "mean"]), ]
+  
   fhPeaks(fh) <- newPeaks
   
   fh <- addComponents(fh)

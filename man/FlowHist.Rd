@@ -3,15 +3,16 @@
 \docType{class}
 \name{FlowHist}
 \alias{FlowHist}
+\alias{FlowHist}
 \alias{batchFlowHist}
 \title{FlowHist}
 \usage{
 FlowHist(file, channel, bins = 256, window = 20, smooth = 20,
   pick = FALSE, linearity = "variable", debris = "SC", opts = list(),
-  samples = 2, gate = logical(), analyze = TRUE)
+  samples = 2, gate = logical(), analyze = TRUE, standards = 0)
 
 batchFlowHist(files, channel, bins = 256, verbose = TRUE, window = 20,
-  smooth = 20, linearity = "variable", debris = "SC", samples = 2)
+  smooth = 20, linearity = "variable", debris = "SC", samples = 2, ...)
 }
 \arguments{
 \item{file}{character, the name of the file to load}
@@ -24,8 +25,8 @@ a histogram}
 \item{window}{the width of the moving window used to identify local
 maxima for peak detection via \code{\link{caTools::runmax}}}
 
-\item{smooth}{the width of the moving window used to reduce noise in
-the histogram via \code{\link{caTools::runmean}}}
+\item{smooth}{the width of the moving window used to reduce noise in the
+histogram via \code{\link{caTools::runmean}}}
 
 \item{pick}{boolean; if TRUE, the user will be prompted to select peaks
 to use for starting values. Otherwise (the default), starting values
@@ -35,21 +36,21 @@ will be detected automatically.}
 If "fixed", linearity is fixed at 2; if "variable", linearity is fit
 as a model parameter.}
 
-\item{debris}{character, either "SC", the default, or "MC", to set the
-debris model component to the Single-Cut or Multi-Cut models.}
+\item{debris}{character, either "SC", the default, "MC", or "none", to
+set the debris model component to the Single-Cut or Multi-Cut models,
+or to not include a debris component (such as for gated data).}
 
 \item{opts}{list, currently not used, but maybe in future as a way to
 test additional model options}
 
 \item{samples}{integer; the number of samples in the data. Default is 2
-(unknown and standard), but can be set to 3 if two standards are  used.}
+(unknown and standard), but can be set to 3 if two standards are used.}
 
 \item{gate}{logical, a vector of events to exclude from analysis. In
 normal usage this will be set interactively, not as a function
 argument.}
 
-\item{analyze}{boolean, if TRUE the  model will be analyzed
-immediately}
+\item{analyze}{boolean, if TRUE the model will be analyzed immediately}
 
 \item{files}{character, a vector of file names to load}
 
@@ -142,6 +143,7 @@ fitted model.}
 default is 2 (i.e., unknown and standard), but if two standards are
 used it should be set to 3.}
 }}
+
 \examples{
 library(flowPloidyData) 
 fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
@@ -153,4 +155,3 @@ batch1
 \author{
 Tyler Smith
 }
-

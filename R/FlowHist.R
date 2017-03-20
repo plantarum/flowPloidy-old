@@ -1047,8 +1047,12 @@ cleanPeaks <- function(fh, window = 20){
 #'   fails to discriminate between overlapping peaks, or is confused by
 #'   noise.
 #'
-#' The normal use, \code{\link{pickPeaks}} is called from
+#' In normal use, \code{\link{pickPeaks}} is called from
 #'   \code{\link{pickInit}}, rather than directly by the user.
+#'
+#' Note that the A peak must be lower (smaller mean, further left) than the
+#'   B peak. If the user selects the A peak with a higher mean than the B
+#'   peak, the peaks will be swapped to ensure A is lower.
 #'
 #' @param fh A \code{\link{FlowHist}} object
 #' 
@@ -1104,6 +1108,7 @@ pickPeaks <- function(fh){
   res <- rbind(peakA, peakB)
   colnames(res) <- c("mean", "height")
   rownames(res) <- NULL
+  res <- res[order(res[, "mean"]), ]
   fhPeaks(fh) <- res
   fh
 }

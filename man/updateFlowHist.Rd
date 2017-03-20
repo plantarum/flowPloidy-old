@@ -44,4 +44,3 @@ plot(fh1)
 \author{
 Tyler Smith
 }
-
