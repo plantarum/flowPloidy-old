@@ -3,6 +3,134 @@
 ##########################
 ## ModelComponent Class ##
 ##########################
+#' An S4 class to represent model components
+#'
+#' \code{\link{ModelComponent}} objects bundle the actual mathematical
+#' function for a particular component with various associated data
+#' necesarry to incorporate them into a complete NLS model.
+#'
+#' To be incorporated in the automatic processing of potential model
+#' components, a \code{\link{ModelComponent}} needs to be added to the
+#' variable \code{fhComponents}.
+#' 
+#' @name ModelComponent
+#'
+#' @slot name character, a convenient name to refer to the component by
+#'
+#' @slot desc character, a short description of the component, for human
+#'   readers
+#'
+#' @slot color character, the color to use when plotting the component
+#'
+#' @slot includeTest function, a function which takes a single argument, a
+#'   \code{\link{FlowHist}} object, and returns \code{TRUE} if the
+#'   component should be included in the model for that object.
+#'
+#' @slot function function, a single-line function that returns the value
+#'   of the component. The function can take multiple arguments, which
+#'   usually will include \code{xx}, the bin number (i.e., x value) of the
+#'   histogram. The other arguments are model parameters, and should be
+#'   included in the \code{initParams} function.
+#'
+#' @slot initParams function, a function with a single argument, a
+#'   \code{\link{FlowHist}} object, which returns named list of model
+#'   parameters and their initial estimates.
+#'
+#' @slot specialParams list, a named list. The names are variables to
+#'   exclude from the default argument list, as they aren't parameters to
+#'   fit in the NLS procedure, but are actually fixed values. The body of
+#'   the list element is the object to insert into the model formula to
+#'   account for that variable. Note that this slot is not set directly,
+#'   but should be provided by the value returned by
+#'   \code{specialParamSetter} (which by default is \code{list(xx =
+#'   substitute(xx))}).
+#'
+#' @slot specialParamSetter function, a function with one argument, the
+#'   \code{\link{FlowHist}} object, used to set the value of
+#'   \code{specialParams}. This allows parameters to be declared 'special'
+#'   based on values in the \code{\link{FlowHist}} object. The default
+#'   value for this slot is a function which returns \code{list(xx =
+#'   substitute(xx))} 
+#'
+#' @slot paramLimits list, a named list with the upper and lower limits of
+#'   each parameter in the function.
+#'
+#' @section Examples:
+#'
+#' See the source code file \code{models.R} for the actual code used in
+#' defining model components. Here are a few examples to illustrate
+#' different concepts.
+#'
+#' We'll start with the G1 peaks. They are modelled by the components
+#' \code{fA1} and \code{fB1} (for the A and B samples). The
+#' \code{includeTest} for \code{fA1} is simply \code{function(fh) TRUE},
+#' since there will always be at least one peak to fit. \code{fB1} is
+#' included if there is more than 1 detected peak, and the setting
+#' \code{samples} is more than 1, so the \code{includeTest} is
+#' \preformatted{function(fh) nrow(fhPeaks(fh)) > 1 && fhSamples(fh) > 1}
+#'
+#' The G1 component is defined by the function
+#' \preformatted{(a1 / (sqrt(2 * pi) * Sa) * exp(-((xx - Ma)^2)/(2 *
+#'   Sa^2)))} 
+#'
+#' with the arguments \code{a1, Ma, Sa, xx}. \code{xx} is treated
+#' specially, by default, and we don't need to deal with it here. the
+#' initial estimates for the other parameters are calculated in
+#' \code{initParams}:
+#' \preformatted{function(fh){
+#'   Ma <- as.numeric(fhPeaks(fh)[1, "mean"])
+#'   Sa <- as.numeric(Ma / 20)
+#'   a1 <- as.numeric(fhPeaks(fh)[1, "height"] * Sa / 0.45)
+#'   list(Ma = Ma, Sa = Sa, a1 = a1)
+#' }
+#' }
+#' 
+#' The limits for these values are provided in \code{paramLimits}.
+#' \preformatted{paramLimits = list(Ma = c(0, Inf), Sa = c(0, Inf), a1 =
+#'   c(0, Inf))}
+#'
+#' The G2 peaks include the \code{d} argument, which is the ratio of the G2
+#' peak to the G1 peak. That is, the linearity parameter:
+#' \preformatted{func = function(a2, Ma, Sa, d, xx){
+#'   (a2 / (sqrt(2 * pi) * Sa * 2) *
+#'     exp(-((xx - Ma * d)^2)/(2 * (Sa * 2)^2))) 
+#' }
+#' }
+#' 
+#' \code{d} is the ratio between the G2 and G1 peaks. If \code{linearity =
+#' "fixed"}, it is set to 2. Otherwise, it is fit as a model parameter.
+#' This requires special handling. First, we check the \code{linearity}
+#' value in \code{initParams}, and provide a value for \code{d} if needed:
+#' \preformatted{res <- list(a2 = a2)
+#' if(fhLinearity(fh) == "variable")
+#'     res <- c(res, d = 2)
+#' }
+#' 
+#' Here, \code{a2} is always treated as a parameter, and \code{d} is
+#' appended to the initial paramter list only if needed.
+#'
+#' We also need to use the \code{specialParamSetter} function, in this case
+#' calling the helper function \code{setLinearity(fh)}. This function
+#' checks the value of \code{linearity}, and returns the appropriate object
+#' depending on the result.
+#'
+#' Note that we use the arguments \code{Ma} and \code{Sa} appear in the
+#' \code{function} slot for \code{fA2}, but we don't need to provide their
+#' initial values or limits. These values are already supplied in the
+#' definition of \code{fA1}, which is always present when \code{fA2} is.
+#'
+#' The Single-Cut component is unusual in two ways. It doesn't include the
+#' argument \code{xx}, but it uses the pre-computed values \code{SCvals}.
+#' Consequently, we must provide a function for \code{specialParamSetter}
+#' to deal with this:
+#' \preformatted{specialParamSetter = function(fh){
+#'   list(SCvals = substitute(SCvals))
+#' }
+#' }
+#' 
+#' The Multi-Cut component \code{MC} is similar, but it needs to include
+#' \code{xx} as a special parameter. The aggregate component \code{AG} also
+#' includes several special parameters.
 setClass(
   Class = "ModelComponent",
   representation = representation(
@@ -236,6 +364,7 @@ erf <- function(x) {
 #' @return NA
 #' @author Tyler Smith
 #' @name gauss
+#' @aliases GaussianComponents
 fhComponents$fA1 <-
   ModelComponent(
     name = "fA1", color = "blue",
@@ -647,6 +776,34 @@ fhComponents$AG <-
 ##############################
 ## Model Building Functions ##
 ##############################
+
+#' Functions for assembling non-linear regression models for
+#' \code{\link{FlowHist}} objects.
+#'
+#' \code{\link{addComponents}} examines the model components in
+#' \code{fhComponents} and includes the ones that pass their
+#' \code{includeTest}.
+#'
+#' \code{\link{dropComponents}} removes a component from the
+#' \code{\link{FlowHist}} model
+#'
+#' \code{\link{setLimits}} collates the parameter limits for the model
+#'   components included in a \code{\link{FlowHist}} object. (could be
+#'   called automatically from \code{\link{addComponents}}, as it already
+#'   is from \code{\link{dropComponents}}?)
+#'
+#' \code{\link{makeModel}} creates a model out of all the included
+#' components. 
+#' 
+#' @title Building Flow Histogram Models
+#'
+#' @name fhModels
+#'
+#' @aliases flowModels
+#' 
+#' @param fh a \code{\link{FlowHist}} object
+#' @return The updated \code{\link{FlowHist}} object.
+#' @author Tyler Smith
 addComponents <- function(fh){
   ## make sure old components are flushed!
   fh <- resetFlowHist(fh, from = "comps")
@@ -669,6 +826,9 @@ addComponents <- function(fh){
   fh
 }
 
+#' @rdname fhModels
+#' @param components character, a vector of \code{\link{ModelComponent}}
+#'   names.
 dropComponents <- function(fh, components){
   fh <- resetFlowHist(fh, "limits")  
   fhComps(fh) <- fhComps(fh)[! names(fhComps(fh)) %in% components]
@@ -678,6 +838,7 @@ dropComponents <- function(fh, components){
   fh
 }
 
+#' @rdname fhModels
 setLimits <- function(fh){
   fhLimits(fh) <- list()
   for(i in fhComps(fh)){
@@ -689,6 +850,9 @@ setLimits <- function(fh){
   fh
 }
 
+#' @rdname fhModels
+#' @param env an R environment. Don't change this, it's R magic to keep the
+#'   appropriate environment in scope when building our model.
 makeModel <- function(fh, env = parent.frame()){
   components <- fhComps(fh)
   names(components) <- NULL
