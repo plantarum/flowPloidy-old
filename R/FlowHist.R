@@ -33,10 +33,15 @@ setClass(
   )
 )
 
+#' @rdname FlowStandards
+#' @param std a \code{\link{FlowStandards}} object
+#' @export
 stdSizes <- function(std){
   std@sizes
 }
 
+#' @rdname FlowStandards
+#' @export
 stdSelected <- function(std){
   std@selected
 }
@@ -49,6 +54,8 @@ stdSelected <- function(std){
   std
 }
 
+#' @rdname FlowStandards
+#' @export
 stdPeak <- function(std){
   std@peak
 }
@@ -265,6 +272,28 @@ setMethod(
 ## Accessors ##
 ###############
 
+#' Functions to access slot values in \code{\link{FlowHist}} objects
+#'
+#' For normal users, these functions aren't necessary. Overly curious
+#' users, or those wishing to hack on the code, may find these useful for
+#' inspecting the various bits and pieces inside a \code{\link{FlowHist}}
+#' object.
+#'
+#' The versions of these functions that allow modification of the
+#' \code{\link{FlowHist}} object are not exported. Functions are provided
+#' for users to update \code{\link{FlowHist}} objects in a safe way.
+#'
+#' @name fhAccessors
+#' 
+#' @title FlowHist Accessors
+#' @param fh a \code{\link{FlowHist}}
+#' @return Used to access a slot, returns the value of the slot. Used to
+#'   update the value of a slot, returns the updated \code{\link{FlowHist}}
+#'   object.
+#' @author Tyler Smith
+
+#' @rdname fhAccessors
+#' @export
 fhGate <- function(fh){
   fh@gate
 }
@@ -274,6 +303,8 @@ fhGate <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhLimits <- function(fh){
   fh@limits
 }
@@ -283,6 +314,8 @@ fhLimits <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhSamples <- function(fh){
   fh@samples
 }
@@ -292,6 +325,8 @@ fhSamples <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhPeaks <- function(fh){
   fh@peaks
 }
@@ -301,6 +336,8 @@ fhPeaks <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhInit <- function(fh){
   fh@init
 }
@@ -310,6 +347,8 @@ fhInit <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhComps <- function(fh){
   fh@comps
 }
@@ -319,6 +358,8 @@ fhComps <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhModel <- function(fh){
   fh@model
 }
@@ -328,16 +369,22 @@ fhModel <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhSpecialParams <- function(fh){
   names(getSpecialParams(fh))
 }
 
+#' @rdname fhAccessors
+#' @export
 fhArgs <- function(fh){
   res <- names(formals(fhModel(fh)))
   res <- res[!res %in% fhSpecialParams(fh)]
   res
 }
 
+#' @rdname fhAccessors
+#' @export
 fhNLS <- function(fh){
   fh@nls
 }
@@ -347,6 +394,8 @@ fhNLS <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhCounts <- function(fh){
   fh@counts
 }
@@ -356,6 +405,8 @@ fhCounts <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhCV <- function(fh){
   fh@CV
 }
@@ -365,6 +416,8 @@ fhCV <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhRCS <- function(fh){
   fh@RCS
 }
@@ -374,6 +427,8 @@ fhRCS <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhFile <- function(fh){
   fh@raw@description$GUID
 }
@@ -386,6 +441,8 @@ fhFile <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhChannel <- function(fh){
   fh@channel
 }
@@ -395,6 +452,8 @@ fhChannel <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhBins <- function(fh){
   fh@bins
 }
@@ -404,6 +463,8 @@ fhBins <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhLinearity <- function(fh){
   fh@linearity
 }
@@ -413,6 +474,8 @@ fhLinearity <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhDebris <- function(fh){
   fh@debris
 }
@@ -422,6 +485,8 @@ fhDebris <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhHistData <- function(fh){
   fh@histData
 }
@@ -431,6 +496,8 @@ fhHistData <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhRaw <- function(fh){
   fh@raw
 }
@@ -441,6 +508,8 @@ fhRaw <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhStandards <- function(fh){
   fh@standards
 }
@@ -450,6 +519,8 @@ fhStandards <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhStdPeak <- function(fh){
   stdPeak(fhStandards(fh))
 }
@@ -459,6 +530,8 @@ fhStdPeak <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhStdSelected <- function(fh){
   stdSelected(fhStandards(fh))
 }
@@ -468,6 +541,8 @@ fhStdSelected <- function(fh){
   fh
 }
 
+#' @rdname fhAccessors
+#' @export
 fhStdSizes <- function(fh){
   stdSizes(fhStandards(fh))
 }
