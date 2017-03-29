@@ -428,6 +428,11 @@ selectPeaks <- function(fh, peakA, peakB, peakC){
   
   colnames(newPeaks) <- c("mean", "height")
   newPeaks <- newPeaks[order(newPeaks[, "mean"]), ]
+
+  ## if we have a single row, the previous selection will return a numeric
+  ## vector, which needs to be converted back into a matrix with 1 row:
+  if(is.numeric(newPeaks))
+    newPeaks <- t(as.matrix(newPeaks))
   
   fhPeaks(fh) <- newPeaks
   
