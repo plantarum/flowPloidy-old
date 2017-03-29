@@ -298,16 +298,20 @@ browseFlowHist <- function(flowList, debug = FALSE){
     })
 
     fhUpdateStdPeak <- observeEvent(input$standardPeak, {
-      if(fhStdPeak(.fhList[[fhCurrent()]]) != input$standardPeak)
+      if(fhStdPeak(.fhList[[fhCurrent()]]) != input$standardPeak){
         fhStdPeak(.fhList[[fhCurrent()]]) <<- input$standardPeak
+        rv$FH <- .fhList[[fhCurrent()]]
+      }
     })
 
     fhUpdateStdSelected <- observeEvent(input$standardSelect, {
       ## don't update the fh object if the input is the same as the actual
       ## value (may come up when switching to a new object)
-      if(fhStdSelected(.fhList[[fhCurrent()]]) != input$standardSelect)
+      if(fhStdSelected(.fhList[[fhCurrent()]]) != input$standardSelect){
         fhStdSelected(.fhList[[fhCurrent()]]) <<-
-          as.numeric(input$standardSelect) 
+          as.numeric(input$standardSelect)
+        rv$FH <- .fhList[[fhCurrent()]]
+      }
     })
 
     observe({
