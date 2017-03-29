@@ -57,9 +57,13 @@ browseFlowHist <- function(flowList, debug = FALSE){
 
   raw <- exprs(fhRaw(.fhList[[.fhI]]))
   chan1 <- fhChannel(.fhList[[.fhI]])
-  chan2 <- viewFlowChannels(.fhList[[.fhI]])[2]      # why 2? sometimes, by
-                                        # chance, the 
-                                        # second column is the SS value.
+  if(length(viewFlowChannels(.fhList[[.fhI]])) > 1){
+    ## why 2? sometimes, by chance, the second column is the SS value.
+    chan2 <- viewFlowChannels(.fhList[[.fhI]])[2]
+  } else {
+    ## there's only one channel, so gating is pointless
+    chan2 <- chan1
+  }
   
   initGateData <- data.frame(x = raw[, chan1],
                              y = raw[, chan2] / raw[, chan1]) 
