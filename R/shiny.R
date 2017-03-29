@@ -44,9 +44,9 @@ browseFlowHist <- function(flowList, debug = FALSE){
   if(debug) message("init Linearity: ", initialLinearity)
 
   initialStdSelected <- fhStdSelected(.fhList[[1]])
-  message("initialStdSelected: ", initialStdSelected)
+  if(debug) message("initialStdSelected: ", initialStdSelected)
   standardList <- fhStdSizes(.fhList[[1]])
-  message("standardList: ", standardList)
+  if(debug) message("standardList: ", standardList)
   initialStdPeak <- fhStdPeak(.fhList[[1]])
   
   initialDebris <- fhDebris(.fhList[[1]])
