@@ -9,13 +9,14 @@
 #' function for a particular component with various associated data
 #' necesarry to incorporate them into a complete NLS model.
 #'
-#' To be incorporated in the automatic processing of potential model
+#' To be included in the automatic processing of potential model
 #' components, a \code{\link{ModelComponent}} needs to be added to the
 #' variable \code{fhComponents}.
 #' 
 #' @name ModelComponent
 #'
-#' @slot name character, a convenient name to refer to the component by
+#' @slot name character, a convenient name with which to refer to the
+#'   component
 #'
 #' @slot desc character, a short description of the component, for human
 #'   readers
@@ -55,7 +56,7 @@
 #' @slot paramLimits list, a named list with the upper and lower limits of
 #'   each parameter in the function.
 #'
-#' @section Examples:
+#' @section Coding Concepts:
 #'
 #' See the source code file \code{models.R} for the actual code used in
 #' defining model components. Here are a few examples to illustrate
@@ -84,11 +85,23 @@
 #'   list(Ma = Ma, Sa = Sa, a1 = a1)
 #' }
 #' }
+#'
+#' \code{Ma} is the mean of the distribution, which should be very close to
+#' the peak. \code{Sa} is the standard distribution of the distribution.
+#' If we assume the CV is 5%, that means the \code{Sa} should be 5% of the
+#' distribution mean, which gives us a good first estimate. \code{a1} is a
+#' scaling parameter, and I came up with the initial estimate by
+#' trial-and-error. Given the other two values are going to be reasonably
+#' close, the starting value of \code{a1} doesn't seem to be that crucial.
 #' 
 #' The limits for these values are provided in \code{paramLimits}.
 #' \preformatted{paramLimits = list(Ma = c(0, Inf), Sa = c(0, Inf), a1 =
 #'   c(0, Inf))}
 #'
+#' They're all bound between 0 and Infinity. The upper bound for \code{Ma}
+#' and \code{Sa} could be lowered to the number of bins, but I haven't had
+#' time or need to explore this yet.
+#' 
 #' The G2 peaks include the \code{d} argument, which is the ratio of the G2
 #' peak to the G1 peak. That is, the linearity parameter:
 #' \preformatted{func = function(a2, Ma, Sa, d, xx){
@@ -131,6 +144,60 @@
 #' The Multi-Cut component \code{MC} is similar, but it needs to include
 #' \code{xx} as a special parameter. The aggregate component \code{AG} also
 #' includes several special parameters.
+#'
+#' The code responsible for this is in the file \code{models.R}. Accessor
+#' functions are provided (but not exported) for getting and setting
+#' \code{\link{ModelComponent}} slots. These functions are named
+#'   \code{mcSLOT}, and include \code{mcFunc}, \code{mcColor},
+#'   \code{mcName}, \code{mcDesc}, \code{mcSpecialParams},
+#'   \code{mcSpecialParamSetter}, \code{mcIncludeTest},
+#'   \code{mcInitParams}.  
+#'
+#' @examples
+#' ## The 'master list' of components is stored in fhComponents:
+#' flowPloidy:::fhComponents ## outputs a list of component summaries
+#'
+#' ## adding a new component to the list:
+#' \dontrun{
+#' fhComponents$pois <-
+#'   new("ModelComponent", name = "pois", color = "bisque",
+#'       desc = "A poisson component, as a silly example",
+#'       includeTest = function(fh){
+#'           ## in this case, we check for a flag in the opt slot
+#'           ## We could also base the test on some feature of the
+#'           ## data, perhaps something in the peaks or histData slots
+#'           "pois" %in% fh@opt
+#'       },
+#'       func = function(xx, plam){
+#'           ## The function needs to be complete on a single line, as it
+#'           ## will be 'stitched' together with other functions to make
+#'           ## the complete model.
+#'           exp(-plam)*plam^xx/factorial(xx)
+#'       },
+#'       initParams = function(fh){
+#'           ## If we were to use this function for one of our peaks, we
+#'           ## could use the peak position as our initial estimate of
+#'           ## the Poisson rate parameter:
+#'           plam <- as.numeric(fhPeaks(fh)[1, "mean"])
+#'       },
+#'       ## bound the search for plam between 0 and infinity. Tighter
+#'       ## bounds might be useful, if possible, in speeding up model
+#'       ## fitting and avoiding local minima in extremes.
+#'       paramLimits = list(plam = c(0, Inf)) 
+#'   )
+#'
+#'   ## specialParamSetter is not needed here - it will default to a
+#'   ## function that returns "xx = xx", indicating that all other
+#'   ## parameters will be fit. That is what we need for this example. If
+#'   ## the component doesn't include xx, or includes other fixed
+#'   ## parameters, then specialParamSetter will need to be provided.  
+#' 
+#'   ## Note that if our intention is to replace an existing component with
+#'   ## a new one, we either need to explicitly change the includeTest for
+#'   ## the existing component to account for situations when the new one
+#'   ## is used instead. As a temporary hack, you could add both and then
+#'   ## manually remove one with \code{dropComponents}. 
+#'   }
 setClass(
   Class = "ModelComponent",
   representation = representation(
@@ -253,27 +320,6 @@ ModelComponent <- function(name, color, desc, includeTest, func,
 ## components that pass the includeTest to add to the components for that
 ## dataset. 
 fhComponents <- list()
-
-## Define new components with the following template:
-##
-## fhComponents$<name> <-
-##   new("ModelComponent", name = "<name>", color = "<colour>",
-##       desc = "<one-line description>",
-##       includeTest = function(fh){
-##
-##       },
-##       func = function(){
-##
-##       },
-##       initParams = function(fh){
-##
-##       }
-##       )
-## 
-## specialParamSetter is optional - it will default to a function that
-## returns "xx = xx", indicating that all other parameters will be fit. If
-## the component doesn't include xx, or includes other fixed parameters,
-## then specialParamSetter will need to be provided.
 
 ###########################################
 ## Helper Functions for Model Components ##
@@ -587,69 +633,75 @@ fhComponents$brC <-
     }
   )
 
-## Single-cut debris model
-##
-## S(x) = a \sum{j = x + 1}^{n} \sqrt[3]{j} Y_j P_s(j, x)
-## P_s (j, x) = \frac{2}{(\pi j \sqrt{(x/j) (1 - x/j)}
-##
-## a = amplitude parameter
-## Y_j = intensity in channel j
-## P_s(j, x) = probability of a nuclei from channel j falling into channel x
-## when cut.
-##
-## By this formula, the debris intensity in a channel/bin is a function of
-## the intensity in all the subsequent bins. This recursive relationship is
-## tricky to code; in order to take full advantage of all of the R tools
-## that support nls, the mean function needs to return one fitted value for
-## one predictor value. The following implementation of singleCut therefore
-## takes the entire vector of the response vector (intensity), necessary to
-## calculate the debris curve, and returns only the value for a single
-## predictor value.
-
-## Single-cut debris model
-##
-## Models debris using the single-cut model described by Bagwell et al.
-## (1991).
-##
-## The model is:
-## \deqn{S(x) = a \sum{j = x + 1}^{n} \sqrt[3]{j} Y_j P_s(j, x)}
-##
-## x is the histogram channel that we're estimating the debris value for
-## SCa is the amplitude parameter
-## Y_j is the histogram intensity for channel j.
-##
-## where P_s(j, x) is the probability of a nuclei from channel j falling
-## into channel x when cut. That is, for j > x, the probability that
-## fragmenting a nuclei from channel j with a single cut will produce a
-## fragment of size x. This probability is calculated as:
-##
-## \deqn{P_s (j, x) = \frac{2}{(\pi j \sqrt{(x/j) (1 - x/j)}}}
-##
-## This model involves a recursive calculation, since the fitted value
-## for channel x depends not just on the intensity for channel x, but
-## also the intensities at all channels > x. Consequently, this is coded
-## with an internal loop, and then vectorized to produce a well-behaved
-## function that we can use with the standard nls toolchain.
-##
-## @name singleCut
-##
-## @param SCa a numeric value, the single-cut amplitude parameter
-## @param intensity a numeric vector, the histogram intensity in each
-##   channel 
-## @param xx an integer vector, the ordered channels corresponding to the
-##   values in `intensity'.
-## @param SCvals a numeric vector, stored in the \code{\link{FlowHist}} object
-##   slot `SCvals`. Users shouldn't need this.
-## @return NA
-##
-## @references Bagwell, C. B., Mayo, S. W., Whetstone, S. D., Hitchcox,
-##   S. 
-##   A., Baker, D. R., Herbert, D. J., Weaver, D. L., Jones, M. A. and
-##   Lovett, E. J. (1991), DNA histogram debris theory and compensation.
-##   Cytometry, 12: 107-118. doi: 10.1002/cyto.990120203
-##
-## @author Tyler Smith
-## @rdname singleCut
+#' Histogram Debris Models
+#'
+#' Implementation of debris models described by Bagwell et al. (1991).
+#'
+#' @section Single Cut Model:
+#' 
+#' The model is:
+#' \deqn{S(x) = a \sum_{j = x + 1}^{n} \sqrt[3]{j} Y_j P_s(j, x)}
+#'
+#' \enumerate{
+#' \item \code{x} the histogram channel that we're estimating the debris
+#' value for.
+#' \item \code{SCa} the amplitude parameter.
+#' \item \code{Y_j} the histogram intensity for channel j.
+#' }
+#' 
+#' where P_s(j, x) is the probability of a nuclei from channel j falling
+#' into channel x when cut. That is, for j > x, the probability that
+#' fragmenting a nuclei from channel j with a single cut will produce a
+#' fragment of size x. This probability is calculated as:
+#'
+#' \deqn{P_s(j, x) = \frac{2}{(\pi j \sqrt{(x/j) (1 - x/j)}}}
+#'
+#' This model involves a recursive calculation, since the fitted value
+#' for channel x depends not just on the intensity for channel x, but also
+#' the intensities at all channels > x. I deal with this by pre-calculating
+#' the raw values, which don't actually depend on the only parameter,
+#' \code{SCa}. These raw values are stored in the \code{histData} matrix
+#' (which is a slot in the \code{\link{FlowHist}} object). This must be
+#' accomodated by treating \code{SCvals} as a 'special parameter' in the
+#' \code{\link{ModelComponent}} definition. See that help page for details.
+#'
+#' @section Multiple-Cut Model
+#'
+#' 
+#' @name DebrisModels
+#'
+#' @param SCa a numeric value, the single-cut amplitude parameter
+#' @param intensity a numeric vector, the histogram intensity in each
+#'   channel
+#' @param xx an integer vector, the ordered channels corresponding to the
+#'   values in `intensity'.
+#' @param SCvals a numeric vector, stored in the \code{\link{FlowHist}}
+#'   object slot \code{histData} in the column \code{SCvals}. Users
+#'   shouldn't need this.
+#' @param first.channel integer, the lowest bin to include in the modelling
+#'   process. Determined by the internal function \code{fhStart}.
+#' @return \code{getSingleCutValsBase}, a vectorized function, returns the
+#'   fixed \code{SCvals} for the histogram.
+#' 
+#' @references Bagwell, C. B., Mayo, S. W., Whetstone, S. D., Hitchcox, S.
+#' A., Baker, D. R., Herbert, D. J., Weaver, D. L., Jones, M. A. and
+#' Lovett, E. J. (1991), DNA histogram debris theory and compensation.
+#' Cytometry, 12: 107-118. doi: 10.1002/cyto.990120203
+#'
+#' @author Tyler Smith
+#'
+#' @examples
+#' ## This is an internal function, called from setBins()
+#' \dontrun{
+#'   ## ...
+#'   SCvals <- getSingleCutVals(intensity, xx, startBin)
+#'   ## ...
+#'   fhHistData(fh) <- data.frame(xx = xx, intensity = intensity,
+#'                            SCvals = SCvals, MCvals = MCvals,
+#'                            DBvals = DBvals, TRvals = TRvals,
+#'                            QDvals = QDvals, gateResid = gateResid)
+#'   ## ...
+#' }
 getSingleCutValsBase <- function(intensity, xx, first.channel){
   ## compute the single cut debris model values
   
@@ -672,6 +724,8 @@ getSingleCutValsBase <- function(intensity, xx, first.channel){
 
 getSingleCutVals <- Vectorize(getSingleCutValsBase, "xx")
 
+#' @rdname DebrisModels
+#' @name SingleCut
 fhComponents$SC <-
   ModelComponent(
     name = "SC", color = "green",
