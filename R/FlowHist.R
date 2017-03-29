@@ -603,6 +603,17 @@ fhStdSizes <- function(fh){
   stdSizes(fhStandards(fh))
 }
 
+#' @rdname fhAccessors
+#' @export
+fhOpts <- function(fh){
+  fh@opts
+}
+
+`fhOpts<-` <- function(fh, value){
+  fh@opts <- value
+  fh
+}
+
 #' Reset the values in a \code{\link{FlowHist}} object
 #'
 #' NB: This function isn't required for normal use, and isn't exported for
