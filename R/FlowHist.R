@@ -898,9 +898,9 @@ exFlowHist <- function(fh){
 
     if(! anyNA(c(df[, c("stdpeak", "standard")]))){
       if(df$stdpeak == "A"){
-        df$pg <- df$sizeB/df$sizeA
+        df$pg <- df$standard * (df$sizeB/df$sizeA)
       } else if(df$stdpeak == "B"){
-        df$pg <- df$sizeA/df$sizeB
+        df$pg <- df$standard * (df$sizeA/df$sizeB)
       }} else {
          df$pg <- NA
        }
