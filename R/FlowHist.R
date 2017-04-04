@@ -1293,6 +1293,41 @@ pickPeaks <- function(fh){
   fh
 }
 
+#' @rdname pickInit
+selectPeaks <- function(fh, peakA, peakB, peakC){
+  pA <- fhHistData(fh)[round(peakA, 0), c("xx", "intensity")]
+  if(is.numeric(peakB))                 
+    pB <- fhHistData(fh)[round(peakB, 0), c("xx", "intensity")]
+  if(is.numeric(peakC))                 
+    pC <- fhHistData(fh)[round(peakC, 0), c("xx", "intensity")]
+  
+  fh <- resetFlowHist(fh)
+
+  if(is.numeric(peakC))
+    newPeaks <- as.matrix(rbind(pA, pB, pC))
+  else if(is.numeric(peakB))
+    newPeaks <- as.matrix(rbind(pA, pB))
+  else
+    newPeaks <- as.matrix(rbind(pA))
+  
+  colnames(newPeaks) <- c("mean", "height")
+  newPeaks <- newPeaks[order(newPeaks[, "mean"]), ]
+
+  ## if we have a single row, the previous selection will return a numeric
+  ## vector, which needs to be converted back into a matrix with 1 row:
+  if(is.numeric(newPeaks) && ! is.matrix(newPeaks))
+    newPeaks <- t(as.matrix(newPeaks))
+  
+  fhPeaks(fh) <- newPeaks
+  
+  fh <- addComponents(fh)
+  fh <- setLimits(fh)
+  fh <- makeModel(fh)
+  fh <- getInit(fh)
+
+  return(fh)
+}
+
 ##########################
 ## Change Model Options ##
 ##########################
