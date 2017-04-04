@@ -2,12 +2,9 @@
 % Please edit documentation in R/FlowHist.R
 \name{pickInit}
 \alias{pickInit}
-\alias{pickPeaks}
 \title{Interactively select model starting values}
 \usage{
 pickInit(fh)
-
-pickPeaks(fh)
 }
 \arguments{
 \item{fh}{A \code{\link{FlowHist}} object}
@@ -40,7 +37,7 @@ peak, the peaks will be swapped to ensure A is lower.
 }
 \examples{
 library(flowPloidyData) 
-fh2 <- FlowHist(file = flowPloidyFiles[12], channel = "FL3.INT.LIN")
+fh2 <- FlowHist(file = flowPloidyFiles[2], channel = "FL3.INT.LIN")
 plot(fh2, init = TRUE) ## automatic peak estimates
 \dontrun{
 fh2 <- pickInit(fh2)   ## hand-pick peak estimates

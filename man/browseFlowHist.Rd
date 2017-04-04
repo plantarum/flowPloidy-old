@@ -13,8 +13,8 @@ browseFlowHist(flowList, debug = FALSE)
 \item{debug}{boolean, turns on debugging messages}
 }
 \value{
-Returns the list of \code{\link{FlowHist}} objects, updated by any
-  changes made in the GUI.
+Returns the list of \code{\link{FlowHist}} objects, updated by
+  any changes made in the GUI.
 }
 \description{
 Visually assess histogram fits

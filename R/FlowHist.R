@@ -1271,7 +1271,6 @@ pickInit <- function(fh){
   fh
 }
 
-#' @rdname pickInit
 pickPeaks <- function(fh){
   ## Does the work of actually plotting and selecting peaks for
   ##   \code{\link{pickInit}}
@@ -1289,7 +1288,6 @@ pickPeaks <- function(fh){
   selectPeaks(fh, peakA[1], peakB[1], NULL)
 }
 
-#' @rdname pickInit
 selectPeaks <- function(fh, peakA, peakB, peakC){
   pA <- fhHistData(fh)[round(peakA, 0), c("xx", "intensity")]
   if(is.numeric(peakB))                 
