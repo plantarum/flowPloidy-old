@@ -1246,7 +1246,7 @@ cleanPeaks <- function(fh, window = 20){
 #'
 #' @examples
 #' library(flowPloidyData) 
-#' fh2 <- FlowHist(file = flowPloidyFiles[12], channel = "FL3.INT.LIN")
+#' fh2 <- FlowHist(file = flowPloidyFiles[2], channel = "FL3.INT.LIN")
 #' plot(fh2, init = TRUE) ## automatic peak estimates
 #' \dontrun{
 #' fh2 <- pickInit(fh2)   ## hand-pick peak estimates
@@ -1285,12 +1285,8 @@ pickPeaks <- function(fh){
   message("select sample B peak:")
   peakB <- unlist(locator(1))
   points(peakB[1], peakB[2], col = 3, cex = 3)
-  res <- rbind(peakA, peakB)
-  colnames(res) <- c("mean", "height")
-  rownames(res) <- NULL
-  res <- res[order(res[, "mean"]), ]
-  fhPeaks(fh) <- res
-  fh
+
+  selectPeaks(fh, peakA[1], peakB[1], NULL)
 }
 
 #' @rdname pickInit
