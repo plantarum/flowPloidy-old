@@ -27,10 +27,13 @@ the unknown sample will not be done.}
 a histogram}
 
 \item{window}{integer, the width of the moving window used to identify
-local maxima for peak detection via \code{\link{runmax}}}
+local maxima for peak detection via \code{\link{runmax}}. The default
+is 20. If you have really clean, narrow, peaks, lowering this value
+may help you get better initial values.}
 
 \item{smooth}{integer, the width of the moving window used to reduce
-noise in the histogram via \code{\link{runmean}}}
+noise in the histogram via \code{\link{runmean}}. The default is 20.
+As for \code{window}, lower values may be helpful for clean peaks.}
 
 \item{pick}{boolean; if TRUE, the user will be prompted to select peaks
 to use for starting values. Otherwise (the default), starting values

@@ -10,9 +10,20 @@ NULL
 #' @importFrom utils str
 NULL
 
-#' Visually assess histogram fits
+#' Visually assess and correct histogram fits
 #'
-#' Visually assess histogram fits
+#' Visually assess histogram fits, correcting initial values, and selecting
+#' model components.
+#'
+#' This function will open a browser tab displaying the first
+#' \code{\link{FlowHist}} object from the argument \code{flowList}. Using
+#' the interface, the user can modify the starting values for the histogram
+#' peaks, select different debris model components, toggle the linearity
+#' option, select which peak to treat as the standard, and, if multiple
+#' standard sizes are available, select which one to apply.
+#'
+#' See the "Getting Started" vignette for a tutorial introduction.
+#' 
 #' @title browseFlowHist
 #' @param flowList either a \code{\link{FlowHist}} object, or a list of
 #'   \code{\link{FlowHist}} objects

@@ -13,7 +13,23 @@ fhDoRCS(fh)
 The updated \code{\link{FlowHist}} object.
 }
 \description{
-Calculcate the Residual Chi-Square for a \code{\link{FlowHist}} object
+Calculcate the Residual Chi-Square value for a \code{\link{FlowHist}}
+model fit.
+}
+\details{
+This is only a rough guideline, and needs to be interpreted with some
+caution. The RCS is heavily influenced by the highest channels, where
+the expected value is close to zero. Consequently, observing 2 or 3
+stray events in one of these channels, where the expected value may be <
+0.02, produces a higher value of (obs - exp)^2 / exp than larger
+absolute differences in the main region of the histogram.
+                                                                    
+Rabinovitch 1994:                                                   
+                                                                    
+The x2 is affected by a large number of variables, not all related  
+to goodness of the fit; these include the number of cells acquired  
+in the histogram and the end points of the analysis region used     
+within the histogram.
 }
 \seealso{
 \code{\link{fhDoCV}}, \code{\link{fhDoNLS}},

@@ -207,9 +207,12 @@ FlowStandards <- function(sizes, selected = 0, peak = "X"){
 #' @param opts list, currently not used, but maybe in future as a way to
 #'   test additional model options
 #' @param window integer, the width of the moving window used to identify
-#'   local maxima for peak detection via \code{\link{runmax}}
+#'   local maxima for peak detection via \code{\link{runmax}}. The default
+#'   is 20. If you have really clean, narrow, peaks, lowering this value
+#'   may help you get better initial values.
 #' @param smooth integer, the width of the moving window used to reduce
-#'   noise in the histogram via \code{\link{runmean}}
+#'   noise in the histogram via \code{\link{runmean}}. The default is 20.
+#'   As for \code{window}, lower values may be helpful for clean peaks.
 #' @param pick boolean; if TRUE, the user will be prompted to select peaks
 #'   to use for starting values. Otherwise (the default), starting values
 #'   will be detected automatically.
@@ -644,6 +647,7 @@ fhOpts <- function(fh){
 #'   to reset from (see details).
 #' @return the updated \code{\link{FlowHist}} object.
 #' @author Tyler Smith
+#' @keywords internal
 resetFlowHist <- function(fh, from = "peaks"){
   ## Clear analysis slots
   ## Default is to clear everything from peaks onwards
@@ -1012,6 +1016,26 @@ setBins <- function(fh, bins = 256){
   fh
 }
 
+#' Calculate the where to start analysis for a \code{\link{FlowHist}}
+#' histogram 
+#'
+#' We exclude the first five bins at the outset (as part of the function
+#' \code{\link{setBins}}. For some flow cytometers, these values contain
+#' very high spikes that are an artifact of compensation, and are not
+#' useful data.
+#'
+#' After that, we call \code{\link{fhStart}} to skip to the highest value
+#' in the first 20 non-zero bins, and ignore everything below that. The
+#' motivation here is the same - to get out beyond the noisy bins and into
+#' the actual data we're trying to fit.
+#' 
+#' @param intensity numeric, the fluorescence intensity channel bins
+#' @return an integer, the index of the first intensity element to include
+#'   in the actual model fitting. That is, everything from \code{startBin}
+#'   to the end of \code{intensity} gets fit in the model, everything below
+#'   \code{startBin} is ignored.
+#' @author Tyler Smith
+#' @keywords internal
 fhStart <- function(intensity){
   ## Returns the first channel to include in the modelling process. We
   ## start on the first peak, ignoring any noise in lower channels. This is
@@ -1067,7 +1091,7 @@ NULL
 #' }
 #' 
 #' @author Tyler Smith
-#'
+#' @keywords internal
 #' @examples
 #' \dontrun{
 #' set.seed(123)
