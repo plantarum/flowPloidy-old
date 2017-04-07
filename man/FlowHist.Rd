@@ -170,9 +170,11 @@ when trying out new options.}
 \item{\code{comps}}{a list of \code{ModelComponent} objects included for these
 data.}
 
-\item{\code{model}}{the function (built from \code{comps}) to fit to these data.}
+\item{\code{model}}{the function (built from \code{comps}) to fit to these
+data.}
 
-\item{\code{limits}}{list, a list of lower and upper bounds for model parameters}
+\item{\code{limits}}{list, a list of lower and upper bounds for model
+parameters}
 
 \item{\code{init}}{a list of initial parameter estimates to use in fitting the
 model.}

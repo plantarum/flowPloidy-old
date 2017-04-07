@@ -44,6 +44,13 @@ setOldClass("nls")
 #'   \code{sizes} slot.
 #' @slot peak character, "A" or "B", indicating which of the histogram
 #'   peaks is the size standard.
+#'
+#' @examples
+#' library(flowPloidyData) 
+#' fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN",
+#'                 standards = c(1.96, 5.43))
+#' fhStandards(fh1)  ## display standards included in this object
+#' stdSizes(fhStandards(fh1))  ## list standard sizes
 setClass(
   Class = "FlowStandards",
   representation = representation(
@@ -248,8 +255,10 @@ FlowStandards <- function(sizes, selected = 0, peak = "X"){
 #'   when trying out new options.
 #' @slot comps a list of \code{ModelComponent} objects included for these
 #'   data.
-#' @slot model the function (built from \code{comps}) to fit to these data.
-#' @slot limits list, a list of lower and upper bounds for model parameters
+#' @slot model the function (built from \code{comps}) to fit to these
+#'   data.
+#' @slot limits list, a list of lower and upper bounds for model
+#'   parameters 
 #' @slot init a list of initial parameter estimates to use in fitting the
 #'   model.
 #' @slot nls the nls object produced by the model fitting
@@ -350,8 +359,11 @@ setMethod(
 #'   update the value of a slot, returns the updated \code{\link{FlowHist}}
 #'   object.
 #' @author Tyler Smith
-
 #' @rdname fhAccessors
+#' @examples
+#' library(flowPloidyData) 
+#' fh1 <- FlowHist(file = flowPloidyFiles[1], channel = "FL3.INT.LIN")
+#' fhModel(fh1) ## prints the model to screen
 #' @export
 fhGate <- function(fh){
   fh@gate
@@ -1250,9 +1262,6 @@ cleanPeaks <- function(fh, window = 20){
 #'   fails to discriminate between overlapping peaks, or is confused by
 #'   noise.
 #'
-#' In normal use, \code{\link{pickPeaks}} is called from
-#' \code{\link{pickInit}}, rather than directly by the user.
-#'
 #' Note that the A peak must be lower (smaller mean, further left) than the
 #' B peak. If the user selects the A peak with a higher mean than the B
 #' peak, the peaks will be swapped to ensure A is lower.
@@ -1261,10 +1270,6 @@ cleanPeaks <- function(fh, window = 20){
 #' 
 #' @return \code{\link{pickInit}} returns the \code{\link{FlowHist}} object
 #'   with its initial value slot updated.
-#'
-#' \code{\link{pickPeaks}} returns a matrix with each peak as a row, with
-#' the mean (position) in the first column, and the height (intensity) in
-#' the second column.
 #'
 #' @author Tyler Smith
 #'

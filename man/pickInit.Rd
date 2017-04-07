@@ -12,10 +12,6 @@ pickInit(fh)
 \value{
 \code{\link{pickInit}} returns the \code{\link{FlowHist}} object
   with its initial value slot updated.
-
-\code{\link{pickPeaks}} returns a matrix with each peak as a row, with
-the mean (position) in the first column, and the height (intensity) in
-the second column.
 }
 \description{
 Prompts the user to select the peaks to use as initial
@@ -27,9 +23,6 @@ The raw histogram data are plotted, and the user is prompted to
   procedure. This is useful when the automated peak-finding algorithm
   fails to discriminate between overlapping peaks, or is confused by
   noise.
-
-In normal use, \code{\link{pickPeaks}} is called from
-\code{\link{pickInit}}, rather than directly by the user.
 
 Note that the A peak must be lower (smaller mean, further left) than the
 B peak. If the user selects the A peak with a higher mean than the B
